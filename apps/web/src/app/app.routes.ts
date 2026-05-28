@@ -36,6 +36,13 @@ export const appRoutes: Routes = [
             (m) => m.LoginComponent,
           ),
       },
+      {
+        path: 'sign-up',
+        loadComponent: () =>
+          import('./features/auth/sign-up/sign-up.component').then(
+            (m) => m.SignUpComponent,
+          ),
+      },
     ],
   },
   {
