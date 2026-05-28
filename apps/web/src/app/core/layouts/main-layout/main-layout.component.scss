@@ -1,0 +1,26 @@
+.erp-layout {
+  min-height: 100vh;
+  display: flex;
+  background: var(--erp-bg);
+}
+
+.erp-main {
+  min-width: 0;
+  flex: 1;
+  margin-left: var(--erp-sidebar-width);
+}
+
+.erp-content {
+  min-height: calc(100vh - var(--erp-header-height));
+  padding: 24px;
+}
+
+@media (max-width: 991px) {
+  .erp-main {
+    margin-left: 0;
+  }
+
+  .erp-content {
+    padding: 16px;
+  }
+}

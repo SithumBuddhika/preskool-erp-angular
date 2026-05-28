@@ -1,0 +1,22 @@
+<aside class="erp-sidebar">
+  <div class="erp-sidebar__brand">
+    <div class="erp-sidebar__logo">P</div>
+    <div>
+      <h1>PreSkool</h1>
+      <p>ERP System</p>
+    </div>
+  </div>
+
+  <nav class="erp-sidebar__nav">
+    @for (item of menuItems; track item.label) {
+      <a
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        class="erp-sidebar__link"
+      >
+        <i-tabler [name]="item.icon" />
+        <span>{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+</aside>

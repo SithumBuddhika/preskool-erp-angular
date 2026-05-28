@@ -1,0 +1,93 @@
+.admin-dashboard {
+  display: grid;
+  gap: 24px;
+}
+
+.admin-dashboard__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.admin-dashboard__header p {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: var(--erp-text-muted);
+}
+
+.admin-dashboard__header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--erp-text-main);
+}
+
+.admin-dashboard__header button {
+  border: 0;
+  border-radius: 10px;
+  background: var(--erp-primary);
+  color: #ffffff;
+  height: 42px;
+  padding: 0 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-dashboard__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.admin-dashboard__card {
+  padding: 20px;
+  display: grid;
+  gap: 8px;
+}
+
+.admin-dashboard__card span {
+  color: var(--erp-text-muted);
+  font-size: 14px;
+}
+
+.admin-dashboard__card strong {
+  font-size: 28px;
+  color: var(--erp-text-main);
+}
+
+.admin-dashboard__card small {
+  color: #16a34a;
+  font-size: 13px;
+}
+
+.admin-dashboard__placeholder {
+  padding: 24px;
+  display: grid;
+  gap: 14px;
+}
+
+.admin-dashboard__placeholder .erp-skeleton {
+  height: 44px;
+}
+
+@media (max-width: 1199px) {
+  .admin-dashboard__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 575px) {
+  .admin-dashboard__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-dashboard__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-dashboard__header button {
+    width: 100%;
+  }
+}
