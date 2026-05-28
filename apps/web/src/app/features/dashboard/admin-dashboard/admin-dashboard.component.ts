@@ -1,8 +1,20 @@
 import { Component } from '@angular/core';
+import { PageTitleComponent } from '../../../shared/components/page-title/page-title.component';
+import { PaymentAlertComponent } from '../../../shared/components/payment-alert/payment-alert.component';
+import { StatCardComponent } from '../../../shared/components/stat-card/stat-card.component';
+import { WelcomeBannerComponent } from '../../../shared/components/welcome-banner/welcome-banner.component';
+import { WidgetCardComponent } from '../../../shared/components/widget-card/widget-card.component';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
+  imports: [
+    PageTitleComponent,
+    PaymentAlertComponent,
+    WelcomeBannerComponent,
+    StatCardComponent,
+    WidgetCardComponent,
+  ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
 })

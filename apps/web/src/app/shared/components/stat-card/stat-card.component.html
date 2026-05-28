@@ -1,0 +1,19 @@
+<article class="erp-card stat-card">
+  <div class="stat-card__icon" [class]="color">
+    {{ short }}
+  </div>
+
+  <div>
+    <div class="stat-card__top">
+      <strong>{{ value }}</strong>
+      <span>{{ badge }}</span>
+    </div>
+
+    <p>{{ label }}</p>
+
+    <div class="stat-card__meta">
+      <span>Active : {{ active }}</span>
+      <span>Inactive : {{ inactive }}</span>
+    </div>
+  </div>
+</article>

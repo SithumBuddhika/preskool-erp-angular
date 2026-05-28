@@ -1,9 +1,6 @@
 <section class="admin-dashboard">
   <div class="admin-dashboard__title-row">
-    <div>
-      <h1>Admin Dashboard</h1>
-      <p>Dashboard <span>/</span> Admin Dashboard</p>
-    </div>
+    <app-page-title title="Admin Dashboard" current="Admin Dashboard" />
 
     <div class="admin-dashboard__actions">
       <button type="button" class="primary-btn">Add New Student</button>
@@ -11,53 +8,30 @@
     </div>
   </div>
 
-  <div class="admin-dashboard__alert">
-    <span class="admin-dashboard__alert-avatar">F</span>
-    <strong>Fahed III,C</strong>
-    <span>has paid Fees for the “Term1”</span>
-    <button type="button">×</button>
-  </div>
+  <app-payment-alert />
 
-  <article class="admin-dashboard__welcome">
-    <div>
-      <h2>Welcome Back, Mr. Herald</h2>
-      <p>Have a Good day at work</p>
-    </div>
-
-    <span>Updated Recently on 15 Jun 2024</span>
-  </article>
+  <app-welcome-banner />
 
   <div class="admin-dashboard__stats">
     @for (card of statCards; track card.label) {
-      <article class="erp-card stat-card">
-        <div class="stat-card__icon" [class]="card.color">
-          {{ card.short }}
-        </div>
-
-        <div>
-          <div class="stat-card__top">
-            <strong>{{ card.value }}</strong>
-            <span>{{ card.badge }}</span>
-          </div>
-
-          <p>{{ card.label }}</p>
-
-          <div class="stat-card__meta">
-            <span>Active : {{ card.active }}</span>
-            <span>Inactive : {{ card.inactive }}</span>
-          </div>
-        </div>
-      </article>
+      <app-stat-card
+        [short]="card.short"
+        [label]="card.label"
+        [value]="card.value"
+        [badge]="card.badge"
+        [active]="card.active"
+        [inactive]="card.inactive"
+        [color]="card.color"
+      />
     }
   </div>
 
   <div class="admin-dashboard__grid">
-    <article class="erp-card widget widget--large">
-      <div class="widget__header">
-        <h3>Fees Collection</h3>
-        <span>Last 8 Quarter</span>
-      </div>
-
+    <app-widget-card
+      title="Fees Collection"
+      meta="Last 8 Quarter"
+      [large]="true"
+    >
       <div class="bar-chart">
         @for (bar of feeBars; track $index) {
           <div class="bar-chart__item">
@@ -68,14 +42,9 @@
           </div>
         }
       </div>
-    </article>
+    </app-widget-card>
 
-    <article class="erp-card widget">
-      <div class="widget__header">
-        <h3>Leave Requests</h3>
-        <span>This Week</span>
-      </div>
-
+    <app-widget-card title="Leave Requests" meta="This Week">
       <div class="leave-card">
         <div class="leave-card__avatar">J</div>
         <div>
@@ -93,27 +62,17 @@
           <small>Leave : 17 - 18 May</small>
         </div>
       </div>
-    </article>
+    </app-widget-card>
 
-    <article class="erp-card widget">
-      <div class="widget__header">
-        <h3>Schedules</h3>
-        <a>Add New</a>
-      </div>
-
+    <app-widget-card title="Schedules" meta="Add New">
       <div class="mini-calendar">
         @for (day of calendarDays; track $index) {
           <span [class.active]="day.active">{{ day.label }}</span>
         }
       </div>
-    </article>
+    </app-widget-card>
 
-    <article class="erp-card widget">
-      <div class="widget__header">
-        <h3>Attendance</h3>
-        <span>Today</span>
-      </div>
-
+    <app-widget-card title="Attendance" meta="Today">
       <div class="attendance-ring">
         <div>
           <strong>3610</strong>
@@ -122,19 +81,15 @@
       </div>
 
       <button class="view-btn" type="button">View All</button>
-    </article>
+    </app-widget-card>
 
-    <article class="erp-card widget">
-      <div class="widget__header">
-        <h3>Quick Links</h3>
-      </div>
-
+    <app-widget-card title="Quick Links">
       <div class="quick-links">
         <button type="button">Calendar</button>
         <button type="button">Events</button>
         <button type="button">Attendance</button>
         <button type="button">Exams</button>
       </div>
-    </article>
+    </app-widget-card>
   </div>
 </section>
