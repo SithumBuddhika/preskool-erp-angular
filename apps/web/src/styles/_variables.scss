@@ -1,20 +1,30 @@
 :root {
   --erp-primary: #3d5ee1;
   --erp-primary-dark: #2f49b8;
+  --erp-primary-soft: #eef3ff;
 
-  --erp-bg: #f7f8fa;
+  --erp-success: #22c55e;
+  --erp-warning: #f4b400;
+  --erp-danger: #ef4444;
+  --erp-info: #14b8c4;
+
+  --erp-bg: #f7f8fb;
   --erp-surface: #ffffff;
 
   --erp-text-main: #202c4b;
   --erp-text-muted: #6b7280;
-  --erp-border: #e5e7eb;
+  --erp-text-light: #8a94a6;
 
-  --erp-sidebar-width: 260px;
-  --erp-header-height: 64px;
+  --erp-border: #e5e7eb;
+  --erp-border-soft: #eef1f6;
+
+  --erp-sidebar-width: 252px;
+  --erp-header-height: 58px;
 
   --erp-radius-sm: 6px;
   --erp-radius-md: 10px;
   --erp-radius-lg: 16px;
 
-  --erp-shadow-card: 0 4px 24px rgba(0, 0, 0, 0.04);
+  --erp-shadow-card: 0 4px 20px rgba(32, 44, 75, 0.06);
+  --erp-shadow-soft: 0 2px 10px rgba(32, 44, 75, 0.04);
 }

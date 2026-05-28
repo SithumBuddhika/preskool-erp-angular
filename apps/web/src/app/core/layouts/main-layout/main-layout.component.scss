@@ -12,7 +12,7 @@
 
 .erp-content {
   min-height: calc(100vh - var(--erp-header-height));
-  padding: 24px;
+  padding: 26px 24px 24px;
 }
 
 @media (max-width: 991px) {
@@ -21,6 +21,6 @@
   }
 
   .erp-content {
-    padding: 16px;
+    padding: 18px 14px;
   }
 }

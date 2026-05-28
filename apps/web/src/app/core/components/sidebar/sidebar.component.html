@@ -1,22 +1,42 @@
 <aside class="erp-sidebar">
   <div class="erp-sidebar__brand">
-    <div class="erp-sidebar__logo">P</div>
-    <div>
-      <h1>PreSkool</h1>
-      <p>ERP System</p>
+    <div class="erp-sidebar__logo">
+      <span></span>
     </div>
+
+    <strong>PreSkool</strong>
+
+    <button type="button" aria-label="Toggle sidebar">
+      <i-tabler name="chevron-right" />
+    </button>
+  </div>
+
+  <div class="erp-sidebar__school">
+    <div class="erp-sidebar__school-icon">G</div>
+    <span>Global International</span>
+    <i-tabler name="chevron-right" />
   </div>
 
   <nav class="erp-sidebar__nav">
-    @for (item of menuItems; track item.label) {
-      <a
-        [routerLink]="item.route"
-        routerLinkActive="active"
-        class="erp-sidebar__link"
-      >
-        <i-tabler [name]="item.icon" />
-        <span>{{ item.label }}</span>
-      </a>
+    @for (section of sections; track section.title) {
+      <div class="erp-sidebar__section">
+        <p>{{ section.title }}</p>
+
+        @for (item of section.items; track item.label) {
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="active"
+            class="erp-sidebar__link"
+          >
+            <span class="erp-sidebar__link-left">
+              <i-tabler [name]="item.icon" />
+              <span>{{ item.label }}</span>
+            </span>
+
+            <i-tabler name="chevron-right" class="erp-sidebar__arrow" />
+          </a>
+        }
+      </div>
     }
   </nav>
 </aside>
