@@ -1,30 +1,57 @@
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import {
+  ReactiveFormsModule,
+  FormControl,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  template: `
-    <section class="erp-card login-card">
-      <h1>Sign In</h1>
-      <p>Login screen will be matched with the Figma authentication design.</p>
-    </section>
-  `,
-  styles: `
-    .login-card {
-      width: min(100%, 420px);
-      padding: 32px;
-      text-align: center;
-    }
-
-    .login-card h1 {
-      margin: 0 0 8px;
-      font-size: 28px;
-    }
-
-    .login-card p {
-      margin: 0;
-      color: var(--erp-text-muted);
-    }
-  `,
+  imports: [ReactiveFormsModule, RouterLink],
+  templateUrl: './login.component.html',
+  styleUrl: './login.component.scss',
 })
-export class LoginComponent {}
+export class LoginComponent {
+  showPassword = false;
+
+  loginForm = new FormGroup({
+    email: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.email],
+    }),
+    password: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    rememberMe: new FormControl(true, {
+      nonNullable: true,
+    }),
+  });
+
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  submitLogin(): void {
+    this.loginForm.markAllAsTouched();
+
+    if (this.loginForm.invalid) {
+      return;
+    }
+
+    console.log('Login data:', this.loginForm.getRawValue());
+  }
+
+  get emailInvalid(): boolean {
+    const email = this.loginForm.controls.email;
+    return email.invalid && email.touched;
+  }
+
+  get passwordInvalid(): boolean {
+    const password = this.loginForm.controls.password;
+    return password.invalid && password.touched;
+  }
+}

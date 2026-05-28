@@ -17,27 +17,26 @@
   margin-bottom: 18px;
 }
 
-.erp-sidebar__logo {
-  width: 31px;
-  height: 31px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #4f7cff, #55d6be);
-  display: grid;
-  place-items: center;
+.erp-sidebar__brand-left {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.erp-sidebar__logo span {
-  width: 15px;
-  height: 15px;
-  border-radius: 5px;
-  background: #ffffff;
-  transform: rotate(45deg);
+.erp-sidebar__brand-icon {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .erp-sidebar__brand strong {
-  font-size: 19px;
+  font-size: 22px;
+  line-height: 1;
   font-weight: 800;
-  color: #111827;
+  color: #0f172a;
+  letter-spacing: -0.6px;
 }
 
 .erp-sidebar__brand button {
