@@ -116,7 +116,13 @@
           <a routerLink="/auth/forgot-password">Forgot Password?</a>
         </div>
 
-        <button class="sign-in-btn" type="submit">Sign In</button>
+        @if (serverError()) {
+          <p class="auth-server-error">{{ serverError() }}</p>
+        }
+
+        <button class="sign-in-btn" type="submit" [disabled]="isSubmitting()">
+          {{ isSubmitting() ? 'Signing In...' : 'Sign In' }}
+        </button>
 
         <p class="create-account">
           Don’t have an account?

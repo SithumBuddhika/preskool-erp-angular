@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -7,7 +7,8 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../../core/services/auth.service';
 
 function passwordsMatchValidator(
   control: AbstractControl,
@@ -32,6 +33,8 @@ function passwordsMatchValidator(
 export class SignUpComponent {
   showPassword = false;
   showConfirmPassword = false;
+  isSubmitting = signal(false);
+  serverError = signal('');
 
   signUpForm = new FormGroup(
     {
@@ -61,6 +64,11 @@ export class SignUpComponent {
     },
   );
 
+  constructor(
+    private readonly authService: AuthService,
+    private readonly router: Router,
+  ) {}
+
   togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
@@ -71,12 +79,28 @@ export class SignUpComponent {
 
   submitSignUp(): void {
     this.signUpForm.markAllAsTouched();
+    this.serverError.set('');
 
-    if (this.signUpForm.invalid) {
+    if (this.signUpForm.invalid || this.isSubmitting()) {
       return;
     }
 
-    console.log('Sign up data:', this.signUpForm.getRawValue());
+    this.isSubmitting.set(true);
+
+    const { fullName, email, password } = this.signUpForm.getRawValue();
+
+    this.authService.register({ fullName, email, password }).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.router.navigateByUrl('/dashboard/admin');
+      },
+      error: (error) => {
+        this.isSubmitting.set(false);
+        this.serverError.set(
+          error?.error?.message || 'Sign up failed. Please try again.',
+        );
+      },
+    });
   }
 
   get fullNameInvalid(): boolean {

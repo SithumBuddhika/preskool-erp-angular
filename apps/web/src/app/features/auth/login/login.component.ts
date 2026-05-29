@@ -1,11 +1,12 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import {
-  ReactiveFormsModule,
   FormControl,
   FormGroup,
+  ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -16,6 +17,8 @@ import {
 })
 export class LoginComponent {
   showPassword = false;
+  isSubmitting = signal(false);
+  serverError = signal('');
 
   loginForm = new FormGroup({
     email: new FormControl('', {
@@ -31,18 +34,39 @@ export class LoginComponent {
     }),
   });
 
+  constructor(
+    private readonly authService: AuthService,
+    private readonly router: Router,
+  ) {}
+
   togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
 
   submitLogin(): void {
     this.loginForm.markAllAsTouched();
+    this.serverError.set('');
 
-    if (this.loginForm.invalid) {
+    if (this.loginForm.invalid || this.isSubmitting()) {
       return;
     }
 
-    console.log('Login data:', this.loginForm.getRawValue());
+    this.isSubmitting.set(true);
+
+    const { email, password } = this.loginForm.getRawValue();
+
+    this.authService.login({ email, password }).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.router.navigateByUrl('/dashboard/admin');
+      },
+      error: (error) => {
+        this.isSubmitting.set(false);
+        this.serverError.set(
+          error?.error?.message || 'Login failed. Please try again.',
+        );
+      },
+    });
   }
 
   get emailInvalid(): boolean {

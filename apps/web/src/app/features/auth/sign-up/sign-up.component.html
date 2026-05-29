@@ -159,7 +159,17 @@
           >
         }
 
-        <button class="auth-submit-btn" type="submit">Sign Up</button>
+        @if (serverError()) {
+          <p class="auth-server-error">{{ serverError() }}</p>
+        }
+
+        <button
+          class="auth-submit-btn"
+          type="submit"
+          [disabled]="isSubmitting()"
+        >
+          {{ isSubmitting() ? 'Creating Account...' : 'Sign Up' }}
+        </button>
 
         <p class="switch-auth">
           Already have an account?
