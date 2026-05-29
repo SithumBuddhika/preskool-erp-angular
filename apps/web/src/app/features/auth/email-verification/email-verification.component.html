@@ -1,0 +1,52 @@
+<section class="auth-page">
+  <div class="auth-page__visual">
+    <img
+      class="auth-page__illustration"
+      src="/assets/images/auth/email-verification.png"
+      alt="Email verification illustration"
+    />
+    <div class="auth-page__wave"></div>
+  </div>
+
+  <div class="auth-page__content">
+    <div class="auth-shell">
+      <div class="auth-brand">
+        <img
+          class="auth-brand__icon"
+          src="/assets/logos/preskool-logo.png"
+          alt="PreSkool logo"
+        />
+        <strong>PreSkool</strong>
+      </div>
+
+      <form
+        class="auth-card"
+        [formGroup]="verifyForm"
+        (ngSubmit)="submitVerification()"
+      >
+        <div class="auth-card__header">
+          <h1>Email Verification</h1>
+          <p>Enter the 6-digit code sent to your email address.</p>
+        </div>
+
+        <label class="form-field">
+          <span>Verification Code</span>
+          <div class="form-field__control">
+            <input type="text" maxlength="6" formControlName="code" />
+          </div>
+        </label>
+
+        <button class="auth-submit-btn" type="submit">Verify Email</button>
+
+        <p class="switch-auth">
+          Didn’t receive code?
+          <a href="#">Resend</a>
+        </p>
+      </form>
+
+      <p class="auth-footer">
+        Copyright © 2026 - PreSkool | Sithum Buddhika Jayalal
+      </p>
+    </div>
+  </div>
+</section>

@@ -30,6 +30,11 @@ export const appRoutes: Routes = [
       ),
     children: [
       {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'login',
+      },
+      {
         path: 'login',
         loadComponent: () =>
           import('./features/auth/login/login.component').then(
@@ -42,6 +47,41 @@ export const appRoutes: Routes = [
           import('./features/auth/sign-up/sign-up.component').then(
             (m) => m.SignUpComponent,
           ),
+      },
+      {
+        path: 'forgot-password',
+        loadComponent: () =>
+          import(
+            './features/auth/forgot-password/forgot-password.component'
+          ).then((m) => m.ForgotPasswordComponent),
+      },
+      {
+        path: 'reset-password',
+        loadComponent: () =>
+          import(
+            './features/auth/reset-password/reset-password.component'
+          ).then((m) => m.ResetPasswordComponent),
+      },
+      {
+        path: 'reset-password-sent',
+        loadComponent: () =>
+          import(
+            './features/auth/reset-password-sent/reset-password-sent.component'
+          ).then((m) => m.ResetPasswordSentComponent),
+      },
+      {
+        path: 'email-verification',
+        loadComponent: () =>
+          import(
+            './features/auth/email-verification/email-verification.component'
+          ).then((m) => m.EmailVerificationComponent),
+      },
+      {
+        path: 'two-step-verification',
+        loadComponent: () =>
+          import(
+            './features/auth/two-step-verification/two-step-verification.component'
+          ).then((m) => m.TwoStepVerificationComponent),
       },
     ],
   },
