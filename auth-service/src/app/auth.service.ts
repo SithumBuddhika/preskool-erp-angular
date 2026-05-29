@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -70,6 +71,22 @@ export class AuthService {
     }
 
     return this.createAuthResponse(user as DbUser);
+  }
+
+  async getMe(userId: string): Promise<AuthUser> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException('Your account is inactive');
+    }
+
+    return this.toAuthUser(user as DbUser);
   }
 
   private async createAuthResponse(user: DbUser): Promise<AuthResponse> {

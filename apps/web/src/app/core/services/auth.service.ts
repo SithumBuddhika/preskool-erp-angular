@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { Observable, catchError, of, tap } from 'rxjs';
 import {
   AuthResponse,
   AuthUser,
@@ -30,6 +30,27 @@ export class AuthService {
       .pipe(tap((response) => this.saveSession(response)));
   }
 
+  me(): Observable<AuthUser> {
+    return this.http.get<AuthUser>(`${this.apiUrl}/me`);
+  }
+
+  loadCurrentUser(): Observable<AuthUser | null> {
+    const token = this.getToken();
+
+    if (!token) {
+      this.logout();
+      return of(null);
+    }
+
+    return this.me().pipe(
+      tap((user) => this.saveUser(user)),
+      catchError(() => {
+        this.logout();
+        return of(null);
+      }),
+    );
+  }
+
   logout(): void {
     localStorage.removeItem('preskool_access_token');
     localStorage.removeItem('preskool_user');
@@ -46,8 +67,12 @@ export class AuthService {
 
   private saveSession(response: AuthResponse): void {
     localStorage.setItem('preskool_access_token', response.accessToken);
-    localStorage.setItem('preskool_user', JSON.stringify(response.user));
-    this.currentUser.set(response.user);
+    this.saveUser(response.user);
+  }
+
+  private saveUser(user: AuthUser): void {
+    localStorage.setItem('preskool_user', JSON.stringify(user));
+    this.currentUser.set(user);
   }
 
   private getStoredUser(): AuthUser | null {
