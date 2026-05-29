@@ -23,6 +23,13 @@ export const appRoutes: Routes = [
             './features/dashboard/admin-dashboard/admin-dashboard.component'
           ).then((m) => m.AdminDashboardComponent),
       },
+      {
+        path: 'people/students',
+        loadComponent: () =>
+          import('./features/people/students/students.component').then(
+            (m) => m.StudentsComponent,
+          ),
+      },
     ],
   },
   {

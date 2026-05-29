@@ -10,7 +10,7 @@ import { RouterLink } from '@angular/router';
 @Component({
   selector: 'app-email-verification',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule],
   templateUrl: './email-verification.component.html',
   styleUrl: './email-verification.component.scss',
 })

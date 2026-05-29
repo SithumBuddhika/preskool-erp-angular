@@ -1,0 +1,313 @@
+<section class="students-page">
+  <div class="students-page__header">
+    <div>
+      <h1>Students</h1>
+      <p>People / Students</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Student
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">S</span>
+      <div>
+        <strong>{{ students().length }}</strong>
+        <p>Total Students</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ activeStudents() }}</strong>
+        <p>Active Students</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">I</span>
+      <div>
+        <strong>{{ inactiveStudents() }}</strong>
+        <p>Inactive Students</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="students-card">
+    <div class="students-card__top">
+      <div>
+        <h2>Student List</h2>
+        <p>Manage student admission details and guardian information.</p>
+      </div>
+
+      <div class="students-search">
+        <input
+          type="text"
+          placeholder="Search students..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showCreateModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="students-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Admission No</th>
+              <th>Student Name</th>
+              <th>Class</th>
+              <th>Gender</th>
+              <th>Guardian</th>
+              <th>Phone</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (student of students(); track student.id) {
+              <tr>
+                <td>
+                  <strong>{{ student.admissionNo }}</strong>
+                </td>
+
+                <td>
+                  <div class="student-name">
+                    <span>
+                      {{ student.firstName[0] }}{{ student.lastName[0] }}
+                    </span>
+
+                    <div>
+                      <strong>{{ getFullName(student) }}</strong>
+                      <p>{{ student.email || 'No email added' }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>{{ student.className }} {{ student.section || '' }}</td>
+                <td>{{ student.gender }}</td>
+                <td>{{ student.guardianName }}</td>
+                <td>{{ student.guardianPhone }}</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--inactive]="student.status !== 'ACTIVE'"
+                  >
+                    {{ student.status }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <button
+                    class="danger-btn"
+                    type="button"
+                    (click)="deleteStudent(student)"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8">
+                  <div class="empty-state">
+                    <strong>No students found</strong>
+                    <p>Add your first student or change your search keyword.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showCreateModal()) {
+  <div class="modal-backdrop">
+    <form
+      class="student-modal"
+      [formGroup]="studentForm"
+      (ngSubmit)="createStudent()"
+    >
+      <div class="student-modal__header">
+        <div>
+          <h2>Add New Student</h2>
+          <p>Enter student admission and guardian details.</p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeCreateModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Admission No
+          <input
+            type="text"
+            formControlName="admissionNo"
+            placeholder="Enter admission number"
+          />
+          @if (isInvalid('admissionNo')) {
+            <small>Admission number is required.</small>
+          }
+        </label>
+
+        <label>
+          First Name
+          <input
+            type="text"
+            formControlName="firstName"
+            placeholder="Enter first name"
+          />
+          @if (isInvalid('firstName')) {
+            <small>First name is required.</small>
+          }
+        </label>
+
+        <label>
+          Last Name
+          <input
+            type="text"
+            formControlName="lastName"
+            placeholder="Enter last name"
+          />
+          @if (isInvalid('lastName')) {
+            <small>Last name is required.</small>
+          }
+        </label>
+
+        <label>
+          Email
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="Enter email address"
+          />
+          @if (isInvalid('email')) {
+            <small>Enter a valid email address.</small>
+          }
+        </label>
+
+        <label>
+          Phone
+          <input
+            type="text"
+            formControlName="phone"
+            placeholder="Enter phone number"
+          />
+        </label>
+
+        <label>
+          Gender
+          <select formControlName="gender">
+            <option value="MALE">Male</option>
+            <option value="FEMALE">Female</option>
+            <option value="OTHER">Other</option>
+          </select>
+        </label>
+
+        <label>
+          Date of Birth
+          <input type="date" formControlName="dateOfBirth" />
+        </label>
+
+        <label>
+          Class
+          <input
+            type="text"
+            formControlName="className"
+            placeholder="Example: Grade 8"
+          />
+          @if (isInvalid('className')) {
+            <small>Class is required.</small>
+          }
+        </label>
+
+        <label>
+          Section
+          <input
+            type="text"
+            formControlName="section"
+            placeholder="Example: A"
+          />
+        </label>
+
+        <label>
+          Guardian Name
+          <input
+            type="text"
+            formControlName="guardianName"
+            placeholder="Enter guardian name"
+          />
+          @if (isInvalid('guardianName')) {
+            <small>Guardian name is required.</small>
+          }
+        </label>
+
+        <label>
+          Guardian Phone
+          <input
+            type="text"
+            formControlName="guardianPhone"
+            placeholder="Enter guardian phone number"
+          />
+          @if (isInvalid('guardianPhone')) {
+            <small>Guardian phone is required.</small>
+          }
+        </label>
+
+        <label class="form-grid__full">
+          Address
+          <textarea
+            formControlName="address"
+            rows="3"
+            placeholder="Enter student address"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="student-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeCreateModal()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{ isSubmitting() ? 'Saving...' : 'Save Student' }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
