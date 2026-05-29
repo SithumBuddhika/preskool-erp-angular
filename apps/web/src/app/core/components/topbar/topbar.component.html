@@ -1,32 +1,45 @@
 <header class="erp-topbar">
-  <button class="erp-topbar__menu" type="button">
-    <i-tabler name="menu-2" />
-  </button>
-
   <div class="erp-topbar__search">
     <i-tabler name="search" />
     <input type="text" placeholder="Search" />
   </div>
 
-  <div class="erp-topbar__spacer"></div>
+  <div class="erp-topbar__actions">
+    <button class="erp-topbar__select" type="button">
+      <span>Academic Year : 2024 / 2025</span>
+      <i-tabler name="chevron-down" />
+    </button>
 
-  <button class="erp-topbar__year" type="button">
-    Academic Year : 2024 / 2025
-    <i-tabler name="chevron-down" />
-  </button>
+    <button class="erp-topbar__small-btn" type="button">US</button>
 
-  <button class="erp-topbar__small-btn" type="button">🇺🇸</button>
+    <button
+      class="erp-topbar__icon-btn"
+      type="button"
+      aria-label="Notifications"
+    >
+      <i-tabler name="bell" />
+    </button>
 
-  <button class="erp-topbar__small-btn" type="button">
-    <i-tabler name="bell" />
-  </button>
+    <div class="erp-topbar__profile">
+      <span class="erp-topbar__avatar">{{ initials }}</span>
 
-  <button class="erp-topbar__profile" type="button">
-    <div class="erp-topbar__avatar">SB</div>
-    <div class="erp-topbar__profile-text">
-      <strong>Sithum</strong>
-      <span>Admin</span>
+      <div class="erp-topbar__user">
+        <strong>{{ displayName }}</strong>
+        <span>{{ displayRole }}</span>
+      </div>
+
+      <button
+        class="erp-topbar__profile-toggle"
+        type="button"
+        aria-label="Open user menu"
+      >
+        <i-tabler name="chevron-down" />
+      </button>
     </div>
-    <i-tabler name="chevron-down" />
-  </button>
+
+    <button class="erp-topbar__logout" type="button" (click)="logout()">
+      <i-tabler name="logout" />
+      <span>Logout</span>
+    </button>
+  </div>
 </header>

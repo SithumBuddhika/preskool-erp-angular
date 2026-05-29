@@ -1,8 +1,11 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
+import { guestGuard } from './core/guards/guest.guard';
 
 export const appRoutes: Routes = [
   {
     path: '',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./core/layouts/main-layout/main-layout.component').then(
         (m) => m.MainLayoutComponent,
@@ -36,6 +39,7 @@ export const appRoutes: Routes = [
       },
       {
         path: 'login',
+        canActivate: [guestGuard],
         loadComponent: () =>
           import('./features/auth/login/login.component').then(
             (m) => m.LoginComponent,
@@ -43,6 +47,7 @@ export const appRoutes: Routes = [
       },
       {
         path: 'sign-up',
+        canActivate: [guestGuard],
         loadComponent: () =>
           import('./features/auth/sign-up/sign-up.component').then(
             (m) => m.SignUpComponent,
@@ -50,6 +55,7 @@ export const appRoutes: Routes = [
       },
       {
         path: 'forgot-password',
+        canActivate: [guestGuard],
         loadComponent: () =>
           import(
             './features/auth/forgot-password/forgot-password.component'
@@ -57,6 +63,7 @@ export const appRoutes: Routes = [
       },
       {
         path: 'reset-password',
+        canActivate: [guestGuard],
         loadComponent: () =>
           import(
             './features/auth/reset-password/reset-password.component'
@@ -64,6 +71,7 @@ export const appRoutes: Routes = [
       },
       {
         path: 'reset-password-sent',
+        canActivate: [guestGuard],
         loadComponent: () =>
           import(
             './features/auth/reset-password-sent/reset-password-sent.component'
@@ -71,6 +79,7 @@ export const appRoutes: Routes = [
       },
       {
         path: 'email-verification',
+        canActivate: [guestGuard],
         loadComponent: () =>
           import(
             './features/auth/email-verification/email-verification.component'
@@ -78,6 +87,7 @@ export const appRoutes: Routes = [
       },
       {
         path: 'two-step-verification',
+        canActivate: [guestGuard],
         loadComponent: () =>
           import(
             './features/auth/two-step-verification/two-step-verification.component'
