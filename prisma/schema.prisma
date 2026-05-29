@@ -29,3 +29,38 @@ model User {
 
   @@map("users")
 }
+
+enum StudentGender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum StudentStatus {
+  ACTIVE
+  INACTIVE
+  GRADUATED
+  SUSPENDED
+}
+
+model Student {
+  id            String        @id @default(uuid())
+  admissionNo   String        @unique
+  firstName     String
+  lastName      String
+  email         String?       @unique
+  phone         String?
+  gender        StudentGender
+  dateOfBirth   DateTime?
+  className     String
+  section       String?
+  guardianName  String
+  guardianPhone String
+  address       String?
+  status        StudentStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("students")
+}

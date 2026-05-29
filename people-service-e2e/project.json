@@ -1,0 +1,17 @@
+{
+  "name": "people-service-e2e",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "implicitDependencies": ["people-service"],
+  "targets": {
+    "e2e": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{e2eProjectRoot}"],
+      "options": {
+        "jestConfig": "people-service-e2e/jest.config.cts",
+        "passWithNoTests": true
+      },
+      "dependsOn": ["people-service:build", "people-service:serve"]
+    }
+  }
+}

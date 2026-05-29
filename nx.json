@@ -67,7 +67,8 @@
         "api-gateway-e2e/**/*",
         "auth-service-e2e/**/*",
         "auth-service-e2e/**/*",
-        "auth-service-e2e/**/*"
+        "auth-service-e2e/**/*",
+        "people-service-e2e/**/*"
       ]
     }
   ],
