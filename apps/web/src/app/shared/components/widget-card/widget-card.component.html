@@ -1,0 +1,11 @@
+<article class="erp-card widget" [class.widget--large]="large">
+  <div class="widget__header">
+    <h3>{{ title }}</h3>
+
+    @if (meta) {
+      <span>{{ meta }}</span>
+    }
+  </div>
+
+  <ng-content />
+</article>

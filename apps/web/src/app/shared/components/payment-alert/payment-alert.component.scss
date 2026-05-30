@@ -1,0 +1,33 @@
+.payment-alert {
+  min-height: 42px;
+  border: 1px solid #35d869;
+  background: #eaffef;
+  color: #07952e;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  font-size: 13px;
+}
+
+.payment-alert__avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: #14b8c4;
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.payment-alert button {
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  color: #07952e;
+  font-size: 20px;
+  cursor: pointer;
+}

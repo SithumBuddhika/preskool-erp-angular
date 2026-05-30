@@ -1,0 +1,46 @@
+<aside class="erp-sidebar">
+  <div class="erp-sidebar__brand">
+    <div class="erp-sidebar__brand-left">
+      <img
+        class="erp-sidebar__brand-icon"
+        src="/assets/logos/preskool-logo.png"
+        alt="PreSkool logo"
+      />
+
+      <strong>PreSkool</strong>
+    </div>
+
+    <button type="button" aria-label="Toggle sidebar">
+      <i-tabler name="chevron-right" />
+    </button>
+  </div>
+
+  <div class="erp-sidebar__school">
+    <div class="erp-sidebar__school-icon">G</div>
+    <span>Global International</span>
+    <i-tabler name="chevron-right" />
+  </div>
+
+  <nav class="erp-sidebar__nav">
+    @for (section of sections; track section.title) {
+      <div class="erp-sidebar__section">
+        <p>{{ section.title }}</p>
+
+        @for (item of section.items; track item.label) {
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="active"
+            class="erp-sidebar__link"
+          >
+            <span class="erp-sidebar__link-left">
+              <i-tabler [name]="item.icon" />
+              <span>{{ item.label }}</span>
+            </span>
+
+            <i-tabler name="chevron-right" class="erp-sidebar__arrow" />
+          </a>
+        }
+      </div>
+    }
+  </nav>
+</aside>

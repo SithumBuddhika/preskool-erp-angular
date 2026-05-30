@@ -1,0 +1,359 @@
+<section class="teachers-page">
+  <div class="teachers-page__header">
+    <div>
+      <h1>Teachers</h1>
+      <p>People / Teachers</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Teacher
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">T</span>
+      <div>
+        <strong>{{ teachers().length }}</strong>
+        <p>Total Teachers</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ activeTeachers() }}</strong>
+        <p>Active Teachers</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">I</span>
+      <div>
+        <strong>{{ inactiveTeachers() }}</strong>
+        <p>Inactive Teachers</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="teachers-card">
+    <div class="teachers-card__top">
+      <div>
+        <h2>Teacher List</h2>
+        <p>Manage teacher employment details and subject information.</p>
+      </div>
+
+      <div class="teachers-search">
+        <input
+          type="text"
+          placeholder="Search teachers..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showTeacherModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="teachers-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Employee No</th>
+              <th>Teacher Name</th>
+              <th>Subject</th>
+              <th>Gender</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>Joining Date</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (teacher of teachers(); track teacher.id) {
+              <tr>
+                <td>
+                  <strong class="employee-no">{{ teacher.employeeNo }}</strong>
+                </td>
+
+                <td>
+                  <div class="teacher-name">
+                    <span>{{ getInitials(teacher) }}</span>
+
+                    <div>
+                      <strong>{{ teacher.fullName }}</strong>
+                      <p>
+                        {{ teacher.qualification || 'No qualification added' }}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>{{ teacher.subject }}</td>
+                <td>{{ getGenderLabel(teacher.gender) }}</td>
+                <td>{{ teacher.phone }}</td>
+                <td>{{ teacher.email }}</td>
+                <td>{{ formatDisplayDate(teacher.joiningDate) }}</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--inactive]="teacher.status !== 'ACTIVE'"
+                  >
+                    {{ teacher.status }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(teacher)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(teacher)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="9">
+                  <div class="empty-state">
+                    <strong>No teachers found</strong>
+                    <p>Add your first teacher or change your search keyword.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showTeacherModal()) {
+  <div class="modal-backdrop">
+    <form
+      class="teacher-modal"
+      [formGroup]="teacherForm"
+      (ngSubmit)="saveTeacher()"
+    >
+      <div class="teacher-modal__header">
+        <div>
+          <h2>{{ isEditMode() ? 'Edit Teacher' : 'Add New Teacher' }}</h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update teacher employment and subject details.'
+                : 'Enter teacher employment and subject details.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeTeacherModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Employee No
+          <input
+            type="text"
+            formControlName="employeeNo"
+            placeholder="Example: TCH-0001"
+          />
+          @if (isInvalid('employeeNo')) {
+            <small>Employee number is required.</small>
+          }
+        </label>
+
+        <label>
+          Full Name
+          <input
+            type="text"
+            formControlName="fullName"
+            placeholder="Enter teacher full name"
+          />
+          @if (isInvalid('fullName')) {
+            <small>Full name is required.</small>
+          }
+        </label>
+
+        <label>
+          Email
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="Enter email address"
+          />
+          @if (isInvalid('email')) {
+            <small>Enter a valid email address.</small>
+          }
+        </label>
+
+        <label>
+          Phone
+          <input
+            type="text"
+            formControlName="phone"
+            placeholder="Enter phone number"
+          />
+          @if (isInvalid('phone')) {
+            <small>Phone number is required.</small>
+          }
+        </label>
+
+        <label>
+          Gender
+          <select formControlName="gender">
+            <option value="MALE">Male</option>
+            <option value="FEMALE">Female</option>
+            <option value="OTHER">Other</option>
+          </select>
+        </label>
+
+        <label>
+          Subject
+          <input
+            type="text"
+            formControlName="subject"
+            placeholder="Example: Mathematics"
+          />
+          @if (isInvalid('subject')) {
+            <small>Subject is required.</small>
+          }
+        </label>
+
+        <label>
+          Qualification
+          <input
+            type="text"
+            formControlName="qualification"
+            placeholder="Example: BSc Mathematics"
+          />
+        </label>
+
+        <label>
+          Joining Date
+          <input type="date" formControlName="joiningDate" />
+          @if (isInvalid('joiningDate')) {
+            <small>Joining date is required.</small>
+          }
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+          </select>
+        </label>
+
+        <label class="form-grid__full">
+          Address
+          <textarea
+            formControlName="address"
+            rows="3"
+            placeholder="Enter teacher address"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="teacher-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeTeacherModal()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Teacher'
+                : 'Save Teacher'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (teacherToDelete(); as teacher) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Teacher?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ teacher.fullName }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteTeacher()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Teacher' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}

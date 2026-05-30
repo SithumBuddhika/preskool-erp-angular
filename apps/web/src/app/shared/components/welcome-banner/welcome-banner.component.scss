@@ -1,0 +1,56 @@
+.welcome-banner {
+  min-height: 100px;
+  background: #0f0b1f;
+  border-radius: 4px;
+  padding: 24px;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.welcome-banner::before,
+.welcome-banner::after {
+  content: '';
+  position: absolute;
+  border: 6px solid rgba(61, 94, 225, 0.65);
+  border-radius: 18px;
+  transform: rotate(25deg);
+}
+
+.welcome-banner::before {
+  width: 62px;
+  height: 62px;
+  right: 250px;
+  bottom: -28px;
+}
+
+.welcome-banner::after {
+  width: 36px;
+  height: 36px;
+  right: 105px;
+  top: -16px;
+}
+
+.welcome-banner h2 {
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.welcome-banner p,
+.welcome-banner span {
+  margin: 0;
+  font-size: 12px;
+  color: #e5e7eb;
+}
+
+@media (max-width: 575px) {
+  .welcome-banner {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+}

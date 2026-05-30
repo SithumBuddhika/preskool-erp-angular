@@ -1,0 +1,27 @@
+.widget {
+  border-radius: 4px;
+  padding: 18px;
+}
+
+.widget--large {
+  min-height: 318px;
+}
+
+.widget__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.widget__header h3 {
+  margin: 0;
+  color: var(--erp-text-main);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.widget__header span {
+  color: #5f6b86;
+  font-size: 12px;
+}

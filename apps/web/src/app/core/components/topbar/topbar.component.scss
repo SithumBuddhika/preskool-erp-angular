@@ -1,0 +1,237 @@
+.erp-topbar {
+  height: 72px;
+  background: #ffffff;
+  border-bottom: 1px solid #edf1f7;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 28px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.erp-topbar__search {
+  width: min(100%, 385px);
+  height: 46px;
+  border: 1px solid #dfe5ef;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px;
+  background: #ffffff;
+  color: #8a94a6;
+}
+
+.erp-topbar__search i-tabler {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.erp-topbar__search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: var(--erp-body-lg, 14px);
+  color: var(--erp-text-main);
+}
+
+.erp-topbar__search input::placeholder {
+  color: #b3bdcc;
+}
+
+.erp-topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.erp-topbar__select,
+.erp-topbar__small-btn,
+.erp-topbar__icon-btn,
+.erp-topbar__profile-toggle,
+.erp-topbar__logout {
+  border: 1px solid #dfe5ef;
+  background: #ffffff;
+  color: #253858;
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.erp-topbar__select:hover,
+.erp-topbar__small-btn:hover,
+.erp-topbar__icon-btn:hover,
+.erp-topbar__profile-toggle:hover {
+  background: #f8fafc;
+}
+
+.erp-topbar__select {
+  height: 42px;
+  min-width: 210px;
+  border-radius: 8px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: var(--erp-body-md, 13px);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.erp-topbar__select i-tabler {
+  width: 16px;
+  height: 16px;
+}
+
+.erp-topbar__small-btn,
+.erp-topbar__icon-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-size: var(--erp-body-md, 13px);
+  font-weight: 700;
+}
+
+.erp-topbar__icon-btn i-tabler {
+  width: 20px;
+  height: 20px;
+}
+
+.erp-topbar__profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.erp-topbar__avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #eef2ff;
+  color: var(--erp-primary);
+  display: grid;
+  place-items: center;
+  font-size: var(--erp-body-md, 13px);
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.erp-topbar__user {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.erp-topbar__user strong {
+  font-size: var(--erp-body-lg, 14px);
+  line-height: 1.1;
+  font-weight: 800;
+  color: #111827;
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.erp-topbar__user span {
+  font-size: var(--erp-body-sm, 12px);
+  line-height: 1.1;
+  color: #64748b;
+  text-transform: capitalize;
+}
+
+.erp-topbar__profile-toggle {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+}
+
+.erp-topbar__profile-toggle i-tabler {
+  width: 18px;
+  height: 18px;
+}
+
+.erp-topbar__logout {
+  height: 38px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 14px;
+  background: #f1f5f9;
+  color: #253858;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--erp-body-md, 13px);
+  font-weight: 700;
+}
+
+.erp-topbar__logout i-tabler {
+  width: 17px;
+  height: 17px;
+}
+
+.erp-topbar__logout:hover {
+  background: #e2e8f0;
+}
+
+@media (max-width: 1199px) {
+  .erp-topbar {
+    padding: 0 22px;
+  }
+
+  .erp-topbar__select {
+    min-width: 180px;
+  }
+
+  .erp-topbar__logout span {
+    display: none;
+  }
+
+  .erp-topbar__logout {
+    width: 42px;
+    padding: 0;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 991px) {
+  .erp-topbar {
+    height: auto;
+    min-height: 72px;
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 14px 18px;
+  }
+
+  .erp-topbar__search {
+    width: 100%;
+  }
+
+  .erp-topbar__actions {
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 575px) {
+  .erp-topbar__select {
+    width: 100%;
+  }
+
+  .erp-topbar__user {
+    display: none;
+  }
+}

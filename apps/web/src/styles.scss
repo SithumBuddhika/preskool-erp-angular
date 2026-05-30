@@ -1,1 +1,61 @@
 @use 'tailwindcss';
+@use './styles/variables';
+@use './styles/typography';
+
+:root {
+  --erp-font-main: 'Inter', 'Segoe UI', Arial, sans-serif;
+  --erp-font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: var(--erp-font-main);
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  font-family: var(--erp-font-main);
+  background: var(--erp-bg);
+  color: var(--erp-text-main);
+  font-weight: 400;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--erp-font-main);
+  letter-spacing: -0.025em;
+  font-weight: 700;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: var(--erp-font-main);
+}
+
+button {
+  cursor: pointer;
+}
+
+input,
+select,
+textarea {
+  font-weight: 400;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #98a2b3;
+  font-weight: 400;
+}

@@ -67,7 +67,8 @@
         "api-gateway-e2e/**/*",
         "auth-service-e2e/**/*",
         "auth-service-e2e/**/*",
-        "auth-service-e2e/**/*"
+        "auth-service-e2e/**/*",
+        "people-service-e2e/**/*"
       ]
     }
   ],
@@ -77,6 +78,9 @@
       "linter": "eslint",
       "style": "scss",
       "unitTestRunner": "vitest"
+    },
+    "@nx/angular:component": {
+      "style": "css"
     }
   }
 }

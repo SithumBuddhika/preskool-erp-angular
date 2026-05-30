@@ -1,0 +1,8 @@
+@if (isVisible) {
+  <div class="payment-alert">
+    <span class="payment-alert__avatar">{{ avatar }}</span>
+    <strong>{{ studentName }}</strong>
+    <span>{{ message }}</span>
+    <button type="button" (click)="closeAlert()">×</button>
+  </div>
+}
