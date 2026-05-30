@@ -121,6 +121,13 @@ export const appRoutes: Routes = [
             (m) => m.GuardiansComponent,
           ),
       },
+      {
+        path: 'people/teachers',
+        loadComponent: () =>
+          import('./features/people/teachers/teachers.component').then(
+            (m) => m.TeachersComponent,
+          ),
+      },
     ],
   },
 

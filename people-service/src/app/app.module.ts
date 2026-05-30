@@ -7,6 +7,8 @@ import { ParentsService } from './parents.service';
 import { PrismaService } from './prisma.service';
 import { StudentsController } from './students.controller';
 import { StudentsService } from './students.service';
+import { TeachersController } from './teachers.controller';
+import { TeachersService } from './teachers.service';
 
 @Module({
   imports: [
@@ -15,7 +17,18 @@ import { StudentsService } from './students.service';
       envFilePath: '.env',
     }),
   ],
-  controllers: [StudentsController, ParentsController, GuardiansController],
-  providers: [StudentsService, ParentsService, GuardiansService, PrismaService],
+  controllers: [
+    StudentsController,
+    ParentsController,
+    GuardiansController,
+    TeachersController,
+  ],
+  providers: [
+    StudentsService,
+    ParentsService,
+    GuardiansService,
+    TeachersService,
+    PrismaService,
+  ],
 })
 export class AppModule {}
