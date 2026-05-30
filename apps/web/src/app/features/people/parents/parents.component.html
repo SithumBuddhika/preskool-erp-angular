@@ -1,0 +1,319 @@
+<section class="parents-page">
+  <div class="parents-page__header">
+    <div>
+      <h1>Parents</h1>
+      <p>People / Parents</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Parent
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">P</span>
+      <div>
+        <strong>{{ parents().length }}</strong>
+        <p>Total Parents</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ activeParents() }}</strong>
+        <p>Active Parents</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">I</span>
+      <div>
+        <strong>{{ inactiveParents() }}</strong>
+        <p>Inactive Parents</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="parents-card">
+    <div class="parents-card__top">
+      <div>
+        <h2>Parent List</h2>
+        <p>Manage parent contact details and relationship information.</p>
+      </div>
+
+      <div class="parents-search">
+        <input
+          type="text"
+          placeholder="Search parents..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showParentModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="parents-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Parent Name</th>
+              <th>Relation</th>
+              <th>Occupation</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (parent of parents(); track parent.id) {
+              <tr>
+                <td>
+                  <div class="parent-name">
+                    <span>{{ getInitials(parent) }}</span>
+
+                    <div>
+                      <strong>{{ parent.fullName }}</strong>
+                      <p>{{ parent.address || 'No address added' }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>{{ getRelationLabel(parent.relation) }}</td>
+                <td>{{ parent.occupation || 'Not added' }}</td>
+                <td>{{ parent.phone }}</td>
+                <td>{{ parent.email || 'No email added' }}</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--inactive]="parent.status !== 'ACTIVE'"
+                  >
+                    {{ parent.status }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(parent)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(parent)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7">
+                  <div class="empty-state">
+                    <strong>No parents found</strong>
+                    <p>Add your first parent or change your search keyword.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showParentModal()) {
+  <div class="modal-backdrop">
+    <form
+      class="parent-modal"
+      [formGroup]="parentForm"
+      (ngSubmit)="saveParent()"
+    >
+      <div class="parent-modal__header">
+        <div>
+          <h2>{{ isEditMode() ? 'Edit Parent' : 'Add New Parent' }}</h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update parent contact and relationship details.'
+                : 'Enter parent contact and relationship details.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeParentModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Full Name
+          <input
+            type="text"
+            formControlName="fullName"
+            placeholder="Enter parent full name"
+          />
+          @if (isInvalid('fullName')) {
+            <small>Full name is required.</small>
+          }
+        </label>
+
+        <label>
+          Email
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="Enter email address"
+          />
+          @if (isInvalid('email')) {
+            <small>Enter a valid email address.</small>
+          }
+        </label>
+
+        <label>
+          Phone
+          <input
+            type="text"
+            formControlName="phone"
+            placeholder="Enter phone number"
+          />
+          @if (isInvalid('phone')) {
+            <small>Phone number is required.</small>
+          }
+        </label>
+
+        <label>
+          Relation
+          <select formControlName="relation">
+            <option value="FATHER">Father</option>
+            <option value="MOTHER">Mother</option>
+            <option value="GUARDIAN">Guardian</option>
+            <option value="OTHER">Other</option>
+          </select>
+        </label>
+
+        <label>
+          Occupation
+          <input
+            type="text"
+            formControlName="occupation"
+            placeholder="Example: Business Owner"
+          />
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+          </select>
+        </label>
+
+        <label class="form-grid__full">
+          Address
+          <textarea
+            formControlName="address"
+            rows="3"
+            placeholder="Enter parent address"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="parent-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeParentModal()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Parent'
+                : 'Save Parent'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (parentToDelete(); as parent) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Parent?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ parent.fullName }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteParent()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Parent' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}

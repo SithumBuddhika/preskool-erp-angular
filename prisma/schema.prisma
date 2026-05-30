@@ -64,3 +64,31 @@ model Student {
 
   @@map("students")
 }
+
+enum ParentRelation {
+  FATHER
+  MOTHER
+  GUARDIAN
+  OTHER
+}
+
+enum ParentStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Parent {
+  id         String         @id @default(uuid())
+  fullName   String
+  email      String?        @unique
+  phone      String
+  relation   ParentRelation
+  occupation String?
+  address    String?
+  status     ParentStatus   @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("parents")
+}

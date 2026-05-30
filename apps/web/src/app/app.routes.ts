@@ -5,35 +5,13 @@ import { guestGuard } from './core/guards/guest.guard';
 export const appRoutes: Routes = [
   {
     path: '',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./core/layouts/main-layout/main-layout.component').then(
-        (m) => m.MainLayoutComponent,
-      ),
-    children: [
-      {
-        path: '',
-        pathMatch: 'full',
-        redirectTo: 'dashboard/admin',
-      },
-      {
-        path: 'dashboard/admin',
-        loadComponent: () =>
-          import(
-            './features/dashboard/admin-dashboard/admin-dashboard.component'
-          ).then((m) => m.AdminDashboardComponent),
-      },
-      {
-        path: 'people/students',
-        loadComponent: () =>
-          import('./features/people/students/students.component').then(
-            (m) => m.StudentsComponent,
-          ),
-      },
-    ],
+    pathMatch: 'full',
+    redirectTo: 'dashboard/admin',
   },
+
   {
     path: 'auth',
+    canActivate: [guestGuard],
     loadComponent: () =>
       import('./core/layouts/auth-layout/auth-layout.component').then(
         (m) => m.AuthLayoutComponent,
@@ -46,7 +24,6 @@ export const appRoutes: Routes = [
       },
       {
         path: 'login',
-        canActivate: [guestGuard],
         loadComponent: () =>
           import('./features/auth/login/login.component').then(
             (m) => m.LoginComponent,
@@ -54,7 +31,6 @@ export const appRoutes: Routes = [
       },
       {
         path: 'sign-up',
-        canActivate: [guestGuard],
         loadComponent: () =>
           import('./features/auth/sign-up/sign-up.component').then(
             (m) => m.SignUpComponent,
@@ -62,7 +38,6 @@ export const appRoutes: Routes = [
       },
       {
         path: 'forgot-password',
-        canActivate: [guestGuard],
         loadComponent: () =>
           import(
             './features/auth/forgot-password/forgot-password.component'
@@ -70,7 +45,6 @@ export const appRoutes: Routes = [
       },
       {
         path: 'reset-password',
-        canActivate: [guestGuard],
         loadComponent: () =>
           import(
             './features/auth/reset-password/reset-password.component'
@@ -78,7 +52,6 @@ export const appRoutes: Routes = [
       },
       {
         path: 'reset-password-sent',
-        canActivate: [guestGuard],
         loadComponent: () =>
           import(
             './features/auth/reset-password-sent/reset-password-sent.component'
@@ -86,7 +59,6 @@ export const appRoutes: Routes = [
       },
       {
         path: 'email-verification',
-        canActivate: [guestGuard],
         loadComponent: () =>
           import(
             './features/auth/email-verification/email-verification.component'
@@ -94,7 +66,6 @@ export const appRoutes: Routes = [
       },
       {
         path: 'two-step-verification',
-        canActivate: [guestGuard],
         loadComponent: () =>
           import(
             './features/auth/two-step-verification/two-step-verification.component'
@@ -102,6 +73,49 @@ export const appRoutes: Routes = [
       },
     ],
   },
+
+  {
+    path: '',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./core/layouts/main-layout/main-layout.component').then(
+        (m) => m.MainLayoutComponent,
+      ),
+    children: [
+      {
+        path: 'dashboard',
+        pathMatch: 'full',
+        redirectTo: 'dashboard/admin',
+      },
+      {
+        path: 'dashboard/admin',
+        loadComponent: () =>
+          import(
+            './features/dashboard/admin-dashboard/admin-dashboard.component'
+          ).then((m) => m.AdminDashboardComponent),
+      },
+      {
+        path: 'people',
+        pathMatch: 'full',
+        redirectTo: 'people/students',
+      },
+      {
+        path: 'people/students',
+        loadComponent: () =>
+          import('./features/people/students/students.component').then(
+            (m) => m.StudentsComponent,
+          ),
+      },
+      {
+        path: 'people/parents',
+        loadComponent: () =>
+          import('./features/people/parents/parents.component').then(
+            (m) => m.ParentsComponent,
+          ),
+      },
+    ],
+  },
+
   {
     path: '**',
     redirectTo: 'dashboard/admin',
