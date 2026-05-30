@@ -12,6 +12,8 @@ import {
   StudentGender,
 } from '../../../core/models/student.model';
 
+type ToastType = 'success' | 'error';
+
 @Component({
   selector: 'app-students',
   standalone: true,
@@ -22,12 +24,17 @@ import {
 export class StudentsComponent implements OnInit {
   students = signal<Student[]>([]);
   selectedStudent = signal<Student | null>(null);
+  studentToDelete = signal<Student | null>(null);
 
   isLoading = signal(false);
   isSubmitting = signal(false);
+  isDeleting = signal(false);
   showCreateModal = signal(false);
   serverError = signal('');
   searchTerm = signal('');
+
+  toast = signal<{ message: string; type: ToastType } | null>(null);
+  private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
   isEditMode = computed(() => this.selectedStudent() !== null);
 
@@ -108,6 +115,7 @@ export class StudentsComponent implements OnInit {
           error?.error?.message || 'Failed to load students.',
         );
         this.isLoading.set(false);
+        this.showToast('Failed to load students.', 'error');
       },
     });
   }
@@ -189,12 +197,14 @@ export class StudentsComponent implements OnInit {
             this.isSubmitting.set(false);
             this.closeCreateModal();
             this.loadStudents();
+            this.showToast('Student updated successfully.', 'success');
           },
           error: (error) => {
             this.isSubmitting.set(false);
             this.serverError.set(
               error?.error?.message || 'Failed to update student.',
             );
+            this.showToast('Failed to update student.', 'error');
           },
         });
 
@@ -206,31 +216,53 @@ export class StudentsComponent implements OnInit {
         this.isSubmitting.set(false);
         this.closeCreateModal();
         this.loadStudents();
+        this.showToast('Student added successfully.', 'success');
       },
       error: (error) => {
         this.isSubmitting.set(false);
         this.serverError.set(
           error?.error?.message || 'Failed to create student.',
         );
+        this.showToast('Failed to create student.', 'error');
       },
     });
   }
 
-  deleteStudent(student: Student): void {
-    const confirmed = confirm(
-      `Are you sure you want to delete ${student.firstName} ${student.lastName}?`,
-    );
+  openDeleteModal(student: Student): void {
+    this.studentToDelete.set(student);
+  }
 
-    if (!confirmed) {
+  closeDeleteModal(): void {
+    if (this.isDeleting()) {
       return;
     }
 
+    this.studentToDelete.set(null);
+  }
+
+  confirmDeleteStudent(): void {
+    const student = this.studentToDelete();
+
+    if (!student || this.isDeleting()) {
+      return;
+    }
+
+    this.isDeleting.set(true);
+
     this.studentsService.deleteStudent(student.id).subscribe({
-      next: () => this.loadStudents(),
+      next: () => {
+        this.isDeleting.set(false);
+        this.studentToDelete.set(null);
+        this.loadStudents();
+        this.showToast('Student deleted successfully.', 'success');
+      },
       error: (error) => {
+        this.isDeleting.set(false);
+        this.studentToDelete.set(null);
         this.serverError.set(
           error?.error?.message || 'Failed to delete student.',
         );
+        this.showToast('Failed to delete student.', 'error');
       },
     });
   }
@@ -274,5 +306,17 @@ export class StudentsComponent implements OnInit {
     }
 
     return date.split('T')[0];
+  }
+
+  private showToast(message: string, type: ToastType): void {
+    this.toast.set({ message, type });
+
+    if (this.toastTimer) {
+      clearTimeout(this.toastTimer);
+    }
+
+    this.toastTimer = setTimeout(() => {
+      this.toast.set(null);
+    }, 2800);
   }
 }

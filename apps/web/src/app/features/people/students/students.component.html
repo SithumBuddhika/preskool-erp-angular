@@ -127,7 +127,7 @@
                     <button
                       class="danger-btn"
                       type="button"
-                      (click)="deleteStudent(student)"
+                      (click)="openDeleteModal(student)"
                     >
                       Delete
                     </button>
@@ -333,5 +333,47 @@
         </button>
       </div>
     </form>
+  </div>
+}
+
+@if (studentToDelete(); as student) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Student?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ getFullName(student) }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteStudent()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Student' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
   </div>
 }
