@@ -1,0 +1,324 @@
+<section class="guardians-page">
+  <div class="guardians-page__header">
+    <div>
+      <h1>Guardians</h1>
+      <p>People / Guardians</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Guardian
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">G</span>
+      <div>
+        <strong>{{ guardians().length }}</strong>
+        <p>Total Guardians</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ activeGuardians() }}</strong>
+        <p>Active Guardians</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">I</span>
+      <div>
+        <strong>{{ inactiveGuardians() }}</strong>
+        <p>Inactive Guardians</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="guardians-card">
+    <div class="guardians-card__top">
+      <div>
+        <h2>Guardian List</h2>
+        <p>Manage guardian contact details and relationship information.</p>
+      </div>
+
+      <div class="guardians-search">
+        <input
+          type="text"
+          placeholder="Search guardians..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showGuardianModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="guardians-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Guardian Name</th>
+              <th>Relation</th>
+              <th>Occupation</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (guardian of guardians(); track guardian.id) {
+              <tr>
+                <td>
+                  <div class="guardian-name">
+                    <span>{{ getInitials(guardian) }}</span>
+
+                    <div>
+                      <strong>{{ guardian.fullName }}</strong>
+                      <p>{{ guardian.address || 'No address added' }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>{{ getRelationLabel(guardian.relation) }}</td>
+                <td>{{ guardian.occupation || 'Not added' }}</td>
+                <td>{{ guardian.phone }}</td>
+                <td>{{ guardian.email || 'No email added' }}</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--inactive]="guardian.status !== 'ACTIVE'"
+                  >
+                    {{ guardian.status }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(guardian)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(guardian)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7">
+                  <div class="empty-state">
+                    <strong>No guardians found</strong>
+                    <p>
+                      Add your first guardian or change your search keyword.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showGuardianModal()) {
+  <div class="modal-backdrop">
+    <form
+      class="guardian-modal"
+      [formGroup]="guardianForm"
+      (ngSubmit)="saveGuardian()"
+    >
+      <div class="guardian-modal__header">
+        <div>
+          <h2>{{ isEditMode() ? 'Edit Guardian' : 'Add New Guardian' }}</h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update guardian contact and relationship details.'
+                : 'Enter guardian contact and relationship details.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeGuardianModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Full Name
+          <input
+            type="text"
+            formControlName="fullName"
+            placeholder="Enter guardian full name"
+          />
+          @if (isInvalid('fullName')) {
+            <small>Full name is required.</small>
+          }
+        </label>
+
+        <label>
+          Email
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="Enter email address"
+          />
+          @if (isInvalid('email')) {
+            <small>Enter a valid email address.</small>
+          }
+        </label>
+
+        <label>
+          Phone
+          <input
+            type="text"
+            formControlName="phone"
+            placeholder="Enter phone number"
+          />
+          @if (isInvalid('phone')) {
+            <small>Phone number is required.</small>
+          }
+        </label>
+
+        <label>
+          Relation
+          <select formControlName="relation">
+            <option value="UNCLE">Uncle</option>
+            <option value="AUNT">Aunt</option>
+            <option value="GRANDFATHER">Grandfather</option>
+            <option value="GRANDMOTHER">Grandmother</option>
+            <option value="BROTHER">Brother</option>
+            <option value="SISTER">Sister</option>
+            <option value="OTHER">Other</option>
+          </select>
+        </label>
+
+        <label>
+          Occupation
+          <input
+            type="text"
+            formControlName="occupation"
+            placeholder="Example: Engineer"
+          />
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+          </select>
+        </label>
+
+        <label class="form-grid__full">
+          Address
+          <textarea
+            formControlName="address"
+            rows="3"
+            placeholder="Enter guardian address"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="guardian-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeGuardianModal()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Guardian'
+                : 'Save Guardian'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (guardianToDelete(); as guardian) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Guardian?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ guardian.fullName }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteGuardian()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Guardian' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}

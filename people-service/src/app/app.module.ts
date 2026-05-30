@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { GuardiansController } from './guardians.controller';
+import { GuardiansService } from './guardians.service';
 import { ParentsController } from './parents.controller';
 import { ParentsService } from './parents.service';
 import { PrismaService } from './prisma.service';
@@ -13,7 +15,7 @@ import { StudentsService } from './students.service';
       envFilePath: '.env',
     }),
   ],
-  controllers: [StudentsController, ParentsController],
-  providers: [StudentsService, ParentsService, PrismaService],
+  controllers: [StudentsController, ParentsController, GuardiansController],
+  providers: [StudentsService, ParentsService, GuardiansService, PrismaService],
 })
 export class AppModule {}

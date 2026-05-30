@@ -94,6 +94,7 @@ export const appRoutes: Routes = [
             './features/dashboard/admin-dashboard/admin-dashboard.component'
           ).then((m) => m.AdminDashboardComponent),
       },
+
       {
         path: 'people',
         pathMatch: 'full',
@@ -111,6 +112,13 @@ export const appRoutes: Routes = [
         loadComponent: () =>
           import('./features/people/parents/parents.component').then(
             (m) => m.ParentsComponent,
+          ),
+      },
+      {
+        path: 'people/guardians',
+        loadComponent: () =>
+          import('./features/people/guardians/guardians.component').then(
+            (m) => m.GuardiansComponent,
           ),
       },
     ],
