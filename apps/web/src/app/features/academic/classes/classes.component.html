@@ -1,0 +1,317 @@
+<section class="classes-page">
+  <div class="classes-page__header">
+    <div>
+      <h1>Classes</h1>
+      <p>Academic / Classes</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Class
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">C</span>
+      <div>
+        <strong>{{ classes().length }}</strong>
+        <p>Total Classes</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ activeClasses() }}</strong>
+        <p>Active Classes</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">I</span>
+      <div>
+        <strong>{{ inactiveClasses() }}</strong>
+        <p>Inactive Classes</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">S</span>
+      <div>
+        <strong>{{ totalCapacity() }}</strong>
+        <p>Total Seats</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="classes-card">
+    <div class="classes-card__top">
+      <div>
+        <h2>Class List</h2>
+        <p>Manage class sections, class teachers, rooms, and capacity.</p>
+      </div>
+
+      <div class="classes-search">
+        <input
+          type="text"
+          placeholder="Search classes..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showClassModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="classes-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Section</th>
+              <th>Class Teacher</th>
+              <th>Room No</th>
+              <th>Capacity</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (schoolClass of classes(); track schoolClass.id) {
+              <tr>
+                <td>
+                  <div class="class-name">
+                    <span>{{ schoolClass.className.charAt(0) }}</span>
+
+                    <div>
+                      <strong>{{ getClassLabel(schoolClass) }}</strong>
+                      <p>{{ schoolClass.className }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <strong class="section-badge">{{
+                    schoolClass.section
+                  }}</strong>
+                </td>
+
+                <td>{{ schoolClass.classTeacher || 'Not assigned' }}</td>
+                <td>{{ schoolClass.roomNo || '-' }}</td>
+                <td>{{ schoolClass.capacity || '-' }}</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--inactive]="
+                      schoolClass.status !== 'ACTIVE'
+                    "
+                  >
+                    {{ schoolClass.status }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(schoolClass)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(schoolClass)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7">
+                  <div class="empty-state">
+                    <strong>No classes found</strong>
+                    <p>Add your first class or change your search keyword.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showClassModal()) {
+  <div class="modal-backdrop">
+    <form class="class-modal" [formGroup]="classForm" (ngSubmit)="saveClass()">
+      <div class="class-modal__header">
+        <div>
+          <h2>{{ isEditMode() ? 'Edit Class' : 'Add New Class' }}</h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update class section and classroom details.'
+                : 'Enter class section and classroom details.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeClassModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Class Name
+          <input
+            type="text"
+            formControlName="className"
+            placeholder="Example: Grade 8"
+          />
+          @if (isInvalid('className')) {
+            <small>Class name is required.</small>
+          }
+        </label>
+
+        <label>
+          Section
+          <input
+            type="text"
+            formControlName="section"
+            placeholder="Example: A"
+          />
+          @if (isInvalid('section')) {
+            <small>Section is required.</small>
+          }
+        </label>
+
+        <label>
+          Class Teacher
+          <input
+            type="text"
+            formControlName="classTeacher"
+            placeholder="Enter class teacher name"
+          />
+        </label>
+
+        <label>
+          Room No
+          <input
+            type="text"
+            formControlName="roomNo"
+            placeholder="Example: R-201"
+          />
+        </label>
+
+        <label>
+          Capacity
+          <input
+            type="number"
+            formControlName="capacity"
+            placeholder="Example: 35"
+            min="1"
+          />
+          @if (isInvalid('capacity')) {
+            <small>Capacity must be at least 1.</small>
+          }
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="class-modal__actions">
+        <button class="secondary-btn" type="button" (click)="closeClassModal()">
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Class'
+                : 'Save Class'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (classToDelete(); as schoolClass) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Class?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ getClassLabel(schoolClass) }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteClass()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Class' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}

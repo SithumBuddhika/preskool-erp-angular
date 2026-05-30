@@ -128,6 +128,19 @@ export const appRoutes: Routes = [
             (m) => m.TeachersComponent,
           ),
       },
+
+      {
+        path: 'academic',
+        pathMatch: 'full',
+        redirectTo: 'academic/classes',
+      },
+      {
+        path: 'academic/classes',
+        loadComponent: () =>
+          import('./features/academic/classes/classes.component').then(
+            (m) => m.ClassesComponent,
+          ),
+      },
     ],
   },
 

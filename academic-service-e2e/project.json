@@ -1,0 +1,17 @@
+{
+  "name": "academic-service-e2e",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "implicitDependencies": ["academic-service"],
+  "projectType": "application",
+  "targets": {
+    "e2e": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{e2eProjectRoot}"],
+      "options": {
+        "jestConfig": "academic-service-e2e/jest.config.cts",
+        "passWithNoTests": true
+      },
+      "dependsOn": ["academic-service:build", "academic-service:serve"]
+    }
+  }
+}
