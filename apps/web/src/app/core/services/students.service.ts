@@ -25,6 +25,13 @@ export class StudentsService {
     return this.http.post<Student>(this.apiUrl, payload);
   }
 
+  updateStudent(
+    id: string,
+    payload: Partial<CreateStudentPayload>,
+  ): Observable<Student> {
+    return this.http.patch<Student>(`${this.apiUrl}/${id}`, payload);
+  }
+
   deleteStudent(id: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
   }

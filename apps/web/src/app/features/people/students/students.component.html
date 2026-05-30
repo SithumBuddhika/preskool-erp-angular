@@ -115,13 +115,23 @@
                 </td>
 
                 <td class="text-right">
-                  <button
-                    class="danger-btn"
-                    type="button"
-                    (click)="deleteStudent(student)"
-                  >
-                    Delete
-                  </button>
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(student)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="deleteStudent(student)"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             } @empty {
@@ -146,12 +156,18 @@
     <form
       class="student-modal"
       [formGroup]="studentForm"
-      (ngSubmit)="createStudent()"
+      (ngSubmit)="saveStudent()"
     >
       <div class="student-modal__header">
         <div>
-          <h2>Add New Student</h2>
-          <p>Enter student admission and guardian details.</p>
+          <h2>{{ isEditMode() ? 'Edit Student' : 'Add New Student' }}</h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update student admission and guardian details.'
+                : 'Enter student admission and guardian details.'
+            }}
+          </p>
         </div>
 
         <button
@@ -305,7 +321,15 @@
         </button>
 
         <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
-          {{ isSubmitting() ? 'Saving...' : 'Save Student' }}
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Student'
+                : 'Save Student'
+          }}
         </button>
       </div>
     </form>

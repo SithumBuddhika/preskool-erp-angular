@@ -21,11 +21,15 @@ import {
 })
 export class StudentsComponent implements OnInit {
   students = signal<Student[]>([]);
+  selectedStudent = signal<Student | null>(null);
+
   isLoading = signal(false);
   isSubmitting = signal(false);
   showCreateModal = signal(false);
   serverError = signal('');
   searchTerm = signal('');
+
+  isEditMode = computed(() => this.selectedStudent() !== null);
 
   activeStudents = computed(
     () =>
@@ -115,6 +119,8 @@ export class StudentsComponent implements OnInit {
   }
 
   openCreateModal(): void {
+    this.selectedStudent.set(null);
+
     this.studentForm.reset({
       admissionNo: '',
       firstName: '',
@@ -134,11 +140,35 @@ export class StudentsComponent implements OnInit {
     this.showCreateModal.set(true);
   }
 
-  closeCreateModal(): void {
-    this.showCreateModal.set(false);
+  openEditModal(student: Student): void {
+    this.selectedStudent.set(student);
+
+    this.studentForm.reset({
+      admissionNo: student.admissionNo,
+      firstName: student.firstName,
+      lastName: student.lastName,
+      email: student.email || '',
+      phone: student.phone || '',
+      gender: student.gender,
+      dateOfBirth: this.formatDateForInput(student.dateOfBirth),
+      className: student.className,
+      section: student.section || '',
+      guardianName: student.guardianName,
+      guardianPhone: student.guardianPhone,
+      address: student.address || '',
+    });
+
+    this.serverError.set('');
+    this.showCreateModal.set(true);
   }
 
-  createStudent(): void {
+  closeCreateModal(): void {
+    this.showCreateModal.set(false);
+    this.selectedStudent.set(null);
+    this.serverError.set('');
+  }
+
+  saveStudent(): void {
     this.studentForm.markAllAsTouched();
     this.serverError.set('');
 
@@ -146,27 +176,30 @@ export class StudentsComponent implements OnInit {
       return;
     }
 
+    const selectedStudent = this.selectedStudent();
+    const payload = this.buildStudentPayload();
+
     this.isSubmitting.set(true);
 
-    const formValue = this.studentForm.getRawValue();
+    if (selectedStudent) {
+      this.studentsService
+        .updateStudent(selectedStudent.id, payload)
+        .subscribe({
+          next: () => {
+            this.isSubmitting.set(false);
+            this.closeCreateModal();
+            this.loadStudents();
+          },
+          error: (error) => {
+            this.isSubmitting.set(false);
+            this.serverError.set(
+              error?.error?.message || 'Failed to update student.',
+            );
+          },
+        });
 
-    const payload: CreateStudentPayload = {
-      admissionNo: formValue.admissionNo.trim(),
-      firstName: formValue.firstName.trim(),
-      lastName: formValue.lastName.trim(),
-      gender: formValue.gender,
-      className: formValue.className.trim(),
-      guardianName: formValue.guardianName.trim(),
-      guardianPhone: formValue.guardianPhone.trim(),
-    };
-
-    if (formValue.email.trim()) payload.email = formValue.email.trim();
-    if (formValue.phone.trim()) payload.phone = formValue.phone.trim();
-    if (formValue.dateOfBirth.trim()) {
-      payload.dateOfBirth = formValue.dateOfBirth.trim();
+      return;
     }
-    if (formValue.section.trim()) payload.section = formValue.section.trim();
-    if (formValue.address.trim()) payload.address = formValue.address.trim();
 
     this.studentsService.createStudent(payload).subscribe({
       next: () => {
@@ -209,5 +242,37 @@ export class StudentsComponent implements OnInit {
   isInvalid(controlName: keyof typeof this.studentForm.controls): boolean {
     const control = this.studentForm.controls[controlName];
     return control.invalid && control.touched;
+  }
+
+  private buildStudentPayload(): CreateStudentPayload {
+    const formValue = this.studentForm.getRawValue();
+
+    const payload: CreateStudentPayload = {
+      admissionNo: formValue.admissionNo.trim(),
+      firstName: formValue.firstName.trim(),
+      lastName: formValue.lastName.trim(),
+      gender: formValue.gender,
+      className: formValue.className.trim(),
+      guardianName: formValue.guardianName.trim(),
+      guardianPhone: formValue.guardianPhone.trim(),
+    };
+
+    if (formValue.email.trim()) payload.email = formValue.email.trim();
+    if (formValue.phone.trim()) payload.phone = formValue.phone.trim();
+    if (formValue.dateOfBirth.trim()) {
+      payload.dateOfBirth = formValue.dateOfBirth.trim();
+    }
+    if (formValue.section.trim()) payload.section = formValue.section.trim();
+    if (formValue.address.trim()) payload.address = formValue.address.trim();
+
+    return payload;
+  }
+
+  private formatDateForInput(date?: string | null): string {
+    if (!date) {
+      return '';
+    }
+
+    return date.split('T')[0];
   }
 }

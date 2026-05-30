@@ -426,3 +426,27 @@ td {
     width: 100%;
   }
 }
+
+.action-buttons {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.edit-btn {
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: #eef4ff;
+  color: var(--erp-primary);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.edit-btn:hover {
+  filter: brightness(0.97);
+}
