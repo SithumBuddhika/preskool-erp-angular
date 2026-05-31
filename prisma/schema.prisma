@@ -248,3 +248,30 @@ model ClassRoutine {
 
   @@map("class_routines")
 }
+
+enum ExamStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+model Exam {
+  id          String     @id @default(uuid())
+  examCode    String     @unique
+  examName    String
+  className   String
+  section     String
+  subjectName String
+  teacherName String
+  roomNo      String
+  examDate    DateTime
+  startTime   String
+  endTime     String
+  maxMarks    Int
+  minMarks    Int
+  status      ExamStatus @default(SCHEDULED)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("exams")
+}

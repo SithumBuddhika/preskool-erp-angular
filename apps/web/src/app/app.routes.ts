@@ -147,6 +147,7 @@ export const appRoutes: Routes = [
             (m) => m.ClassesComponent,
           ),
       },
+
       {
         path: 'academic/class-room',
         pathMatch: 'full',
@@ -159,6 +160,7 @@ export const appRoutes: Routes = [
             (m) => m.ClassRoomsComponent,
           ),
       },
+
       {
         path: 'academic/subject',
         pathMatch: 'full',
@@ -171,6 +173,7 @@ export const appRoutes: Routes = [
             (m) => m.SubjectsComponent,
           ),
       },
+
       {
         path: 'academic/class-routine',
         loadComponent: () =>
@@ -185,10 +188,24 @@ export const appRoutes: Routes = [
       },
 
       {
+        path: 'academic/exam-schedule',
+        loadComponent: () =>
+          import('./features/academic/exams/exams.component').then(
+            (m) => m.ExamsComponent,
+          ),
+      },
+      {
+        path: 'academic/exams',
+        pathMatch: 'full',
+        redirectTo: 'academic/exam-schedule',
+      },
+
+      {
         path: 'applications',
         pathMatch: 'full',
         redirectTo: 'dashboard/admin',
       },
+
       {
         path: 'management',
         pathMatch: 'full',
@@ -204,6 +221,7 @@ export const appRoutes: Routes = [
         pathMatch: 'full',
         redirectTo: 'dashboard/admin',
       },
+
       {
         path: 'hrm',
         pathMatch: 'full',
@@ -219,6 +237,7 @@ export const appRoutes: Routes = [
         pathMatch: 'full',
         redirectTo: 'dashboard/admin',
       },
+
       {
         path: 'reports',
         pathMatch: 'full',

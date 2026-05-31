@@ -105,6 +105,11 @@ export class SidebarComponent {
           route: '/academic/class-routine',
           icon: 'school',
         },
+        {
+          label: 'Exam Schedule',
+          route: '/academic/exam-schedule',
+          icon: 'school',
+        },
       ],
     },
     {

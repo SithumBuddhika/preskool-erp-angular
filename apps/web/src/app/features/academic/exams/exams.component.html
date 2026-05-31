@@ -1,0 +1,596 @@
+<section class="exams-page">
+  <div class="exams-page__header">
+    <div>
+      <h1>Exam Schedule</h1>
+      <p>Academic / Exam Schedule</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Exam
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">E</span>
+      <div>
+        <strong>{{ exams().length }}</strong>
+        <p>Total Exams</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">S</span>
+      <div>
+        <strong>{{ scheduledExams() }}</strong>
+        <p>Scheduled</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">C</span>
+      <div>
+        <strong>{{ completedExams() }}</strong>
+        <p>Completed</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">B</span>
+      <div>
+        <strong>{{ totalSubjects() }}</strong>
+        <p>Subjects</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="exams-card">
+    <div class="exams-card__top">
+      <div>
+        <h2>Exam Schedule List</h2>
+        <p>
+          Manage exam ID, class section, subjects, rooms, dates, marks, and time
+          slots.
+        </p>
+      </div>
+
+      <div class="exams-search">
+        <input
+          type="text"
+          placeholder="Search exams..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showExamModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="exams-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Exam ID</th>
+              <th>Exam</th>
+              <th>Class</th>
+              <th>Section</th>
+              <th>Subject</th>
+              <th>Teacher</th>
+              <th>Room No</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Marks</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (exam of exams(); track exam.id) {
+              <tr>
+                <td>
+                  <span class="exam-code">{{ exam.examCode }}</span>
+                </td>
+
+                <td>
+                  <div class="exam-name">
+                    <span>{{ getExamInitial(exam) }}</span>
+
+                    <div>
+                      <strong>{{ exam.examName }}</strong>
+                      <p>{{ getDuration(exam) }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>{{ exam.className }}</td>
+
+                <td>
+                  <span class="section-badge">{{ exam.section }}</span>
+                </td>
+
+                <td>{{ exam.subjectName }}</td>
+                <td>{{ exam.teacherName }}</td>
+                <td>{{ exam.roomNo }}</td>
+                <td>{{ getDateLabel(exam.examDate) }}</td>
+                <td>{{ getTimeRange(exam) }}</td>
+                <td>{{ exam.minMarks }} / {{ exam.maxMarks }}</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--completed]="exam.status === 'COMPLETED'"
+                    [class.status-pill--cancelled]="exam.status === 'CANCELLED'"
+                  >
+                    {{ getStatusLabel(exam.status) }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(exam)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(exam)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="12">
+                  <div class="empty-state">
+                    <strong>No exam schedules found</strong>
+                    <p>
+                      Add your first exam schedule or change your search
+                      keyword.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showExamModal()) {
+  <div class="modal-backdrop">
+    <form class="exam-modal" [formGroup]="examForm" (ngSubmit)="saveExam()">
+      <div class="exam-modal__header">
+        <div>
+          <h2>
+            {{ isEditMode() ? 'Edit Exam Schedule' : 'Add New Exam Schedule' }}
+          </h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update exam ID, class, subject, teacher, room, date, marks, and time.'
+                : 'Create a new exam schedule using existing class, subject, teacher, and room data.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeExamModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Exam ID
+          <input
+            type="text"
+            formControlName="examCode"
+            placeholder="Example: EXM-0001"
+          />
+
+          @if (isInvalid('examCode')) {
+            <small>Exam ID is required.</small>
+          }
+        </label>
+
+        <label>
+          Exam Name
+          <input
+            type="text"
+            formControlName="examName"
+            placeholder="Example: Mid Term Exam"
+          />
+
+          @if (isInvalid('examName')) {
+            <small>Exam name is required.</small>
+          }
+        </label>
+
+        <label class="autocomplete-field">
+          Class
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="className"
+              placeholder="Type class name..."
+              autocomplete="off"
+              (input)="onClassInput($event)"
+              (focus)="onClassFocus()"
+              (blur)="onClassBlur()"
+            />
+
+            @if (isInvalid('className')) {
+              <small>Class is required.</small>
+            }
+
+            @if (showClassSuggestions() && filteredClasses().length > 0) {
+              <div class="suggestions-panel">
+                @for (schoolClass of filteredClasses(); track schoolClass.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectClass(schoolClass)"
+                  >
+                    <span>{{ getClassInitial(schoolClass) }}</span>
+
+                    <div>
+                      <strong>{{ getClassLabel(schoolClass) }}</strong>
+                      <p>
+                        Section {{ schoolClass.section }}
+                        @if (schoolClass.classTeacher) {
+                          · {{ schoolClass.classTeacher }}
+                        }
+                        @if (schoolClass.roomNo) {
+                          · {{ schoolClass.roomNo }}
+                        }
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showClassSuggestions() &&
+              classSearchTerm().trim() &&
+              filteredClasses().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching class found
+              </div>
+            }
+          </div>
+        </label>
+
+        <label>
+          Section
+          <input
+            type="text"
+            formControlName="section"
+            placeholder="Auto-filled from class"
+            readonly
+          />
+
+          @if (isInvalid('section')) {
+            <small>Section is required.</small>
+          }
+        </label>
+
+        <label class="autocomplete-field">
+          Subject
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="subjectName"
+              placeholder="Type subject name..."
+              autocomplete="off"
+              (input)="onSubjectInput($event)"
+              (focus)="onSubjectFocus()"
+              (blur)="onSubjectBlur()"
+            />
+
+            @if (isInvalid('subjectName')) {
+              <small>Subject is required.</small>
+            }
+
+            @if (showSubjectSuggestions() && filteredSubjects().length > 0) {
+              <div class="suggestions-panel">
+                @for (subject of filteredSubjects(); track subject.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectSubject(subject)"
+                  >
+                    <span>{{ getSubjectInitial(subject) }}</span>
+
+                    <div>
+                      <strong>{{ subject.subjectName }}</strong>
+                      <p>
+                        {{ subject.subjectCode }}
+                        @if (subject.teacherName) {
+                          · {{ subject.teacherName }}
+                        }
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showSubjectSuggestions() &&
+              subjectSearchTerm().trim() &&
+              filteredSubjects().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching subject found
+              </div>
+            }
+          </div>
+        </label>
+
+        <label class="autocomplete-field">
+          Teacher
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="teacherName"
+              placeholder="Type teacher name..."
+              autocomplete="off"
+              (input)="onTeacherInput($event)"
+              (focus)="onTeacherFocus()"
+              (blur)="onTeacherBlur()"
+            />
+
+            @if (isInvalid('teacherName')) {
+              <small>Teacher is required.</small>
+            }
+
+            @if (showTeacherSuggestions() && filteredTeachers().length > 0) {
+              <div class="suggestions-panel">
+                @for (teacher of filteredTeachers(); track teacher.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectTeacher(teacher)"
+                  >
+                    <span>{{ getTeacherInitial(teacher) }}</span>
+
+                    <div>
+                      <strong>{{ teacher.fullName }}</strong>
+                      <p>
+                        {{ teacher.subject || 'Teacher' }}
+                        @if (teacher.email) {
+                          · {{ teacher.email }}
+                        }
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showTeacherSuggestions() &&
+              teacherSearchTerm().trim() &&
+              filteredTeachers().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching teacher found
+              </div>
+            }
+          </div>
+        </label>
+
+        <label class="autocomplete-field">
+          Room No
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="roomNo"
+              placeholder="Type room number..."
+              autocomplete="off"
+              (input)="onRoomInput($event)"
+              (focus)="onRoomFocus()"
+              (blur)="onRoomBlur()"
+            />
+
+            @if (isInvalid('roomNo')) {
+              <small>Room is required.</small>
+            }
+
+            @if (showRoomSuggestions() && filteredRooms().length > 0) {
+              <div class="suggestions-panel">
+                @for (room of filteredRooms(); track room.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectRoom(room)"
+                  >
+                    <span>{{ getRoomInitial(room) }}</span>
+
+                    <div>
+                      <strong>{{ getRoomLabel(room) }}</strong>
+                      <p>{{ getRoomMeta(room) }}</p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showRoomSuggestions() &&
+              roomSearchTerm().trim() &&
+              filteredRooms().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching room found
+              </div>
+            }
+          </div>
+        </label>
+
+        <label>
+          Exam Date
+          <input type="date" formControlName="examDate" />
+
+          @if (isInvalid('examDate')) {
+            <small>Exam date is required.</small>
+          }
+        </label>
+
+        <label>
+          Start Time
+          <input type="time" formControlName="startTime" />
+
+          @if (isInvalid('startTime')) {
+            <small>Start time is required.</small>
+          }
+        </label>
+
+        <label>
+          End Time
+          <input type="time" formControlName="endTime" />
+
+          @if (isInvalid('endTime')) {
+            <small>End time is required.</small>
+          }
+        </label>
+
+        <label>
+          Max Marks
+          <input
+            type="number"
+            formControlName="maxMarks"
+            placeholder="Example: 100"
+            min="1"
+          />
+
+          @if (isInvalid('maxMarks')) {
+            <small>Maximum marks are required.</small>
+          }
+        </label>
+
+        <label>
+          Min Marks
+          <input
+            type="number"
+            formControlName="minMarks"
+            placeholder="Example: 40"
+            min="0"
+          />
+
+          @if (isInvalid('minMarks')) {
+            <small>Minimum marks are required.</small>
+          }
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="SCHEDULED">Scheduled</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="CANCELLED">Cancelled</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="exam-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeExamModal()"
+          [disabled]="isSubmitting()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Exam'
+                : 'Save Exam'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (examToDelete(); as exam) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Exam Schedule?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ exam.examCode }} - {{ exam.examName }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteExam()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Exam' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}
