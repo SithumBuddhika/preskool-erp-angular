@@ -147,8 +147,6 @@ export const appRoutes: Routes = [
             (m) => m.ClassesComponent,
           ),
       },
-
-      // Old sidebar route support
       {
         path: 'academic/class-room',
         pathMatch: 'full',
@@ -161,8 +159,6 @@ export const appRoutes: Routes = [
             (m) => m.ClassRoomsComponent,
           ),
       },
-
-      // Old sidebar route support
       {
         path: 'academic/subject',
         pathMatch: 'full',
@@ -175,8 +171,19 @@ export const appRoutes: Routes = [
             (m) => m.SubjectsComponent,
           ),
       },
+      {
+        path: 'academic/class-routine',
+        loadComponent: () =>
+          import(
+            './features/academic/class-routine/class-routine.component'
+          ).then((m) => m.ClassRoutineComponent),
+      },
+      {
+        path: 'academic/class-routines',
+        pathMatch: 'full',
+        redirectTo: 'academic/class-routine',
+      },
 
-      // Temporary safe routes for sidebar items not built yet
       {
         path: 'applications',
         pathMatch: 'full',
