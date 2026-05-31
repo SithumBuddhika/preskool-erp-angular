@@ -1,0 +1,492 @@
+<section class="grades-page">
+  <div class="grades-page__header">
+    <div>
+      <h1>Grades</h1>
+      <p>Academic / Grades</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Grade
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">G</span>
+      <div>
+        <strong>{{ grades().length }}</strong>
+        <p>Total Grades</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">P</span>
+      <div>
+        <strong>{{ passGrades() }}</strong>
+        <p>Passed</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">F</span>
+      <div>
+        <strong>{{ failGrades() }}</strong>
+        <p>Failed</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">D</span>
+      <div>
+        <strong>{{ draftGrades() }}</strong>
+        <p>Draft Records</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="grades-card">
+    <div class="grades-card__top">
+      <div>
+        <h2>Grade List</h2>
+        <p>
+          Manage student marks, pass/fail results, grade letters, and publishing
+          status.
+        </p>
+      </div>
+
+      <div class="grades-search">
+        <input
+          type="text"
+          placeholder="Search grades..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showGradeModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="grades-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Grade ID</th>
+              <th>Student</th>
+              <th>Exam</th>
+              <th>Class</th>
+              <th>Section</th>
+              <th>Subject</th>
+              <th>Marks</th>
+              <th>Percentage</th>
+              <th>Result</th>
+              <th>Grade</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (grade of grades(); track grade.id) {
+              <tr>
+                <td>
+                  <span class="grade-code">{{ grade.gradeCode }}</span>
+                </td>
+
+                <td>
+                  <div class="student-name">
+                    <span>{{ getGradeInitial(grade) }}</span>
+
+                    <div>
+                      <strong>{{ grade.studentName }}</strong>
+                      <p>{{ grade.admissionNo }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <strong>{{ grade.examCode }}</strong>
+                  <p class="muted-text">{{ grade.examName }}</p>
+                </td>
+
+                <td>{{ grade.className }}</td>
+
+                <td>
+                  <span class="section-badge">{{ grade.section }}</span>
+                </td>
+
+                <td>{{ grade.subjectName }}</td>
+
+                <td>{{ grade.marksObtained }} / {{ grade.maxMarks }}</td>
+
+                <td>{{ getPercentage(grade) }}</td>
+
+                <td>
+                  <span
+                    class="result-pill"
+                    [class.result-pill--fail]="grade.result === 'FAIL'"
+                  >
+                    {{ getResultLabel(grade.result) }}
+                  </span>
+                </td>
+
+                <td>
+                  <span
+                    class="grade-letter"
+                    [class.grade-letter--fail]="grade.gradeLetter === 'F'"
+                  >
+                    {{ grade.gradeLetter }}
+                  </span>
+                </td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--published]="
+                      grade.status === 'PUBLISHED'
+                    "
+                  >
+                    {{ getStatusLabel(grade.status) }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(grade)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(grade)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="12">
+                  <div class="empty-state">
+                    <strong>No grade records found</strong>
+                    <p>
+                      Add your first grade record or change your search keyword.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showGradeModal()) {
+  <div class="modal-backdrop">
+    <form class="grade-modal" [formGroup]="gradeForm" (ngSubmit)="saveGrade()">
+      <div class="grade-modal__header">
+        <div>
+          <h2>
+            {{ isEditMode() ? 'Edit Grade Record' : 'Add New Grade Record' }}
+          </h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update exam, student, marks, and publishing status.'
+                : 'Select an exam and student, then enter marks obtained.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeGradeModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Grade ID
+          <input
+            type="text"
+            formControlName="gradeCode"
+            placeholder="Example: GRD-0001"
+          />
+
+          @if (isInvalid('gradeCode')) {
+            <small>Grade ID is required.</small>
+          }
+        </label>
+
+        <label class="autocomplete-field">
+          Exam
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="examName"
+              placeholder="Type exam name or ID..."
+              autocomplete="off"
+              (input)="onExamInput($event)"
+              (focus)="onExamFocus()"
+              (blur)="onExamBlur()"
+            />
+
+            @if (isInvalid('examName')) {
+              <small>Exam is required.</small>
+            }
+
+            @if (showExamSuggestions() && filteredExams().length > 0) {
+              <div class="suggestions-panel">
+                @for (exam of filteredExams(); track exam.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectExam(exam)"
+                  >
+                    <span>{{ exam.examCode.slice(-2) }}</span>
+
+                    <div>
+                      <strong>{{ exam.examCode }} - {{ exam.examName }}</strong>
+                      <p>
+                        {{ exam.className }} · {{ exam.subjectName }} ·
+                        {{ exam.maxMarks }} marks
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showExamSuggestions() &&
+              examSearchTerm().trim() &&
+              filteredExams().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching exam found
+              </div>
+            }
+          </div>
+        </label>
+
+        <label>
+          Exam Code
+          <input type="text" formControlName="examCode" readonly />
+        </label>
+
+        <label>
+          Class
+          <input type="text" formControlName="className" readonly />
+        </label>
+
+        <label>
+          Section
+          <input type="text" formControlName="section" readonly />
+        </label>
+
+        <label>
+          Subject
+          <input type="text" formControlName="subjectName" readonly />
+        </label>
+
+        <label>
+          Teacher
+          <input type="text" formControlName="teacherName" readonly />
+        </label>
+
+        <label class="autocomplete-field">
+          Student
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="studentName"
+              placeholder="Type student name or admission no..."
+              autocomplete="off"
+              (input)="onStudentInput($event)"
+              (focus)="onStudentFocus()"
+              (blur)="onStudentBlur()"
+            />
+
+            @if (isInvalid('studentName')) {
+              <small>Student is required.</small>
+            }
+
+            @if (showStudentSuggestions() && filteredStudents().length > 0) {
+              <div class="suggestions-panel">
+                @for (student of filteredStudents(); track student.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectStudent(student)"
+                  >
+                    <span>{{ getStudentInitial(student) }}</span>
+
+                    <div>
+                      <strong
+                        >{{ student.admissionNo }} -
+                        {{ getStudentName(student) }}</strong
+                      >
+                      <p>
+                        {{ student.className || 'No class' }}
+                        {{ student.section || '' }}
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showStudentSuggestions() &&
+              studentSearchTerm().trim() &&
+              filteredStudents().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching student found
+              </div>
+            }
+          </div>
+        </label>
+
+        <label>
+          Admission No
+          <input type="text" formControlName="admissionNo" readonly />
+        </label>
+
+        <label>
+          Marks Obtained
+          <input
+            type="number"
+            formControlName="marksObtained"
+            placeholder="Example: 78"
+            min="0"
+          />
+
+          @if (isInvalid('marksObtained')) {
+            <small>Marks obtained are required.</small>
+          }
+        </label>
+
+        <label>
+          Max Marks
+          <input type="number" formControlName="maxMarks" readonly />
+        </label>
+
+        <label>
+          Min Marks
+          <input type="number" formControlName="minMarks" readonly />
+        </label>
+
+        <label>
+          Result Preview
+          <input type="text" [value]="getResultPreview()" readonly />
+        </label>
+
+        <label>
+          Grade Preview
+          <input type="text" [value]="getGradeLetterPreview()" readonly />
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="DRAFT">Draft</option>
+            <option value="PUBLISHED">Published</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="grade-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeGradeModal()"
+          [disabled]="isSubmitting()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Grade'
+                : 'Save Grade'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (gradeToDelete(); as grade) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Grade Record?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ grade.gradeCode }} - {{ grade.studentName }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteGrade()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Grade' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}
