@@ -128,6 +128,33 @@ export const appRoutes: Routes = [
             (m) => m.TeachersComponent,
           ),
       },
+
+      {
+        path: 'academic',
+        pathMatch: 'full',
+        redirectTo: 'academic/classes',
+      },
+      {
+        path: 'academic/classes',
+        loadComponent: () =>
+          import('./features/academic/classes/classes.component').then(
+            (m) => m.ClassesComponent,
+          ),
+      },
+      {
+        path: 'academic/class-rooms',
+        loadComponent: () =>
+          import('./features/academic/class-rooms/class-rooms.component').then(
+            (m) => m.ClassRoomsComponent,
+          ),
+      },
+      {
+        path: 'academic/subjects',
+        loadComponent: () =>
+          import('./features/academic/subjects/subjects.component').then(
+            (m) => m.SubjectsComponent,
+          ),
+      },
     ],
   },
 

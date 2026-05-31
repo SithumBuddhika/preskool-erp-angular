@@ -1,0 +1,367 @@
+<section class="subjects-page">
+  <div class="subjects-page__header">
+    <div>
+      <h1>Subjects</h1>
+      <p>Academic / Subjects</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Subject
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">S</span>
+      <div>
+        <strong>{{ subjects().length }}</strong>
+        <p>Total Subjects</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ activeSubjects() }}</strong>
+        <p>Active Subjects</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">I</span>
+      <div>
+        <strong>{{ inactiveSubjects() }}</strong>
+        <p>Inactive Subjects</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">H</span>
+      <div>
+        <strong>{{ totalWeeklyHours() }}</strong>
+        <p>Weekly Hours</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="subjects-card">
+    <div class="subjects-card__top">
+      <div>
+        <h2>Subject List</h2>
+        <p>
+          Manage subject codes, class allocation, teachers, and weekly hours.
+        </p>
+      </div>
+
+      <div class="subjects-search">
+        <input
+          type="text"
+          placeholder="Search subjects..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showSubjectModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="subjects-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th>Subject Code</th>
+              <th>Class</th>
+              <th>Teacher</th>
+              <th>Weekly Hours</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (subject of subjects(); track subject.id) {
+              <tr>
+                <td>
+                  <div class="subject-name">
+                    <span>{{ getSubjectInitial(subject) }}</span>
+
+                    <div>
+                      <strong>{{ subject.subjectName }}</strong>
+                      <p>{{ subject.subjectCode }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>{{ subject.subjectCode }}</td>
+                <td>{{ subject.className || '-' }}</td>
+                <td>{{ subject.teacherName || 'Not assigned' }}</td>
+                <td>{{ subject.weeklyHours || '-' }}</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--inactive]="
+                      subject.status === 'INACTIVE'
+                    "
+                  >
+                    {{ getStatusLabel(subject.status) }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(subject)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(subject)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7">
+                  <div class="empty-state">
+                    <strong>No subjects found</strong>
+                    <p>Add your first subject or change your search keyword.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showSubjectModal()) {
+  <div class="modal-backdrop">
+    <form
+      class="subject-modal"
+      [formGroup]="subjectForm"
+      (ngSubmit)="saveSubject()"
+    >
+      <div class="subject-modal__header">
+        <div>
+          <h2>{{ isEditMode() ? 'Edit Subject' : 'Add New Subject' }}</h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update subject code, class, teacher, and weekly hours.'
+                : 'Enter subject code, class, teacher, and weekly hours.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeSubjectModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Subject Code
+          <input
+            type="text"
+            formControlName="subjectCode"
+            placeholder="Example: SUB-0001"
+          />
+          @if (isInvalid('subjectCode')) {
+            <small>Subject code is required.</small>
+          }
+        </label>
+
+        <label>
+          Subject Name
+          <input
+            type="text"
+            formControlName="subjectName"
+            placeholder="Example: Mathematics"
+          />
+          @if (isInvalid('subjectName')) {
+            <small>Subject name is required.</small>
+          }
+        </label>
+
+        <label>
+          Class
+          <input
+            type="text"
+            formControlName="className"
+            placeholder="Example: Grade 8"
+          />
+        </label>
+
+        <label class="autocomplete-field">
+          Teacher Name
+
+          <div class="teacher-autocomplete">
+            <input
+              type="text"
+              formControlName="teacherName"
+              placeholder="Type teacher name, email, or subject"
+              autocomplete="off"
+              (input)="onTeacherInput($event)"
+              (focus)="onTeacherFocus()"
+              (blur)="onTeacherBlur()"
+            />
+
+            @if (
+              showTeacherSuggestions() &&
+              teacherSearchTerm().trim() &&
+              filteredTeachers().length > 0
+            ) {
+              <div class="teacher-suggestions">
+                @for (teacher of filteredTeachers(); track teacher.id) {
+                  <button
+                    type="button"
+                    class="teacher-suggestion"
+                    (mousedown)="selectTeacher(teacher)"
+                  >
+                    <span>{{ getTeacherInitial(teacher) }}</span>
+
+                    <div>
+                      <strong>{{ teacher.fullName }}</strong>
+                      <p>
+                        {{ teacher.subject || 'Teacher' }}
+                        @if (teacher.email) {
+                          · {{ teacher.email }}
+                        }
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showTeacherSuggestions() &&
+              teacherSearchTerm().trim() &&
+              filteredTeachers().length === 0
+            ) {
+              <div class="teacher-suggestions teacher-suggestions--empty">
+                No matching teacher found
+              </div>
+            }
+          </div>
+        </label>
+
+        <label>
+          Weekly Hours
+          <input
+            type="number"
+            formControlName="weeklyHours"
+            placeholder="Example: 5"
+            min="1"
+          />
+          @if (isInvalid('weeklyHours')) {
+            <small>Weekly hours must be at least 1.</small>
+          }
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="subject-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeSubjectModal()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Subject'
+                : 'Save Subject'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (subjectToDelete(); as subject) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Subject?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ subject.subjectCode }} - {{ subject.subjectName }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteSubject()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Subject' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}

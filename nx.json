@@ -68,7 +68,8 @@
         "auth-service-e2e/**/*",
         "auth-service-e2e/**/*",
         "auth-service-e2e/**/*",
-        "people-service-e2e/**/*"
+        "people-service-e2e/**/*",
+        "academic-service-e2e/**/*"
       ]
     }
   ],
