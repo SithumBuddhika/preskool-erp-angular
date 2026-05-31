@@ -6,6 +6,8 @@ import { ClassRoutinesController } from './class-routines.controller';
 import { ClassRoutinesService } from './class-routines.service';
 import { ClassesController } from './classes.controller';
 import { ClassesService } from './classes.service';
+import { ExamsController } from './exams.controller';
+import { ExamsService } from './exams.service';
 import { PrismaService } from './prisma.service';
 import { SubjectsController } from './subjects.controller';
 import { SubjectsService } from './subjects.service';
@@ -22,12 +24,14 @@ import { SubjectsService } from './subjects.service';
     ClassRoomsController,
     SubjectsController,
     ClassRoutinesController,
+    ExamsController,
   ],
   providers: [
     ClassesService,
     ClassRoomsService,
     SubjectsService,
     ClassRoutinesService,
+    ExamsService,
     PrismaService,
   ],
 })
