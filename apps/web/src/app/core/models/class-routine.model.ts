@@ -10,7 +10,7 @@ export type RoutineDay =
 export type ClassRoutineStatus = 'ACTIVE' | 'INACTIVE';
 
 export interface ClassRoutine {
-  id: number;
+  id: string;
   routineCode: string;
   className: string;
   section: string;

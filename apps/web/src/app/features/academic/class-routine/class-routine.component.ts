@@ -86,11 +86,11 @@ export class ClassRoutineComponent implements OnInit {
   );
 
   totalRoomsUsed = computed(() => {
-    const rooms = this.routines()
+    const roomNumbers = this.routines()
       .map((routine) => routine.roomNo)
       .filter(Boolean);
 
-    return new Set(rooms).size;
+    return new Set(roomNumbers).size;
   });
 
   filteredClasses = computed(() => {
@@ -276,8 +276,10 @@ export class ClassRoutineComponent implements OnInit {
         this.routines.set(routines);
         this.isLoading.set(false);
       },
-      error: () => {
-        this.serverError.set('Failed to load class routines.');
+      error: (error) => {
+        this.serverError.set(
+          error?.error?.message || 'Failed to load class routines.',
+        );
         this.isLoading.set(false);
         this.showToast('Failed to load class routines.', 'error');
       },
@@ -338,6 +340,10 @@ export class ClassRoutineComponent implements OnInit {
     const value = (event.target as HTMLInputElement).value;
     this.classSearchTerm.set(value);
     this.showClassSuggestions.set(true);
+
+    if (!value.trim()) {
+      this.routineForm.controls.section.setValue('');
+    }
   }
 
   onClassFocus(): void {
@@ -463,7 +469,7 @@ export class ClassRoutineComponent implements OnInit {
     this.selectedRoutine.set(null);
 
     this.routineForm.reset({
-      routineCode: this.classRoutinesService.generateNextRoutineCode(),
+      routineCode: '',
       className: '',
       section: '',
       subjectName: '',
@@ -473,6 +479,16 @@ export class ClassRoutineComponent implements OnInit {
       startTime: '',
       endTime: '',
       status: 'ACTIVE',
+    });
+
+    this.classRoutinesService.generateNextRoutineCode().subscribe({
+      next: (routineCode) => {
+        this.routineForm.controls.routineCode.setValue(routineCode);
+      },
+      error: () => {
+        this.routineForm.controls.routineCode.setValue('RTN-0001');
+        this.showToast('Could not generate next routine ID.', 'error');
+      },
     });
 
     this.resetSuggestionState();
@@ -551,9 +567,11 @@ export class ClassRoutineComponent implements OnInit {
             this.loadRoutines();
             this.showToast('Class routine updated successfully.', 'success');
           },
-          error: () => {
+          error: (error) => {
             this.isSubmitting.set(false);
-            this.serverError.set('Failed to update class routine.');
+            this.serverError.set(
+              error?.error?.message || 'Failed to update class routine.',
+            );
             this.showToast('Failed to update class routine.', 'error');
           },
         });
@@ -568,9 +586,11 @@ export class ClassRoutineComponent implements OnInit {
         this.loadRoutines();
         this.showToast('Class routine added successfully.', 'success');
       },
-      error: () => {
+      error: (error) => {
         this.isSubmitting.set(false);
-        this.serverError.set('Failed to create class routine.');
+        this.serverError.set(
+          error?.error?.message || 'Failed to create class routine.',
+        );
         this.showToast('Failed to create class routine.', 'error');
       },
     });
@@ -604,9 +624,12 @@ export class ClassRoutineComponent implements OnInit {
         this.loadRoutines();
         this.showToast('Class routine deleted successfully.', 'success');
       },
-      error: () => {
+      error: (error) => {
         this.isDeleting.set(false);
         this.routineToDelete.set(null);
+        this.serverError.set(
+          error?.error?.message || 'Failed to delete class routine.',
+        );
         this.showToast('Failed to delete class routine.', 'error');
       },
     });

@@ -215,3 +215,36 @@ model Subject {
 
   @@map("subjects")
 }
+
+enum ClassRoutineStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum RoutineDay {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+model ClassRoutine {
+  id          String             @id @default(uuid())
+  routineCode String             @unique
+  className   String
+  section     String
+  subjectName String
+  teacherName String
+  roomNo      String
+  day         RoutineDay
+  startTime   String
+  endTime     String
+  status      ClassRoutineStatus @default(ACTIVE)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@map("class_routines")
+}
