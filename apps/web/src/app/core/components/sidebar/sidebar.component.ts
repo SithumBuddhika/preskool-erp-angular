@@ -92,12 +92,12 @@ export class SidebarComponent {
         },
         {
           label: 'Class Room',
-          route: '/academic/class-room',
+          route: '/academic/class-rooms',
           icon: 'school',
         },
         {
           label: 'Subject',
-          route: '/academic/subject',
+          route: '/academic/subjects',
           icon: 'school',
         },
       ],

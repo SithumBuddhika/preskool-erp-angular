@@ -439,6 +439,82 @@ td {
   font-weight: 500;
 }
 
+.autocomplete-field {
+  position: relative;
+}
+
+.suggestion-input-wrap {
+  position: relative;
+}
+
+.suggestions-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 120;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #dfe5ef;
+  border-radius: 12px;
+  box-shadow: 0 18px 50px rgba(16, 24, 40, 0.16);
+}
+
+.suggestion-option {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.suggestion-option:hover {
+  background: #f8fafc;
+}
+
+.suggestion-option + .suggestion-option {
+  border-top: 1px solid #edf1f7;
+}
+
+.suggestion-option > span {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #eef4ff;
+  color: var(--erp-primary);
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+
+.suggestion-option strong {
+  display: block;
+  color: var(--erp-text-main);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.suggestion-option p {
+  margin: 3px 0 0;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.suggestions-panel--empty {
+  padding: 12px 14px;
+  color: #667085;
+  font-size: 13px;
+  font-weight: 500;
+}
+
 .class-modal__actions {
   margin-top: 22px;
   display: flex;

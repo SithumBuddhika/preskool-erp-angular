@@ -5,14 +5,14 @@
       <p>Academic / Subjects</p>
     </div>
 
-    <button class="primary-btn" type="button" (click)="openCreateModal()">
+    <button type="button" class="primary-btn" (click)="openCreateModal()">
       Add New Subject
     </button>
   </div>
 
   <div class="summary-grid">
     <article class="summary-card">
-      <span class="summary-card__icon summary-card__icon--blue">S</span>
+      <div class="summary-card__icon summary-card__icon--blue">S</div>
       <div>
         <strong>{{ subjects().length }}</strong>
         <p>Total Subjects</p>
@@ -20,7 +20,7 @@
     </article>
 
     <article class="summary-card">
-      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div class="summary-card__icon summary-card__icon--green">A</div>
       <div>
         <strong>{{ activeSubjects() }}</strong>
         <p>Active Subjects</p>
@@ -28,7 +28,7 @@
     </article>
 
     <article class="summary-card">
-      <span class="summary-card__icon summary-card__icon--orange">I</span>
+      <div class="summary-card__icon summary-card__icon--orange">I</div>
       <div>
         <strong>{{ inactiveSubjects() }}</strong>
         <p>Inactive Subjects</p>
@@ -36,7 +36,7 @@
     </article>
 
     <article class="summary-card">
-      <span class="summary-card__icon summary-card__icon--purple">H</span>
+      <div class="summary-card__icon summary-card__icon--purple">H</div>
       <div>
         <strong>{{ totalWeeklyHours() }}</strong>
         <p>Weekly Hours</p>
@@ -72,7 +72,6 @@
         <span></span>
         <span></span>
         <span></span>
-        <span></span>
       </div>
     } @else {
       <div class="table-wrap">
@@ -103,9 +102,14 @@
                   </div>
                 </td>
 
-                <td>{{ subject.subjectCode }}</td>
+                <td>
+                  <span class="code-badge">{{ subject.subjectCode }}</span>
+                </td>
+
                 <td>{{ subject.className || '-' }}</td>
+
                 <td>{{ subject.teacherName || 'Not assigned' }}</td>
+
                 <td>{{ subject.weeklyHours || '-' }}</td>
 
                 <td>
@@ -122,16 +126,16 @@
                 <td class="text-right">
                   <div class="action-buttons">
                     <button
-                      class="edit-btn"
                       type="button"
+                      class="edit-btn"
                       (click)="openEditModal(subject)"
                     >
                       Edit
                     </button>
 
                     <button
-                      class="danger-btn"
                       type="button"
+                      class="danger-btn"
                       (click)="openDeleteModal(subject)"
                     >
                       Delete
@@ -158,11 +162,7 @@
 
 @if (showSubjectModal()) {
   <div class="modal-backdrop">
-    <form
-      class="subject-modal"
-      [formGroup]="subjectForm"
-      (ngSubmit)="saveSubject()"
-    >
+    <div class="subject-modal">
       <div class="subject-modal__header">
         <div>
           <h2>{{ isEditMode() ? 'Edit Subject' : 'Add New Subject' }}</h2>
@@ -175,12 +175,7 @@
           </p>
         </div>
 
-        <button
-          type="button"
-          class="modal-close"
-          aria-label="Close modal"
-          (click)="closeSubjectModal()"
-        >
+        <button type="button" class="modal-close" (click)="closeSubjectModal()">
           ×
         </button>
       </div>
@@ -189,138 +184,176 @@
         <p class="server-error">{{ serverError() }}</p>
       }
 
-      <div class="form-grid">
-        <label>
-          Subject Code
-          <input
-            type="text"
-            formControlName="subjectCode"
-            placeholder="Example: SUB-0001"
-          />
-          @if (isInvalid('subjectCode')) {
-            <small>Subject code is required.</small>
-          }
-        </label>
-
-        <label>
-          Subject Name
-          <input
-            type="text"
-            formControlName="subjectName"
-            placeholder="Example: Mathematics"
-          />
-          @if (isInvalid('subjectName')) {
-            <small>Subject name is required.</small>
-          }
-        </label>
-
-        <label>
-          Class
-          <input
-            type="text"
-            formControlName="className"
-            placeholder="Example: Grade 8"
-          />
-        </label>
-
-        <label class="autocomplete-field">
-          Teacher Name
-
-          <div class="teacher-autocomplete">
+      <form [formGroup]="subjectForm" (ngSubmit)="saveSubject()">
+        <div class="form-grid">
+          <label>
+            <span>Subject Code</span>
             <input
               type="text"
-              formControlName="teacherName"
-              placeholder="Type teacher name, email, or subject"
-              autocomplete="off"
-              (input)="onTeacherInput($event)"
-              (focus)="onTeacherFocus()"
-              (blur)="onTeacherBlur()"
+              formControlName="subjectCode"
+              placeholder="Example: SUB-0001"
             />
 
-            @if (
-              showTeacherSuggestions() &&
-              teacherSearchTerm().trim() &&
-              filteredTeachers().length > 0
-            ) {
-              <div class="teacher-suggestions">
-                @for (teacher of filteredTeachers(); track teacher.id) {
-                  <button
-                    type="button"
-                    class="teacher-suggestion"
-                    (mousedown)="selectTeacher(teacher)"
-                  >
-                    <span>{{ getTeacherInitial(teacher) }}</span>
-
-                    <div>
-                      <strong>{{ teacher.fullName }}</strong>
-                      <p>
-                        {{ teacher.subject || 'Teacher' }}
-                        @if (teacher.email) {
-                          · {{ teacher.email }}
-                        }
-                      </p>
-                    </div>
-                  </button>
-                }
-              </div>
+            @if (isInvalid('subjectCode')) {
+              <small>Subject code is required.</small>
             }
+          </label>
 
-            @if (
-              showTeacherSuggestions() &&
-              teacherSearchTerm().trim() &&
-              filteredTeachers().length === 0
-            ) {
-              <div class="teacher-suggestions teacher-suggestions--empty">
-                No matching teacher found
-              </div>
+          <label>
+            <span>Subject Name</span>
+            <input
+              type="text"
+              formControlName="subjectName"
+              placeholder="Example: Mathematics"
+            />
+
+            @if (isInvalid('subjectName')) {
+              <small>Subject name is required.</small>
             }
-          </div>
-        </label>
+          </label>
 
-        <label>
-          Weekly Hours
-          <input
-            type="number"
-            formControlName="weeklyHours"
-            placeholder="Example: 5"
-            min="1"
-          />
-          @if (isInvalid('weeklyHours')) {
-            <small>Weekly hours must be at least 1.</small>
-          }
-        </label>
+          <label class="autocomplete-field">
+            <span>Class</span>
 
-        <label>
-          Status
-          <select formControlName="status">
-            <option value="ACTIVE">Active</option>
-            <option value="INACTIVE">Inactive</option>
-          </select>
-        </label>
-      </div>
+            <div class="teacher-autocomplete">
+              <input
+                type="text"
+                formControlName="className"
+                placeholder="Type class name..."
+                autocomplete="off"
+                (input)="onClassInput($event)"
+                (focus)="onClassFocus()"
+                (blur)="onClassBlur()"
+              />
 
-      <div class="subject-modal__actions">
-        <button
-          class="secondary-btn"
-          type="button"
-          (click)="closeSubjectModal()"
-        >
-          Cancel
-        </button>
+              @if (showClassSuggestions() && filteredClasses().length > 0) {
+                <div class="teacher-suggestions">
+                  @for (
+                    schoolClass of filteredClasses();
+                    track schoolClass.id
+                  ) {
+                    <button
+                      type="button"
+                      class="teacher-suggestion"
+                      (click)="selectClass(schoolClass)"
+                    >
+                      <span>{{ getClassInitial(schoolClass) }}</span>
 
-        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
-          {{
-            isSubmitting()
-              ? isEditMode()
-                ? 'Updating...'
-                : 'Saving...'
-              : isEditMode()
-                ? 'Update Subject'
-                : 'Save Subject'
-          }}
-        </button>
-      </div>
-    </form>
+                      <div>
+                        <strong>{{ getClassLabel(schoolClass) }}</strong>
+                        <p>
+                          Room {{ schoolClass.roomNo || 'N/A' }}
+                          @if (schoolClass.classTeacher) {
+                            · {{ schoolClass.classTeacher }}
+                          }
+                        </p>
+                      </div>
+                    </button>
+                  }
+                </div>
+              }
+
+              @if (
+                showClassSuggestions() &&
+                classSearchTerm().trim() &&
+                filteredClasses().length === 0
+              ) {
+                <div class="teacher-suggestions teacher-suggestions--empty">
+                  No matching class found
+                </div>
+              }
+            </div>
+          </label>
+
+          <label class="autocomplete-field">
+            <span>Teacher Name</span>
+
+            <div class="teacher-autocomplete">
+              <input
+                type="text"
+                formControlName="teacherName"
+                placeholder="Type teacher name..."
+                autocomplete="off"
+                (input)="onTeacherInput($event)"
+                (focus)="onTeacherFocus()"
+                (blur)="onTeacherBlur()"
+              />
+
+              @if (showTeacherSuggestions() && filteredTeachers().length > 0) {
+                <div class="teacher-suggestions">
+                  @for (teacher of filteredTeachers(); track teacher.id) {
+                    <button
+                      type="button"
+                      class="teacher-suggestion"
+                      (click)="selectTeacher(teacher)"
+                    >
+                      <span>{{ getTeacherInitial(teacher) }}</span>
+
+                      <div>
+                        <strong>{{ teacher.fullName }}</strong>
+                        <p>
+                          {{ teacher.subject || 'Teacher' }}
+                          @if (teacher.email) {
+                            · {{ teacher.email }}
+                          }
+                        </p>
+                      </div>
+                    </button>
+                  }
+                </div>
+              }
+
+              @if (
+                showTeacherSuggestions() &&
+                teacherSearchTerm().trim() &&
+                filteredTeachers().length === 0
+              ) {
+                <div class="teacher-suggestions teacher-suggestions--empty">
+                  No matching teacher found
+                </div>
+              }
+            </div>
+          </label>
+
+          <label>
+            <span>Weekly Hours</span>
+            <input
+              type="number"
+              formControlName="weeklyHours"
+              placeholder="Example: 5"
+              min="1"
+            />
+
+            @if (isInvalid('weeklyHours')) {
+              <small>Weekly hours must be at least 1.</small>
+            }
+          </label>
+
+          <label>
+            <span>Status</span>
+            <select formControlName="status">
+              <option value="ACTIVE">Active</option>
+              <option value="INACTIVE">Inactive</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="subject-modal__actions">
+          <button
+            type="button"
+            class="secondary-btn"
+            (click)="closeSubjectModal()"
+            [disabled]="isSubmitting()"
+          >
+            Cancel
+          </button>
+
+          <button type="submit" class="primary-btn" [disabled]="isSubmitting()">
+            {{ getSaveButtonLabel() }}
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 }
 
@@ -339,8 +372,8 @@
 
       <div class="confirm-modal__actions">
         <button
-          class="secondary-btn"
           type="button"
+          class="secondary-btn"
           (click)="closeDeleteModal()"
           [disabled]="isDeleting()"
         >
@@ -348,8 +381,8 @@
         </button>
 
         <button
-          class="danger-confirm-btn"
           type="button"
+          class="danger-confirm-btn"
           (click)="confirmDeleteSubject()"
           [disabled]="isDeleting()"
         >

@@ -1,403 +1,489 @@
-import { CommonModule } from '@angular/common';
-import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import {
-  FormBuilder,
+  FormControl,
   FormGroup,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import {
+  CreateSubjectPayload,
+  Subject,
+  SubjectStatus,
+} from '../../../core/models/subject.model';
+import { SchoolClass } from '../../../core/models/school-class.model';
+import { Teacher } from '../../../core/models/teacher.model';
+import { ClassesService } from '../../../core/services/classes.service';
+import { SubjectsService } from '../../../core/services/subjects.service';
+import { TeachersService } from '../../../core/services/teachers.service';
 
-interface Teacher {
-  id: number;
-  firstName?: string;
-  lastName?: string;
-  name?: string;
-  email?: string;
-}
-
-interface ClassItem {
-  id: number;
-  className?: string;
-  name?: string;
-  grade?: string;
-  section?: string;
-}
-
-interface Subject {
-  id: number;
-  subjectName: string;
-  subjectCode: string;
-  description?: string;
-  status?: string;
-
-  teacherId?: number;
-  classId?: number;
-
-  teacher?: Teacher;
-  class?: ClassItem;
-  schoolClass?: ClassItem;
-}
+type ToastType = 'success' | 'error';
 
 @Component({
   selector: 'app-subjects',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, HttpClientModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './subjects.component.html',
-  styleUrls: ['./subjects.component.scss'],
+  styleUrl: './subjects.component.scss',
 })
 export class SubjectsComponent implements OnInit {
-  private readonly apiBaseUrl = 'http://localhost:3000/api';
+  subjects = signal<Subject[]>([]);
+  teachers = signal<Teacher[]>([]);
+  classes = signal<SchoolClass[]>([]);
 
-  subjectForm!: FormGroup;
+  selectedSubject = signal<Subject | null>(null);
+  subjectToDelete = signal<Subject | null>(null);
 
-  subjects: Subject[] = [];
-  teachers: Teacher[] = [];
-  classes: ClassItem[] = [];
+  isLoading = signal(false);
+  isSubmitting = signal(false);
+  isDeleting = signal(false);
+  showSubjectModal = signal(false);
 
-  filteredTeachers: Teacher[] = [];
-  filteredClasses: ClassItem[] = [];
+  showTeacherSuggestions = signal(false);
+  teacherSearchTerm = signal('');
 
-  selectedTeacher: Teacher | null = null;
-  selectedClass: ClassItem | null = null;
+  showClassSuggestions = signal(false);
+  classSearchTerm = signal('');
 
-  showTeacherSuggestions = false;
-  showClassSuggestions = false;
+  serverError = signal('');
+  searchTerm = signal('');
 
-  isLoading = false;
-  isSubmitting = false;
-  isEditMode = false;
-  editingSubjectId: number | null = null;
+  toast = signal<{ message: string; type: ToastType } | null>(null);
+  private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
-  errorMessage = '';
-  successMessage = '';
+  isEditMode = computed(() => this.selectedSubject() !== null);
+
+  activeSubjects = computed(
+    () =>
+      this.subjects().filter((subject) => subject.status === 'ACTIVE').length,
+  );
+
+  inactiveSubjects = computed(
+    () =>
+      this.subjects().filter((subject) => subject.status === 'INACTIVE').length,
+  );
+
+  totalWeeklyHours = computed(() =>
+    this.subjects().reduce(
+      (total, subject) => total + (subject.weeklyHours || 0),
+      0,
+    ),
+  );
+
+  filteredTeachers = computed(() => {
+    const keyword = this.teacherSearchTerm().trim().toLowerCase();
+
+    const activeTeachers = this.teachers().filter(
+      (teacher) => teacher.status !== 'INACTIVE',
+    );
+
+    if (!keyword) {
+      return activeTeachers.slice(0, 6);
+    }
+
+    return activeTeachers
+      .filter((teacher) => {
+        const searchableText = [
+          teacher.fullName,
+          teacher.email,
+          teacher.subject,
+          teacher.employeeNo,
+          teacher.phone,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+
+        return searchableText.includes(keyword);
+      })
+      .slice(0, 6);
+  });
+
+  filteredClasses = computed(() => {
+    const keyword = this.classSearchTerm().trim().toLowerCase();
+
+    const activeClasses = this.classes().filter(
+      (schoolClass) => schoolClass.status !== 'INACTIVE',
+    );
+
+    if (!keyword) {
+      return activeClasses.slice(0, 6);
+    }
+
+    return activeClasses
+      .filter((schoolClass) => {
+        const searchableText = [
+          schoolClass.className,
+          schoolClass.section,
+          schoolClass.classTeacher,
+          schoolClass.roomNo,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+
+        return searchableText.includes(keyword);
+      })
+      .slice(0, 6);
+  });
+
+  subjectForm = new FormGroup({
+    subjectCode: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    subjectName: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    className: new FormControl('', {
+      nonNullable: true,
+    }),
+    teacherName: new FormControl('', {
+      nonNullable: true,
+    }),
+    weeklyHours: new FormControl<number | null>(null, {
+      validators: [Validators.min(1)],
+    }),
+    status: new FormControl<SubjectStatus>('ACTIVE', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+  });
 
   constructor(
-    private fb: FormBuilder,
-    private http: HttpClient,
-    private elementRef: ElementRef,
+    private readonly subjectsService: SubjectsService,
+    private readonly teachersService: TeachersService,
+    private readonly classesService: ClassesService,
   ) {}
 
   ngOnInit(): void {
-    this.initForm();
-    this.loadInitialData();
+    this.loadSubjects();
+    this.loadTeachers();
+    this.loadClasses();
+  }
 
-    this.subjectForm.get('teacherSearch')?.valueChanges.subscribe((value) => {
-      this.filterTeachers(value || '');
+  loadSubjects(search = this.searchTerm()): void {
+    this.isLoading.set(true);
+    this.serverError.set('');
+
+    this.subjectsService.getSubjects(search).subscribe({
+      next: (subjects) => {
+        this.subjects.set(subjects);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        this.serverError.set(
+          error?.error?.message || 'Failed to load subjects.',
+        );
+        this.isLoading.set(false);
+        this.showToast('Failed to load subjects.', 'error');
+      },
     });
+  }
 
-    this.subjectForm.get('classSearch')?.valueChanges.subscribe((value) => {
-      this.filterClasses(value || '');
+  loadTeachers(): void {
+    this.teachersService.getTeachers().subscribe({
+      next: (teachers) => {
+        this.teachers.set(teachers);
+      },
+      error: () => {
+        this.showToast(
+          'Teacher suggestions could not load. Check people-service.',
+          'error',
+        );
+      },
     });
   }
 
-  private initForm(): void {
-    this.subjectForm = this.fb.group({
-      subjectName: ['', [Validators.required, Validators.minLength(2)]],
-      subjectCode: ['', [Validators.required, Validators.minLength(2)]],
-      teacherSearch: ['', Validators.required],
-      teacherId: [null, Validators.required],
-      classSearch: ['', Validators.required],
-      classId: [null, Validators.required],
-      description: [''],
-      status: ['Active', Validators.required],
+  loadClasses(): void {
+    this.classesService.getClasses().subscribe({
+      next: (classes) => {
+        this.classes.set(classes);
+      },
+      error: () => {
+        this.showToast(
+          'Class suggestions could not load. Check academic-service.',
+          'error',
+        );
+      },
     });
   }
 
-  private loadInitialData(): void {
-    this.isLoading = true;
-    this.errorMessage = '';
-
-    Promise.all([
-      this.http.get<Subject[]>(`${this.apiBaseUrl}/subjects`).toPromise(),
-      this.http.get<Teacher[]>(`${this.apiBaseUrl}/teachers`).toPromise(),
-      this.http.get<ClassItem[]>(`${this.apiBaseUrl}/classes`).toPromise(),
-    ])
-      .then(([subjects, teachers, classes]) => {
-        this.subjects = subjects || [];
-        this.teachers = teachers || [];
-        this.classes = classes || [];
-
-        this.filteredTeachers = this.teachers;
-        this.filteredClasses = this.classes;
-      })
-      .catch(() => {
-        this.errorMessage =
-          'Failed to load subjects data. Please check backend connection.';
-      })
-      .finally(() => {
-        this.isLoading = false;
-      });
+  onSearchInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.searchTerm.set(value);
+    this.loadSubjects(value);
   }
 
-  filterTeachers(searchText: string): void {
-    const value = searchText.toLowerCase().trim();
-
-    this.showTeacherSuggestions = true;
-
-    if (!value) {
-      this.filteredTeachers = this.teachers;
-      this.selectedTeacher = null;
-      this.subjectForm.patchValue({ teacherId: null }, { emitEvent: false });
-      return;
-    }
-
-    this.filteredTeachers = this.teachers.filter((teacher) =>
-      this.getTeacherName(teacher).toLowerCase().includes(value),
-    );
-
-    if (
-      this.selectedTeacher &&
-      this.getTeacherName(this.selectedTeacher).toLowerCase() !== value
-    ) {
-      this.selectedTeacher = null;
-      this.subjectForm.patchValue({ teacherId: null }, { emitEvent: false });
-    }
+  onTeacherInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.teacherSearchTerm.set(value);
+    this.showTeacherSuggestions.set(true);
   }
 
-  filterClasses(searchText: string): void {
-    const value = searchText.toLowerCase().trim();
+  onTeacherFocus(): void {
+    const value = this.subjectForm.controls.teacherName.value;
+    this.teacherSearchTerm.set(value);
+    this.showTeacherSuggestions.set(true);
+  }
 
-    this.showClassSuggestions = true;
-
-    if (!value) {
-      this.filteredClasses = this.classes;
-      this.selectedClass = null;
-      this.subjectForm.patchValue({ classId: null }, { emitEvent: false });
-      return;
-    }
-
-    this.filteredClasses = this.classes.filter((classItem) =>
-      this.getClassName(classItem).toLowerCase().includes(value),
-    );
-
-    if (
-      this.selectedClass &&
-      this.getClassName(this.selectedClass).toLowerCase() !== value
-    ) {
-      this.selectedClass = null;
-      this.subjectForm.patchValue({ classId: null }, { emitEvent: false });
-    }
+  onTeacherBlur(): void {
+    setTimeout(() => {
+      this.showTeacherSuggestions.set(false);
+    }, 160);
   }
 
   selectTeacher(teacher: Teacher): void {
-    this.selectedTeacher = teacher;
-
-    this.subjectForm.patchValue(
-      {
-        teacherSearch: this.getTeacherName(teacher),
-        teacherId: teacher.id,
-      },
-      { emitEvent: false },
-    );
-
-    this.showTeacherSuggestions = false;
+    this.subjectForm.controls.teacherName.setValue(teacher.fullName);
+    this.teacherSearchTerm.set(teacher.fullName);
+    this.showTeacherSuggestions.set(false);
   }
 
-  selectClass(classItem: ClassItem): void {
-    this.selectedClass = classItem;
-
-    this.subjectForm.patchValue(
-      {
-        classSearch: this.getClassName(classItem),
-        classId: classItem.id,
-      },
-      { emitEvent: false },
-    );
-
-    this.showClassSuggestions = false;
+  onClassInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.classSearchTerm.set(value);
+    this.showClassSuggestions.set(true);
   }
 
-  clearTeacher(): void {
-    this.selectedTeacher = null;
-    this.subjectForm.patchValue({
-      teacherSearch: '',
-      teacherId: null,
+  onClassFocus(): void {
+    const value = this.subjectForm.controls.className.value;
+    this.classSearchTerm.set(value);
+    this.showClassSuggestions.set(true);
+  }
+
+  onClassBlur(): void {
+    setTimeout(() => {
+      this.showClassSuggestions.set(false);
+    }, 160);
+  }
+
+  selectClass(schoolClass: SchoolClass): void {
+    const classLabel = this.getClassLabel(schoolClass);
+
+    this.subjectForm.controls.className.setValue(classLabel);
+    this.classSearchTerm.set(classLabel);
+    this.showClassSuggestions.set(false);
+  }
+
+  openCreateModal(): void {
+    this.selectedSubject.set(null);
+
+    this.subjectForm.reset({
+      subjectCode: '',
+      subjectName: '',
+      className: '',
+      teacherName: '',
+      weeklyHours: null,
+      status: 'ACTIVE',
     });
-    this.filteredTeachers = this.teachers;
+
+    this.teacherSearchTerm.set('');
+    this.classSearchTerm.set('');
+    this.showTeacherSuggestions.set(false);
+    this.showClassSuggestions.set(false);
+    this.serverError.set('');
+    this.showSubjectModal.set(true);
   }
 
-  clearClass(): void {
-    this.selectedClass = null;
-    this.subjectForm.patchValue({
-      classSearch: '',
-      classId: null,
+  openEditModal(subject: Subject): void {
+    this.selectedSubject.set(subject);
+
+    this.subjectForm.reset({
+      subjectCode: subject.subjectCode,
+      subjectName: subject.subjectName,
+      className: subject.className || '',
+      teacherName: subject.teacherName || '',
+      weeklyHours: subject.weeklyHours || null,
+      status: subject.status,
     });
-    this.filteredClasses = this.classes;
+
+    this.teacherSearchTerm.set(subject.teacherName || '');
+    this.classSearchTerm.set(subject.className || '');
+    this.showTeacherSuggestions.set(false);
+    this.showClassSuggestions.set(false);
+    this.serverError.set('');
+    this.showSubjectModal.set(true);
   }
 
-  submitSubject(): void {
-    this.errorMessage = '';
-    this.successMessage = '';
-
-    if (this.subjectForm.invalid) {
-      this.subjectForm.markAllAsTouched();
-      this.errorMessage = 'Please fill all required fields correctly.';
+  closeSubjectModal(): void {
+    if (this.isSubmitting()) {
       return;
     }
 
-    if (!this.subjectForm.value.teacherId) {
-      this.errorMessage = 'Please select a teacher from the suggestions list.';
+    this.showSubjectModal.set(false);
+    this.selectedSubject.set(null);
+    this.teacherSearchTerm.set('');
+    this.classSearchTerm.set('');
+    this.showTeacherSuggestions.set(false);
+    this.showClassSuggestions.set(false);
+    this.serverError.set('');
+  }
+
+  saveSubject(): void {
+    this.subjectForm.markAllAsTouched();
+    this.serverError.set('');
+
+    if (this.subjectForm.invalid || this.isSubmitting()) {
       return;
     }
 
-    if (!this.subjectForm.value.classId) {
-      this.errorMessage = 'Please select a class from the suggestions list.';
+    const selectedSubject = this.selectedSubject();
+    const payload = this.buildSubjectPayload();
+
+    this.isSubmitting.set(true);
+
+    if (selectedSubject) {
+      this.subjectsService
+        .updateSubject(selectedSubject.id, payload)
+        .subscribe({
+          next: () => {
+            this.isSubmitting.set(false);
+            this.closeSubjectModal();
+            this.loadSubjects();
+            this.showToast('Subject updated successfully.', 'success');
+          },
+          error: (error) => {
+            this.isSubmitting.set(false);
+            this.serverError.set(
+              error?.error?.message || 'Failed to update subject.',
+            );
+            this.showToast('Failed to update subject.', 'error');
+          },
+        });
+
       return;
     }
 
-    const payload = {
-      subjectName: this.subjectForm.value.subjectName.trim(),
-      subjectCode: this.subjectForm.value.subjectCode.trim(),
-      teacherId: Number(this.subjectForm.value.teacherId),
-      classId: Number(this.subjectForm.value.classId),
-      description: this.subjectForm.value.description?.trim() || '',
-      status: this.subjectForm.value.status,
+    this.subjectsService.createSubject(payload).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.closeSubjectModal();
+        this.loadSubjects();
+        this.showToast('Subject added successfully.', 'success');
+      },
+      error: (error) => {
+        this.isSubmitting.set(false);
+        this.serverError.set(
+          error?.error?.message || 'Failed to create subject.',
+        );
+        this.showToast('Failed to create subject.', 'error');
+      },
+    });
+  }
+
+  openDeleteModal(subject: Subject): void {
+    this.subjectToDelete.set(subject);
+  }
+
+  closeDeleteModal(): void {
+    if (this.isDeleting()) {
+      return;
+    }
+
+    this.subjectToDelete.set(null);
+  }
+
+  confirmDeleteSubject(): void {
+    const subject = this.subjectToDelete();
+
+    if (!subject || this.isDeleting()) {
+      return;
+    }
+
+    this.isDeleting.set(true);
+
+    this.subjectsService.deleteSubject(subject.id).subscribe({
+      next: () => {
+        this.isDeleting.set(false);
+        this.subjectToDelete.set(null);
+        this.loadSubjects();
+        this.showToast('Subject deleted successfully.', 'success');
+      },
+      error: (error) => {
+        this.isDeleting.set(false);
+        this.subjectToDelete.set(null);
+        this.serverError.set(
+          error?.error?.message || 'Failed to delete subject.',
+        );
+        this.showToast('Failed to delete subject.', 'error');
+      },
+    });
+  }
+
+  getSubjectInitial(subject: Subject): string {
+    return subject.subjectName.charAt(0).toUpperCase();
+  }
+
+  getTeacherInitial(teacher: Teacher): string {
+    return teacher.fullName
+      .split(' ')
+      .map((name) => name.charAt(0))
+      .join('')
+      .slice(0, 2)
+      .toUpperCase();
+  }
+
+  getClassInitial(schoolClass: SchoolClass): string {
+    const classInitial = schoolClass.className.charAt(0) || 'C';
+    const sectionInitial = schoolClass.section.charAt(0) || '';
+
+    return `${classInitial}${sectionInitial}`.toUpperCase();
+  }
+
+  getClassLabel(schoolClass: SchoolClass): string {
+    return `${schoolClass.className} ${schoolClass.section}`.trim();
+  }
+
+  getStatusLabel(status: SubjectStatus): string {
+    return status.charAt(0) + status.slice(1).toLowerCase();
+  }
+
+  getSaveButtonLabel(): string {
+    if (this.isSubmitting()) {
+      return this.isEditMode() ? 'Updating...' : 'Saving...';
+    }
+
+    return this.isEditMode() ? 'Update Subject' : 'Save Subject';
+  }
+
+  isInvalid(controlName: keyof typeof this.subjectForm.controls): boolean {
+    const control = this.subjectForm.controls[controlName];
+    return control.invalid && control.touched;
+  }
+
+  private buildSubjectPayload(): CreateSubjectPayload {
+    const formValue = this.subjectForm.getRawValue();
+
+    const payload: CreateSubjectPayload = {
+      subjectCode: formValue.subjectCode.trim(),
+      subjectName: formValue.subjectName.trim(),
+      status: formValue.status,
     };
 
-    this.isSubmitting = true;
-
-    const request =
-      this.isEditMode && this.editingSubjectId
-        ? this.http.put<Subject>(
-            `${this.apiBaseUrl}/subjects/${this.editingSubjectId}`,
-            payload,
-          )
-        : this.http.post<Subject>(`${this.apiBaseUrl}/subjects`, payload);
-
-    request.subscribe({
-      next: () => {
-        this.successMessage = this.isEditMode
-          ? 'Subject updated successfully.'
-          : 'Subject added successfully.';
-
-        this.resetForm();
-        this.loadInitialData();
-      },
-      error: () => {
-        this.errorMessage = this.isEditMode
-          ? 'Failed to update subject.'
-          : 'Failed to add subject.';
-      },
-      complete: () => {
-        this.isSubmitting = false;
-      },
-    });
-  }
-
-  editSubject(subject: Subject): void {
-    this.isEditMode = true;
-    this.editingSubjectId = subject.id;
-
-    const teacher =
-      subject.teacher ||
-      this.teachers.find((t) => t.id === subject.teacherId) ||
-      null;
-
-    const classItem =
-      subject.class ||
-      subject.schoolClass ||
-      this.classes.find((c) => c.id === subject.classId) ||
-      null;
-
-    this.selectedTeacher = teacher;
-    this.selectedClass = classItem;
-
-    this.subjectForm.patchValue({
-      subjectName: subject.subjectName,
-      subjectCode: subject.subjectCode,
-      teacherSearch: teacher ? this.getTeacherName(teacher) : '',
-      teacherId: teacher?.id || subject.teacherId || null,
-      classSearch: classItem ? this.getClassName(classItem) : '',
-      classId: classItem?.id || subject.classId || null,
-      description: subject.description || '',
-      status: subject.status || 'Active',
-    });
-
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  deleteSubject(subjectId: number): void {
-    const confirmDelete = confirm(
-      'Are you sure you want to delete this subject?',
-    );
-
-    if (!confirmDelete) return;
-
-    this.http.delete(`${this.apiBaseUrl}/subjects/${subjectId}`).subscribe({
-      next: () => {
-        this.successMessage = 'Subject deleted successfully.';
-        this.loadInitialData();
-      },
-      error: () => {
-        this.errorMessage = 'Failed to delete subject.';
-      },
-    });
-  }
-
-  resetForm(): void {
-    this.subjectForm.reset({
-      subjectName: '',
-      subjectCode: '',
-      teacherSearch: '',
-      teacherId: null,
-      classSearch: '',
-      classId: null,
-      description: '',
-      status: 'Active',
-    });
-
-    this.selectedTeacher = null;
-    this.selectedClass = null;
-    this.filteredTeachers = this.teachers;
-    this.filteredClasses = this.classes;
-
-    this.showTeacherSuggestions = false;
-    this.showClassSuggestions = false;
-
-    this.isEditMode = false;
-    this.editingSubjectId = null;
-  }
-
-  getTeacherName(teacher?: Teacher | null): string {
-    if (!teacher) return 'Not assigned';
-
-    if (teacher.name) return teacher.name;
-
-    const fullName =
-      `${teacher.firstName || ''} ${teacher.lastName || ''}`.trim();
-
-    return fullName || 'Unnamed Teacher';
-  }
-
-  getClassName(classItem?: ClassItem | null): string {
-    if (!classItem) return 'Not assigned';
-
-    if (classItem.className) return classItem.className;
-    if (classItem.name) return classItem.name;
-
-    const gradeSection =
-      `${classItem.grade || ''} ${classItem.section || ''}`.trim();
-
-    return gradeSection || 'Unnamed Class';
-  }
-
-  getSubjectClass(subject: Subject): string {
-    return this.getClassName(subject.class || subject.schoolClass);
-  }
-
-  isFieldInvalid(fieldName: string): boolean {
-    const field = this.subjectForm.get(fieldName);
-    return !!field && field.invalid && (field.dirty || field.touched);
-  }
-
-  @HostListener('document:click', ['$event'])
-  handleOutsideClick(event: MouseEvent): void {
-    const clickedInside = this.elementRef.nativeElement.contains(event.target);
-
-    if (!clickedInside) {
-      this.showTeacherSuggestions = false;
-      this.showClassSuggestions = false;
+    if (formValue.className.trim()) {
+      payload.className = formValue.className.trim();
     }
+
+    if (formValue.teacherName.trim()) {
+      payload.teacherName = formValue.teacherName.trim();
+    }
+
+    if (formValue.weeklyHours !== null && formValue.weeklyHours !== undefined) {
+      payload.weeklyHours = Number(formValue.weeklyHours);
+    }
+
+    return payload;
+  }
+
+  private showToast(message: string, type: ToastType): void {
+    this.toast.set({ message, type });
+
+    if (this.toastTimer) {
+      clearTimeout(this.toastTimer);
+    }
+
+    this.toastTimer = setTimeout(() => {
+      this.toast.set(null);
+    }, 2800);
   }
 }
