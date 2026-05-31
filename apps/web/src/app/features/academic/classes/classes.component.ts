@@ -10,7 +10,11 @@ import {
   CreateClassPayload,
   SchoolClass,
 } from '../../../core/models/school-class.model';
+import { ClassRoom } from '../../../core/models/class-room.model';
+import { Teacher } from '../../../core/models/teacher.model';
 import { ClassesService } from '../../../core/services/classes.service';
+import { ClassRoomsService } from '../../../core/services/class-rooms.service';
+import { TeachersService } from '../../../core/services/teachers.service';
 
 type ToastType = 'success' | 'error';
 
@@ -23,6 +27,9 @@ type ToastType = 'success' | 'error';
 })
 export class ClassesComponent implements OnInit {
   classes = signal<SchoolClass[]>([]);
+  teachers = signal<Teacher[]>([]);
+  classRooms = signal<ClassRoom[]>([]);
+
   selectedClass = signal<SchoolClass | null>(null);
   classToDelete = signal<SchoolClass | null>(null);
 
@@ -32,6 +39,12 @@ export class ClassesComponent implements OnInit {
   showClassModal = signal(false);
   serverError = signal('');
   searchTerm = signal('');
+
+  showTeacherSuggestions = signal(false);
+  teacherSearchTerm = signal('');
+
+  showRoomSuggestions = signal(false);
+  roomSearchTerm = signal('');
 
   toast = signal<{ message: string; type: ToastType } | null>(null);
   private toastTimer: ReturnType<typeof setTimeout> | null = null;
@@ -49,6 +62,65 @@ export class ClassesComponent implements OnInit {
   totalCapacity = computed(() =>
     this.classes().reduce((total, item) => total + (item.capacity || 0), 0),
   );
+
+  filteredTeachers = computed(() => {
+    const keyword = this.teacherSearchTerm().trim().toLowerCase();
+
+    const activeTeachers = this.teachers().filter(
+      (teacher) => teacher.status !== 'INACTIVE',
+    );
+
+    if (!keyword) {
+      return activeTeachers.slice(0, 6);
+    }
+
+    return activeTeachers
+      .filter((teacher) => {
+        const searchableText = [
+          teacher.fullName,
+          teacher.email,
+          teacher.employeeNo,
+          teacher.phone,
+          teacher.subject,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+
+        return searchableText.includes(keyword);
+      })
+      .slice(0, 6);
+  });
+
+  filteredRooms = computed(() => {
+    const keyword = this.roomSearchTerm().trim().toLowerCase();
+
+    const availableRooms = this.classRooms().filter(
+      (room) => room.status !== 'INACTIVE',
+    );
+
+    if (!keyword) {
+      return availableRooms.slice(0, 6);
+    }
+
+    return availableRooms
+      .filter((room) => {
+        const searchableText = [
+          room.roomNo,
+          room.roomName,
+          room.building,
+          room.floor,
+          room.capacity,
+          room.status,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+
+        return searchableText.includes(keyword);
+      })
+      .slice(0, 6);
+  });
 
   classForm = new FormGroup({
     className: new FormControl('', {
@@ -74,10 +146,16 @@ export class ClassesComponent implements OnInit {
     }),
   });
 
-  constructor(private readonly classesService: ClassesService) {}
+  constructor(
+    private readonly classesService: ClassesService,
+    private readonly teachersService: TeachersService,
+    private readonly classRoomsService: ClassRoomsService,
+  ) {}
 
   ngOnInit(): void {
     this.loadClasses();
+    this.loadTeachers();
+    this.loadClassRooms();
   }
 
   loadClasses(search = this.searchTerm()): void {
@@ -99,10 +177,96 @@ export class ClassesComponent implements OnInit {
     });
   }
 
+  loadTeachers(): void {
+    this.teachersService.getTeachers().subscribe({
+      next: (teachers) => {
+        this.teachers.set(teachers);
+      },
+      error: () => {
+        this.showToast(
+          'Teacher suggestions could not load. Check people-service.',
+          'error',
+        );
+      },
+    });
+  }
+
+  loadClassRooms(): void {
+    this.classRoomsService.getClassRooms().subscribe({
+      next: (classRooms) => {
+        this.classRooms.set(classRooms);
+      },
+      error: () => {
+        this.showToast(
+          'Room suggestions could not load. Check academic-service.',
+          'error',
+        );
+      },
+    });
+  }
+
   onSearchInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.searchTerm.set(value);
     this.loadClasses(value);
+  }
+
+  onTeacherInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.teacherSearchTerm.set(value);
+    this.showTeacherSuggestions.set(true);
+  }
+
+  onTeacherFocus(): void {
+    const value = this.classForm.controls.classTeacher.value;
+    this.teacherSearchTerm.set(value);
+    this.showTeacherSuggestions.set(true);
+  }
+
+  onTeacherBlur(): void {
+    setTimeout(() => {
+      this.showTeacherSuggestions.set(false);
+    }, 160);
+  }
+
+  selectTeacher(teacher: Teacher): void {
+    this.classForm.controls.classTeacher.setValue(teacher.fullName);
+    this.teacherSearchTerm.set(teacher.fullName);
+    this.showTeacherSuggestions.set(false);
+  }
+
+  onRoomInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.roomSearchTerm.set(value);
+    this.showRoomSuggestions.set(true);
+  }
+
+  onRoomFocus(): void {
+    const value = this.classForm.controls.roomNo.value;
+    this.roomSearchTerm.set(value);
+    this.showRoomSuggestions.set(true);
+  }
+
+  onRoomBlur(): void {
+    setTimeout(() => {
+      this.showRoomSuggestions.set(false);
+    }, 160);
+  }
+
+  selectRoom(room: ClassRoom): void {
+    this.classForm.controls.roomNo.setValue(room.roomNo);
+    this.roomSearchTerm.set(room.roomNo);
+    this.showRoomSuggestions.set(false);
+
+    const currentCapacity = this.classForm.controls.capacity.value;
+
+    if (
+      room.capacity !== null &&
+      room.capacity !== undefined &&
+      (!currentCapacity || currentCapacity <= 0)
+    ) {
+      this.classForm.controls.capacity.setValue(Number(room.capacity));
+    }
   }
 
   openCreateModal(): void {
@@ -116,6 +280,11 @@ export class ClassesComponent implements OnInit {
       capacity: null,
       status: 'ACTIVE',
     });
+
+    this.teacherSearchTerm.set('');
+    this.roomSearchTerm.set('');
+    this.showTeacherSuggestions.set(false);
+    this.showRoomSuggestions.set(false);
 
     this.serverError.set('');
     this.showClassModal.set(true);
@@ -133,13 +302,28 @@ export class ClassesComponent implements OnInit {
       status: schoolClass.status,
     });
 
+    this.teacherSearchTerm.set(schoolClass.classTeacher || '');
+    this.roomSearchTerm.set(schoolClass.roomNo || '');
+    this.showTeacherSuggestions.set(false);
+    this.showRoomSuggestions.set(false);
+
     this.serverError.set('');
     this.showClassModal.set(true);
   }
 
   closeClassModal(): void {
+    if (this.isSubmitting()) {
+      return;
+    }
+
     this.showClassModal.set(false);
     this.selectedClass.set(null);
+
+    this.teacherSearchTerm.set('');
+    this.roomSearchTerm.set('');
+    this.showTeacherSuggestions.set(false);
+    this.showRoomSuggestions.set(false);
+
     this.serverError.set('');
   }
 
@@ -233,7 +417,38 @@ export class ClassesComponent implements OnInit {
   }
 
   getClassLabel(schoolClass: SchoolClass): string {
-    return `${schoolClass.className} ${schoolClass.section}`;
+    return `${schoolClass.className} ${schoolClass.section}`.trim();
+  }
+
+  getTeacherInitial(teacher: Teacher): string {
+    return teacher.fullName
+      .split(' ')
+      .map((name) => name.charAt(0))
+      .join('')
+      .slice(0, 2)
+      .toUpperCase();
+  }
+
+  getRoomInitial(room: ClassRoom): string {
+    return room.roomNo
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .slice(0, 2)
+      .toUpperCase();
+  }
+
+  getRoomLabel(room: ClassRoom): string {
+    return `${room.roomNo} - ${room.roomName}`;
+  }
+
+  getRoomMeta(room: ClassRoom): string {
+    const details = [
+      room.building,
+      room.floor,
+      room.capacity ? `${room.capacity} seats` : '',
+      room.status === 'MAINTENANCE' ? 'Maintenance' : '',
+    ].filter(Boolean);
+
+    return details.length ? details.join(' · ') : 'Room details not added';
   }
 
   isInvalid(controlName: keyof typeof this.classForm.controls): boolean {

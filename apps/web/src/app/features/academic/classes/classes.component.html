@@ -102,9 +102,9 @@
                 </td>
 
                 <td>
-                  <strong class="section-badge">{{
-                    schoolClass.section
-                  }}</strong>
+                  <strong class="section-badge">
+                    {{ schoolClass.section }}
+                  </strong>
                 </td>
 
                 <td>{{ schoolClass.classTeacher || 'Not assigned' }}</td>
@@ -213,22 +213,99 @@
           }
         </label>
 
-        <label>
+        <label class="autocomplete-field">
           Class Teacher
-          <input
-            type="text"
-            formControlName="classTeacher"
-            placeholder="Enter class teacher name"
-          />
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="classTeacher"
+              placeholder="Type teacher name..."
+              autocomplete="off"
+              (input)="onTeacherInput($event)"
+              (focus)="onTeacherFocus()"
+              (blur)="onTeacherBlur()"
+            />
+
+            @if (showTeacherSuggestions() && filteredTeachers().length > 0) {
+              <div class="suggestions-panel">
+                @for (teacher of filteredTeachers(); track teacher.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectTeacher(teacher)"
+                  >
+                    <span>{{ getTeacherInitial(teacher) }}</span>
+
+                    <div>
+                      <strong>{{ teacher.fullName }}</strong>
+                      <p>
+                        {{ teacher.subject || 'Teacher' }}
+                        @if (teacher.email) {
+                          · {{ teacher.email }}
+                        }
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showTeacherSuggestions() &&
+              teacherSearchTerm().trim() &&
+              filteredTeachers().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching teacher found
+              </div>
+            }
+          </div>
         </label>
 
-        <label>
+        <label class="autocomplete-field">
           Room No
-          <input
-            type="text"
-            formControlName="roomNo"
-            placeholder="Example: R-201"
-          />
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="roomNo"
+              placeholder="Type room number..."
+              autocomplete="off"
+              (input)="onRoomInput($event)"
+              (focus)="onRoomFocus()"
+              (blur)="onRoomBlur()"
+            />
+
+            @if (showRoomSuggestions() && filteredRooms().length > 0) {
+              <div class="suggestions-panel">
+                @for (room of filteredRooms(); track room.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectRoom(room)"
+                  >
+                    <span>{{ getRoomInitial(room) }}</span>
+
+                    <div>
+                      <strong>{{ getRoomLabel(room) }}</strong>
+                      <p>{{ getRoomMeta(room) }}</p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showRoomSuggestions() &&
+              roomSearchTerm().trim() &&
+              filteredRooms().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching room found
+              </div>
+            }
+          </div>
         </label>
 
         <label>
@@ -254,7 +331,12 @@
       </div>
 
       <div class="class-modal__actions">
-        <button class="secondary-btn" type="button" (click)="closeClassModal()">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeClassModal()"
+          [disabled]="isSubmitting()"
+        >
           Cancel
         </button>
 

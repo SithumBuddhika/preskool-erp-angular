@@ -83,6 +83,12 @@ export const appRoutes: Routes = [
       ),
     children: [
       {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'dashboard/admin',
+      },
+
+      {
         path: 'dashboard',
         pathMatch: 'full',
         redirectTo: 'dashboard/admin',
@@ -141,6 +147,13 @@ export const appRoutes: Routes = [
             (m) => m.ClassesComponent,
           ),
       },
+
+      // Old sidebar route support
+      {
+        path: 'academic/class-room',
+        pathMatch: 'full',
+        redirectTo: 'academic/class-rooms',
+      },
       {
         path: 'academic/class-rooms',
         loadComponent: () =>
@@ -148,12 +161,76 @@ export const appRoutes: Routes = [
             (m) => m.ClassRoomsComponent,
           ),
       },
+
+      // Old sidebar route support
+      {
+        path: 'academic/subject',
+        pathMatch: 'full',
+        redirectTo: 'academic/subjects',
+      },
       {
         path: 'academic/subjects',
         loadComponent: () =>
           import('./features/academic/subjects/subjects.component').then(
             (m) => m.SubjectsComponent,
           ),
+      },
+
+      // Temporary safe routes for sidebar items not built yet
+      {
+        path: 'applications',
+        pathMatch: 'full',
+        redirectTo: 'dashboard/admin',
+      },
+      {
+        path: 'management',
+        pathMatch: 'full',
+        redirectTo: 'dashboard/admin',
+      },
+      {
+        path: 'management/fees',
+        pathMatch: 'full',
+        redirectTo: 'dashboard/admin',
+      },
+      {
+        path: 'management/library',
+        pathMatch: 'full',
+        redirectTo: 'dashboard/admin',
+      },
+      {
+        path: 'hrm',
+        pathMatch: 'full',
+        redirectTo: 'dashboard/admin',
+      },
+      {
+        path: 'hrm/staff',
+        pathMatch: 'full',
+        redirectTo: 'dashboard/admin',
+      },
+      {
+        path: 'hrm/departments',
+        pathMatch: 'full',
+        redirectTo: 'dashboard/admin',
+      },
+      {
+        path: 'reports',
+        pathMatch: 'full',
+        redirectTo: 'dashboard/admin',
+      },
+      {
+        path: 'reports/attendance',
+        pathMatch: 'full',
+        redirectTo: 'dashboard/admin',
+      },
+      {
+        path: 'reports/student',
+        pathMatch: 'full',
+        redirectTo: 'dashboard/admin',
+      },
+
+      {
+        path: '**',
+        redirectTo: 'dashboard/admin',
       },
     ],
   },
