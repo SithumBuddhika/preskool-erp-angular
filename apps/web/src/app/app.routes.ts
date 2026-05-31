@@ -148,6 +148,13 @@ export const appRoutes: Routes = [
             (m) => m.ClassRoomsComponent,
           ),
       },
+      {
+        path: 'academic/subjects',
+        loadComponent: () =>
+          import('./features/academic/subjects/subjects.component').then(
+            (m) => m.SubjectsComponent,
+          ),
+      },
     ],
   },
 

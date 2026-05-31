@@ -5,6 +5,8 @@ import { ClassRoomsService } from './class-rooms.service';
 import { ClassesController } from './classes.controller';
 import { ClassesService } from './classes.service';
 import { PrismaService } from './prisma.service';
+import { SubjectsController } from './subjects.controller';
+import { SubjectsService } from './subjects.service';
 
 @Module({
   imports: [
@@ -13,7 +15,12 @@ import { PrismaService } from './prisma.service';
       envFilePath: '.env',
     }),
   ],
-  controllers: [ClassesController, ClassRoomsController],
-  providers: [ClassesService, ClassRoomsService, PrismaService],
+  controllers: [ClassesController, ClassRoomsController, SubjectsController],
+  providers: [
+    ClassesService,
+    ClassRoomsService,
+    SubjectsService,
+    PrismaService,
+  ],
 })
 export class AppModule {}
