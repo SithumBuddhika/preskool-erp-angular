@@ -100,6 +100,11 @@ export class SidebarComponent {
           route: '/academic/subjects',
           icon: 'school',
         },
+        {
+          label: 'Class Routine',
+          route: '/academic/class-routine',
+          icon: 'school',
+        },
       ],
     },
     {
