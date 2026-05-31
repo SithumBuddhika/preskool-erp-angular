@@ -120,6 +120,11 @@ export class SidebarComponent {
           route: '/academic/syllabus-subject-groups',
           icon: 'school',
         },
+        {
+          label: 'Time Table',
+          route: '/academic/time-table',
+          icon: 'school',
+        },
       ],
     },
     {

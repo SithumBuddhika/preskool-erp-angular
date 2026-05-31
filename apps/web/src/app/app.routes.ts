@@ -87,6 +87,7 @@ export const appRoutes: Routes = [
         pathMatch: 'full',
         redirectTo: 'dashboard/admin',
       },
+
       {
         path: 'dashboard',
         pathMatch: 'full',
@@ -146,6 +147,7 @@ export const appRoutes: Routes = [
             (m) => m.ClassesComponent,
           ),
       },
+
       {
         path: 'academic/class-room',
         pathMatch: 'full',
@@ -158,6 +160,7 @@ export const appRoutes: Routes = [
             (m) => m.ClassRoomsComponent,
           ),
       },
+
       {
         path: 'academic/subject',
         pathMatch: 'full',
@@ -170,6 +173,7 @@ export const appRoutes: Routes = [
             (m) => m.SubjectsComponent,
           ),
       },
+
       {
         path: 'academic/class-routine',
         loadComponent: () =>
@@ -182,6 +186,7 @@ export const appRoutes: Routes = [
         pathMatch: 'full',
         redirectTo: 'academic/class-routine',
       },
+
       {
         path: 'academic/exam-schedule',
         loadComponent: () =>
@@ -194,6 +199,7 @@ export const appRoutes: Routes = [
         pathMatch: 'full',
         redirectTo: 'academic/exam-schedule',
       },
+
       {
         path: 'academic/grades',
         loadComponent: () =>
@@ -206,6 +212,7 @@ export const appRoutes: Routes = [
         pathMatch: 'full',
         redirectTo: 'academic/grades',
       },
+
       {
         path: 'academic/syllabus-subject-groups',
         loadComponent: () =>
@@ -218,12 +225,31 @@ export const appRoutes: Routes = [
         pathMatch: 'full',
         redirectTo: 'academic/syllabus-subject-groups',
       },
+      {
+        path: 'academic/subject-groups',
+        pathMatch: 'full',
+        redirectTo: 'academic/syllabus-subject-groups',
+      },
+
+      {
+        path: 'academic/time-table',
+        loadComponent: () =>
+          import('./features/academic/time-table/time-table.component').then(
+            (m) => m.TimeTableComponent,
+          ),
+      },
+      {
+        path: 'academic/timetable',
+        pathMatch: 'full',
+        redirectTo: 'academic/time-table',
+      },
 
       {
         path: 'applications',
         pathMatch: 'full',
         redirectTo: 'dashboard/admin',
       },
+
       {
         path: 'management',
         pathMatch: 'full',
@@ -239,6 +265,7 @@ export const appRoutes: Routes = [
         pathMatch: 'full',
         redirectTo: 'dashboard/admin',
       },
+
       {
         path: 'hrm',
         pathMatch: 'full',
@@ -254,6 +281,7 @@ export const appRoutes: Routes = [
         pathMatch: 'full',
         redirectTo: 'dashboard/admin',
       },
+
       {
         path: 'reports',
         pathMatch: 'full',

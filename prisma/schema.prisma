@@ -331,3 +331,26 @@ model SyllabusSubjectGroup {
 
   @@map("syllabus_subject_groups")
 }
+
+enum TimeTableStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model TimeTable {
+  id            String          @id @default(uuid())
+  timeTableCode String          @unique
+  className     String
+  section       String
+  subjectName   String
+  teacherName   String
+  roomNo        String
+  day           RoutineDay
+  startTime     String
+  endTime       String
+  status        TimeTableStatus @default(ACTIVE)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@map("time_tables")
+}

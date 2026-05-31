@@ -1,0 +1,558 @@
+<section class="time-table-page">
+  <div class="time-table-page__header">
+    <div>
+      <h1>Time Table</h1>
+      <p>Academic / Time Table</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Time Table
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">T</span>
+      <div>
+        <strong>{{ timeTables().length }}</strong>
+        <p>Total Periods</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ activeRecords() }}</strong>
+        <p>Active Periods</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">C</span>
+      <div>
+        <strong>{{ totalClassesUsed() }}</strong>
+        <p>Classes Used</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">R</span>
+      <div>
+        <strong>{{ totalRoomsUsed() }}</strong>
+        <p>Rooms Used</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="weekly-card">
+    <div class="weekly-card__top">
+      <div>
+        <h2>Weekly Time Table View</h2>
+        <p>View all scheduled periods grouped by day.</p>
+      </div>
+    </div>
+
+    <div class="weekly-grid">
+      @for (day of days; track day.value) {
+        <article class="day-card">
+          <div class="day-card__header">
+            <strong>{{ day.label }}</strong>
+            <span>{{ getRecordsByDay(day.value).length }} periods</span>
+          </div>
+
+          <div class="day-card__body">
+            @for (record of getRecordsByDay(day.value); track record.id) {
+              <div class="period-card">
+                <div>
+                  <strong>{{ record.subjectName }}</strong>
+                  <p>{{ record.className }} · {{ record.roomNo }}</p>
+                </div>
+
+                <span>{{ record.startTime }} - {{ record.endTime }}</span>
+              </div>
+            } @empty {
+              <p class="day-card__empty">No periods scheduled.</p>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  </div>
+
+  <div class="time-table-card">
+    <div class="time-table-card__top">
+      <div>
+        <h2>Time Table List</h2>
+        <p>
+          Manage class-wise subjects, teachers, rooms, days, and time slots.
+        </p>
+      </div>
+
+      <div class="time-table-search">
+        <input
+          type="text"
+          placeholder="Search time table..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showTimeTableModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="time-table-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Time Table ID</th>
+              <th>Class</th>
+              <th>Section</th>
+              <th>Subject</th>
+              <th>Teacher</th>
+              <th>Room No</th>
+              <th>Day</th>
+              <th>Time</th>
+              <th>Duration</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (timeTable of timeTables(); track timeTable.id) {
+              <tr>
+                <td>
+                  <span class="time-table-code">{{
+                    timeTable.timeTableCode
+                  }}</span>
+                </td>
+
+                <td>
+                  <div class="class-name">
+                    <span>{{ getTimeTableInitial(timeTable) }}</span>
+
+                    <div>
+                      <strong>{{ timeTable.className }}</strong>
+                      <p>{{ timeTable.day }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="section-badge">{{ timeTable.section }}</span>
+                </td>
+
+                <td>{{ timeTable.subjectName }}</td>
+                <td>{{ timeTable.teacherName }}</td>
+                <td>{{ timeTable.roomNo }}</td>
+                <td>{{ getDayLabel(timeTable.day) }}</td>
+                <td>{{ getTimeRange(timeTable) }}</td>
+                <td>{{ getDuration(timeTable) }}</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--inactive]="
+                      timeTable.status === 'INACTIVE'
+                    "
+                  >
+                    {{ getStatusLabel(timeTable.status) }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(timeTable)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(timeTable)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="11">
+                  <div class="empty-state">
+                    <strong>No time table records found</strong>
+                    <p>Add your first period or change your search keyword.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showTimeTableModal()) {
+  <div class="modal-backdrop">
+    <form
+      class="time-table-modal"
+      [formGroup]="timeTableForm"
+      (ngSubmit)="saveTimeTable()"
+    >
+      <div class="time-table-modal__header">
+        <div>
+          <h2>
+            {{
+              isEditMode()
+                ? 'Edit Time Table Period'
+                : 'Add New Time Table Period'
+            }}
+          </h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update class, subject, teacher, room, day, and time.'
+                : 'Create a new timetable period using existing academic data.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeTimeTableModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Time Table ID
+          <input
+            type="text"
+            formControlName="timeTableCode"
+            placeholder="Example: TTB-0001"
+          />
+
+          @if (isInvalid('timeTableCode')) {
+            <small>Time Table ID is required.</small>
+          }
+        </label>
+
+        <label class="autocomplete-field">
+          Class
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="className"
+              placeholder="Type class name..."
+              autocomplete="off"
+              (input)="onClassInput($event)"
+              (focus)="onClassFocus()"
+              (blur)="onClassBlur()"
+            />
+
+            @if (isInvalid('className')) {
+              <small>Class is required.</small>
+            }
+
+            @if (showClassSuggestions() && filteredClasses().length > 0) {
+              <div class="suggestions-panel">
+                @for (schoolClass of filteredClasses(); track schoolClass.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectClass(schoolClass)"
+                  >
+                    <span>{{ getClassInitial(schoolClass) }}</span>
+
+                    <div>
+                      <strong>{{ getClassLabel(schoolClass) }}</strong>
+                      <p>
+                        Section {{ schoolClass.section }}
+                        @if (schoolClass.classTeacher) {
+                          · {{ schoolClass.classTeacher }}
+                        }
+                        @if (schoolClass.roomNo) {
+                          · {{ schoolClass.roomNo }}
+                        }
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        </label>
+
+        <label>
+          Section
+          <input
+            type="text"
+            formControlName="section"
+            placeholder="Auto-filled from class"
+            readonly
+          />
+
+          @if (isInvalid('section')) {
+            <small>Section is required.</small>
+          }
+        </label>
+
+        <label class="autocomplete-field">
+          Subject
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="subjectName"
+              placeholder="Type subject name..."
+              autocomplete="off"
+              (input)="onSubjectInput($event)"
+              (focus)="onSubjectFocus()"
+              (blur)="onSubjectBlur()"
+            />
+
+            @if (isInvalid('subjectName')) {
+              <small>Subject is required.</small>
+            }
+
+            @if (showSubjectSuggestions() && filteredSubjects().length > 0) {
+              <div class="suggestions-panel">
+                @for (subject of filteredSubjects(); track subject.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectSubject(subject)"
+                  >
+                    <span>{{ getSubjectInitial(subject) }}</span>
+
+                    <div>
+                      <strong>{{ subject.subjectName }}</strong>
+                      <p>
+                        {{ subject.subjectCode }}
+                        @if (subject.teacherName) {
+                          · {{ subject.teacherName }}
+                        }
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        </label>
+
+        <label class="autocomplete-field">
+          Teacher
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="teacherName"
+              placeholder="Type teacher name..."
+              autocomplete="off"
+              (input)="onTeacherInput($event)"
+              (focus)="onTeacherFocus()"
+              (blur)="onTeacherBlur()"
+            />
+
+            @if (isInvalid('teacherName')) {
+              <small>Teacher is required.</small>
+            }
+
+            @if (showTeacherSuggestions() && filteredTeachers().length > 0) {
+              <div class="suggestions-panel">
+                @for (teacher of filteredTeachers(); track teacher.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectTeacher(teacher)"
+                  >
+                    <span>{{ getTeacherInitial(teacher) }}</span>
+
+                    <div>
+                      <strong>{{ teacher.fullName }}</strong>
+                      <p>
+                        {{ teacher.subject || 'Teacher' }}
+                        @if (teacher.email) {
+                          · {{ teacher.email }}
+                        }
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        </label>
+
+        <label class="autocomplete-field">
+          Room No
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="roomNo"
+              placeholder="Type room number..."
+              autocomplete="off"
+              (input)="onRoomInput($event)"
+              (focus)="onRoomFocus()"
+              (blur)="onRoomBlur()"
+            />
+
+            @if (isInvalid('roomNo')) {
+              <small>Room is required.</small>
+            }
+
+            @if (showRoomSuggestions() && filteredRooms().length > 0) {
+              <div class="suggestions-panel">
+                @for (room of filteredRooms(); track room.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectRoom(room)"
+                  >
+                    <span>{{ getRoomInitial(room) }}</span>
+
+                    <div>
+                      <strong>{{ getRoomLabel(room) }}</strong>
+                      <p>{{ getRoomMeta(room) }}</p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        </label>
+
+        <label>
+          Day
+          <select formControlName="day">
+            @for (day of days; track day.value) {
+              <option [value]="day.value">{{ day.label }}</option>
+            }
+          </select>
+
+          @if (isInvalid('day')) {
+            <small>Day is required.</small>
+          }
+        </label>
+
+        <label>
+          Start Time
+          <input type="time" formControlName="startTime" />
+
+          @if (isInvalid('startTime')) {
+            <small>Start time is required.</small>
+          }
+        </label>
+
+        <label>
+          End Time
+          <input type="time" formControlName="endTime" />
+
+          @if (isInvalid('endTime')) {
+            <small>End time is required.</small>
+          }
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="time-table-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeTimeTableModal()"
+          [disabled]="isSubmitting()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Period'
+                : 'Save Period'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (timeTableToDelete(); as timeTable) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Time Table Period?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong
+          >{{ timeTable.timeTableCode }} - {{ timeTable.subjectName }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteTimeTable()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Period' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}

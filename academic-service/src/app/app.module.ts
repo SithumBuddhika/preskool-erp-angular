@@ -15,6 +15,8 @@ import { SubjectsController } from './subjects.controller';
 import { SubjectsService } from './subjects.service';
 import { SyllabusSubjectGroupsController } from './syllabus-subject-groups.controller';
 import { SyllabusSubjectGroupsService } from './syllabus-subject-groups.service';
+import { TimeTableController } from './time-table.controller';
+import { TimeTableService } from './time-table.service';
 
 @Module({
   imports: [
@@ -31,6 +33,7 @@ import { SyllabusSubjectGroupsService } from './syllabus-subject-groups.service'
     ExamsController,
     GradesController,
     SyllabusSubjectGroupsController,
+    TimeTableController,
   ],
   providers: [
     ClassesService,
@@ -40,6 +43,7 @@ import { SyllabusSubjectGroupsService } from './syllabus-subject-groups.service'
     ExamsService,
     GradesService,
     SyllabusSubjectGroupsService,
+    TimeTableService,
     PrismaService,
   ],
 })
