@@ -21,6 +21,11 @@ export class StudentsController {
     return this.studentsService.findAll(search);
   }
 
+  @Get('next-code')
+  generateNextCode() {
+    return this.studentsService.generateNextCode();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.studentsService.findOne(id);

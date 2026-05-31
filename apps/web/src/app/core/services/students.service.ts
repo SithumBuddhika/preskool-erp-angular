@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { CreateStudentPayload, Student } from '../models/student.model';
 
 @Injectable({
@@ -34,5 +34,11 @@ export class StudentsService {
 
   deleteStudent(id: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
+  }
+
+  generateNextAdmissionNo(): Observable<string> {
+    return this.http
+      .get<{ admissionNo: string }>(`${this.apiUrl}/next-code`)
+      .pipe(map((response) => response.admissionNo));
   }
 }

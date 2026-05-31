@@ -20,8 +20,11 @@ export class StudentsService {
               { firstName: { contains: search, mode: 'insensitive' } },
               { lastName: { contains: search, mode: 'insensitive' } },
               { email: { contains: search, mode: 'insensitive' } },
+              { phone: { contains: search, mode: 'insensitive' } },
               { className: { contains: search, mode: 'insensitive' } },
+              { section: { contains: search, mode: 'insensitive' } },
               { guardianName: { contains: search, mode: 'insensitive' } },
+              { guardianPhone: { contains: search, mode: 'insensitive' } },
             ],
           }
         : undefined,
@@ -41,6 +44,25 @@ export class StudentsService {
     }
 
     return student;
+  }
+
+  async generateNextCode() {
+    const students = await this.prisma.student.findMany({
+      select: {
+        admissionNo: true,
+      },
+    });
+
+    const highestNumber = students.reduce((highest, student) => {
+      const match = student.admissionNo.match(/\d+/);
+      const codeNumber = match ? Number(match[0]) : 0;
+
+      return codeNumber > highest ? codeNumber : highest;
+    }, 0);
+
+    return {
+      admissionNo: `ADM-${String(highestNumber + 1).padStart(4, '0')}`,
+    };
   }
 
   async create(createStudentDto: CreateStudentDto) {
@@ -87,17 +109,32 @@ export class StudentsService {
         admissionNo: updateStudentDto.admissionNo?.trim(),
         firstName: updateStudentDto.firstName?.trim(),
         lastName: updateStudentDto.lastName?.trim(),
-        email: updateStudentDto.email?.toLowerCase().trim(),
-        phone: updateStudentDto.phone?.trim(),
+        email:
+          updateStudentDto.email !== undefined
+            ? updateStudentDto.email?.toLowerCase().trim() || null
+            : undefined,
+        phone:
+          updateStudentDto.phone !== undefined
+            ? updateStudentDto.phone?.trim() || null
+            : undefined,
         gender: updateStudentDto.gender,
-        dateOfBirth: updateStudentDto.dateOfBirth
-          ? new Date(updateStudentDto.dateOfBirth)
-          : undefined,
+        dateOfBirth:
+          updateStudentDto.dateOfBirth !== undefined
+            ? updateStudentDto.dateOfBirth
+              ? new Date(updateStudentDto.dateOfBirth)
+              : null
+            : undefined,
         className: updateStudentDto.className?.trim(),
-        section: updateStudentDto.section?.trim(),
+        section:
+          updateStudentDto.section !== undefined
+            ? updateStudentDto.section?.trim() || null
+            : undefined,
         guardianName: updateStudentDto.guardianName?.trim(),
         guardianPhone: updateStudentDto.guardianPhone?.trim(),
-        address: updateStudentDto.address?.trim(),
+        address:
+          updateStudentDto.address !== undefined
+            ? updateStudentDto.address?.trim() || null
+            : undefined,
         status: updateStudentDto.status,
       },
     });
