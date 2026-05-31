@@ -116,7 +116,7 @@ export class SidebarComponent {
           icon: 'school',
         },
         {
-          label: 'Syllabus Subject Group',
+          label: 'Subject Group',
           route: '/academic/syllabus-subject-groups',
           icon: 'school',
         },
