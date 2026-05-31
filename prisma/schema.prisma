@@ -309,3 +309,25 @@ model Grade {
   @@unique([examCode, admissionNo])
   @@map("grades")
 }
+
+enum SyllabusSubjectGroupStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model SyllabusSubjectGroup {
+  id            String                     @id @default(uuid())
+  groupCode     String                     @unique
+  groupName     String
+  className     String
+  section       String
+  classTeacher  String?
+  subjectNames  String[]
+  subjectCodes  String[]                   @default([])
+  totalSubjects Int                        @default(0)
+  status        SyllabusSubjectGroupStatus @default(ACTIVE)
+  createdAt     DateTime                   @default(now())
+  updatedAt     DateTime                   @updatedAt
+
+  @@map("syllabus_subject_groups")
+}

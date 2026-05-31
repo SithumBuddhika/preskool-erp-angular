@@ -13,6 +13,8 @@ import { GradesService } from './grades.service';
 import { PrismaService } from './prisma.service';
 import { SubjectsController } from './subjects.controller';
 import { SubjectsService } from './subjects.service';
+import { SyllabusSubjectGroupsController } from './syllabus-subject-groups.controller';
+import { SyllabusSubjectGroupsService } from './syllabus-subject-groups.service';
 
 @Module({
   imports: [
@@ -28,6 +30,7 @@ import { SubjectsService } from './subjects.service';
     ClassRoutinesController,
     ExamsController,
     GradesController,
+    SyllabusSubjectGroupsController,
   ],
   providers: [
     ClassesService,
@@ -36,6 +39,7 @@ import { SubjectsService } from './subjects.service';
     ClassRoutinesService,
     ExamsService,
     GradesService,
+    SyllabusSubjectGroupsService,
     PrismaService,
   ],
 })

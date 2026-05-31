@@ -87,7 +87,6 @@ export const appRoutes: Routes = [
         pathMatch: 'full',
         redirectTo: 'dashboard/admin',
       },
-
       {
         path: 'dashboard',
         pathMatch: 'full',
@@ -206,6 +205,18 @@ export const appRoutes: Routes = [
         path: 'academic/grade',
         pathMatch: 'full',
         redirectTo: 'academic/grades',
+      },
+      {
+        path: 'academic/syllabus-subject-groups',
+        loadComponent: () =>
+          import(
+            './features/academic/syllabus-subject-groups/syllabus-subject-groups.component'
+          ).then((m) => m.SyllabusSubjectGroupsComponent),
+      },
+      {
+        path: 'academic/syllabus-subject-group',
+        pathMatch: 'full',
+        redirectTo: 'academic/syllabus-subject-groups',
       },
 
       {

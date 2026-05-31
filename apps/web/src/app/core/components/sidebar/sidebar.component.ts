@@ -115,6 +115,11 @@ export class SidebarComponent {
           route: '/academic/grades',
           icon: 'school',
         },
+        {
+          label: 'Syllabus Subject Group',
+          route: '/academic/syllabus-subject-groups',
+          icon: 'school',
+        },
       ],
     },
     {
