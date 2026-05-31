@@ -1,6 +1,8 @@
 .exams-page {
   display: grid;
   gap: 24px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .exams-page__header {
@@ -68,6 +70,7 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
+  min-width: 0;
 }
 
 .summary-card {
@@ -80,6 +83,7 @@
   align-items: center;
   gap: 16px;
   box-shadow: 0 10px 28px rgba(16, 24, 40, 0.04);
+  min-width: 0;
 }
 
 .summary-card__icon {
@@ -89,6 +93,7 @@
   display: grid;
   place-items: center;
   font-weight: 700;
+  flex: 0 0 auto;
 }
 
 .summary-card__icon--blue {
@@ -128,6 +133,9 @@
 }
 
 .exams-card {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   background: #ffffff;
   border: 1px solid #edf1f7;
   border-radius: 12px;
@@ -160,6 +168,7 @@
 
 .exams-search {
   width: min(100%, 360px);
+  flex: 0 0 auto;
 }
 
 .exams-search input {
@@ -189,13 +198,16 @@
 
 .table-wrap {
   width: 100%;
+  max-width: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1350px;
+  min-width: 1240px;
 }
 
 th {
@@ -203,17 +215,34 @@ th {
   color: #667085;
   font-size: 12px;
   text-align: left;
-  padding: 14px;
+  padding: 13px 12px;
   font-weight: 600;
   border-bottom: 1px solid #edf1f7;
+  white-space: nowrap;
 }
 
 td {
-  padding: 16px 14px;
+  padding: 14px 12px;
   color: #253858;
   font-size: 13px;
   font-weight: 400;
   border-bottom: 1px solid #edf1f7;
+  white-space: nowrap;
+}
+
+td:nth-child(2),
+th:nth-child(2) {
+  min-width: 160px;
+}
+
+td:nth-child(6),
+th:nth-child(6) {
+  min-width: 140px;
+}
+
+td:nth-child(12),
+th:nth-child(12) {
+  min-width: 120px;
 }
 
 .text-right {
@@ -265,6 +294,7 @@ td {
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
+  flex: 0 0 auto;
 }
 
 .exam-name strong {
@@ -670,6 +700,11 @@ td {
 
   .exams-search {
     width: 100%;
+    flex: none;
+  }
+
+  table {
+    min-width: 1180px;
   }
 }
 
