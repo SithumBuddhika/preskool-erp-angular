@@ -8,6 +8,8 @@ import { ClassesController } from './classes.controller';
 import { ClassesService } from './classes.service';
 import { ExamsController } from './exams.controller';
 import { ExamsService } from './exams.service';
+import { GradesController } from './grades.controller';
+import { GradesService } from './grades.service';
 import { PrismaService } from './prisma.service';
 import { SubjectsController } from './subjects.controller';
 import { SubjectsService } from './subjects.service';
@@ -25,6 +27,7 @@ import { SubjectsService } from './subjects.service';
     SubjectsController,
     ClassRoutinesController,
     ExamsController,
+    GradesController,
   ],
   providers: [
     ClassesService,
@@ -32,6 +35,7 @@ import { SubjectsService } from './subjects.service';
     SubjectsService,
     ClassRoutinesService,
     ExamsService,
+    GradesService,
     PrismaService,
   ],
 })

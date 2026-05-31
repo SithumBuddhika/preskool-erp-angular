@@ -275,3 +275,37 @@ model Exam {
 
   @@map("exams")
 }
+
+enum GradeResult {
+  PASS
+  FAIL
+}
+
+enum GradeStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model Grade {
+  id            String      @id @default(uuid())
+  gradeCode     String      @unique
+  examCode      String
+  examName      String
+  className     String
+  section       String
+  subjectName   String
+  teacherName   String
+  admissionNo   String
+  studentName   String
+  marksObtained Int
+  maxMarks      Int
+  minMarks      Int
+  result        GradeResult
+  gradeLetter   String
+  status        GradeStatus @default(DRAFT)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([examCode, admissionNo])
+  @@map("grades")
+}
