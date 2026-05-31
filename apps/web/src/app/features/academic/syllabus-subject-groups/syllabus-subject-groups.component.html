@@ -1,0 +1,496 @@
+<section class="syllabus-groups-page">
+  <div class="syllabus-groups-page__header">
+    <div>
+      <h1>Syllabus Subject Group</h1>
+      <p>Academic / Syllabus Subject Group</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Group
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">G</span>
+      <div>
+        <strong>{{ groups().length }}</strong>
+        <p>Total Groups</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ activeGroups() }}</strong>
+        <p>Active Groups</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">I</span>
+      <div>
+        <strong>{{ inactiveGroups() }}</strong>
+        <p>Inactive Groups</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">S</span>
+      <div>
+        <strong>{{ totalGroupedSubjects() }}</strong>
+        <p>Grouped Subjects</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="groups-card">
+    <div class="groups-card__top">
+      <div>
+        <h2>Subject Group List</h2>
+        <p>Manage class-wise syllabus subject groups and assigned subjects.</p>
+      </div>
+
+      <div class="groups-search">
+        <input
+          type="text"
+          placeholder="Search groups..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showGroupModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="groups-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Group ID</th>
+              <th>Group Name</th>
+              <th>Class</th>
+              <th>Section</th>
+              <th>Class Teacher</th>
+              <th>Subjects</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (group of groups(); track group.id) {
+              <tr>
+                <td>
+                  <span class="group-code">{{ group.groupCode }}</span>
+                </td>
+
+                <td>
+                  <div class="group-name">
+                    <span>{{ getGroupInitial(group) }}</span>
+
+                    <div>
+                      <strong>{{ group.groupName }}</strong>
+                      <p>{{ group.className }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>{{ group.className }}</td>
+
+                <td>
+                  <span class="section-badge">{{ group.section }}</span>
+                </td>
+
+                <td>{{ group.classTeacher || 'Not assigned' }}</td>
+
+                <td>
+                  <div class="subject-chip-list">
+                    @for (
+                      subjectName of getVisibleSubjects(group);
+                      track subjectName
+                    ) {
+                      <span class="subject-chip">{{ subjectName }}</span>
+                    }
+
+                    @if (getRemainingSubjectCount(group) > 0) {
+                      <span class="subject-chip subject-chip--more">
+                        +{{ getRemainingSubjectCount(group) }}
+                      </span>
+                    }
+                  </div>
+                </td>
+
+                <td>{{ group.totalSubjects }}</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--inactive]="group.status === 'INACTIVE'"
+                  >
+                    {{ getStatusLabel(group.status) }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(group)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(group)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="9">
+                  <div class="empty-state">
+                    <strong>No subject groups found</strong>
+                    <p>
+                      Add your first subject group or change your search
+                      keyword.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showGroupModal()) {
+  <div class="modal-backdrop">
+    <form class="group-modal" [formGroup]="groupForm" (ngSubmit)="saveGroup()">
+      <div class="group-modal__header">
+        <div>
+          <h2>
+            {{
+              isEditMode()
+                ? 'Edit Syllabus Subject Group'
+                : 'Add New Syllabus Subject Group'
+            }}
+          </h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update class, teacher, and selected subjects.'
+                : 'Create a group by selecting a class and related subjects.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeGroupModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Group ID
+          <input
+            type="text"
+            formControlName="groupCode"
+            placeholder="Example: SSG-0001"
+          />
+
+          @if (isInvalid('groupCode')) {
+            <small>Group ID is required.</small>
+          }
+        </label>
+
+        <label>
+          Group Name
+          <input
+            type="text"
+            formControlName="groupName"
+            placeholder="Example: Grade 8 Core Subjects"
+          />
+
+          @if (isInvalid('groupName')) {
+            <small>Group name is required.</small>
+          }
+        </label>
+
+        <label class="autocomplete-field">
+          Class
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="className"
+              placeholder="Type class name..."
+              autocomplete="off"
+              (input)="onClassInput($event)"
+              (focus)="onClassFocus()"
+              (blur)="onClassBlur()"
+            />
+
+            @if (isInvalid('className')) {
+              <small>Class is required.</small>
+            }
+
+            @if (showClassSuggestions() && filteredClasses().length > 0) {
+              <div class="suggestions-panel">
+                @for (schoolClass of filteredClasses(); track schoolClass.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectClass(schoolClass)"
+                  >
+                    <span>{{ getClassInitial(schoolClass) }}</span>
+
+                    <div>
+                      <strong>{{ getClassLabel(schoolClass) }}</strong>
+                      <p>
+                        Section {{ schoolClass.section }}
+                        @if (schoolClass.classTeacher) {
+                          · {{ schoolClass.classTeacher }}
+                        }
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        </label>
+
+        <label>
+          Section
+          <input
+            type="text"
+            formControlName="section"
+            placeholder="Auto-filled from class"
+            readonly
+          />
+
+          @if (isInvalid('section')) {
+            <small>Section is required.</small>
+          }
+        </label>
+
+        <label class="autocomplete-field">
+          Class Teacher
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="classTeacher"
+              placeholder="Type teacher name..."
+              autocomplete="off"
+              (input)="onTeacherInput($event)"
+              (focus)="onTeacherFocus()"
+              (blur)="onTeacherBlur()"
+            />
+
+            @if (showTeacherSuggestions() && filteredTeachers().length > 0) {
+              <div class="suggestions-panel">
+                @for (teacher of filteredTeachers(); track teacher.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectTeacher(teacher)"
+                  >
+                    <span>{{ getTeacherInitial(teacher) }}</span>
+
+                    <div>
+                      <strong>{{ teacher.fullName }}</strong>
+                      <p>
+                        {{ teacher.subject || 'Teacher' }}
+                        @if (teacher.email) {
+                          · {{ teacher.email }}
+                        }
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+          </select>
+        </label>
+
+        <label class="autocomplete-field form-grid__full">
+          Subjects
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              placeholder="Type subject name or code..."
+              autocomplete="off"
+              [value]="subjectSearchTerm()"
+              (input)="onSubjectInput($event)"
+              (focus)="onSubjectFocus()"
+              (blur)="onSubjectBlur()"
+            />
+
+            @if (showSubjectSuggestions() && filteredSubjects().length > 0) {
+              <div class="suggestions-panel">
+                @for (subject of filteredSubjects(); track subject.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectSubject(subject)"
+                  >
+                    <span>{{ getSubjectInitial(subject) }}</span>
+
+                    <div>
+                      <strong>{{ subject.subjectName }}</strong>
+                      <p>
+                        {{ subject.subjectCode }}
+                        @if (subject.teacherName) {
+                          · {{ subject.teacherName }}
+                        }
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showSubjectSuggestions() &&
+              subjectSearchTerm().trim() &&
+              filteredSubjects().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching subject found
+              </div>
+            }
+          </div>
+        </label>
+
+        <div class="selected-subjects form-grid__full">
+          <div class="selected-subjects__top">
+            <strong>Selected Subjects</strong>
+            <span>{{ selectedSubjects().length }} selected</span>
+          </div>
+
+          @if (selectedSubjects().length > 0) {
+            <div class="selected-subjects__list">
+              @for (subject of selectedSubjects(); track subject.subjectName) {
+                <button
+                  type="button"
+                  class="selected-subject"
+                  (click)="removeSelectedSubject(subject)"
+                >
+                  <span>{{ getSubjectInitial(subject) }}</span>
+                  {{ subject.subjectName }}
+                  <strong>×</strong>
+                </button>
+              }
+            </div>
+          } @else {
+            <p>No subjects selected yet.</p>
+          }
+        </div>
+      </div>
+
+      <div class="group-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeGroupModal()"
+          [disabled]="isSubmitting()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Group'
+                : 'Save Group'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (groupToDelete(); as group) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Subject Group?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ group.groupCode }} - {{ group.groupName }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteGroup()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Group' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}
