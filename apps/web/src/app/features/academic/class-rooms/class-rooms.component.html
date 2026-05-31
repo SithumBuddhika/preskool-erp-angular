@@ -1,0 +1,322 @@
+<section class="class-rooms-page">
+  <div class="class-rooms-page__header">
+    <div>
+      <h1>Class Rooms</h1>
+      <p>Academic / Class Rooms</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Room
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">R</span>
+      <div>
+        <strong>{{ classRooms().length }}</strong>
+        <p>Total Rooms</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ activeRooms() }}</strong>
+        <p>Active Rooms</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">M</span>
+      <div>
+        <strong>{{ maintenanceRooms() }}</strong>
+        <p>Maintenance</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">S</span>
+      <div>
+        <strong>{{ totalCapacity() }}</strong>
+        <p>Total Seats</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="class-rooms-card">
+    <div class="class-rooms-card__top">
+      <div>
+        <h2>Class Room List</h2>
+        <p>Manage room numbers, buildings, floors, and capacity.</p>
+      </div>
+
+      <div class="class-rooms-search">
+        <input
+          type="text"
+          placeholder="Search class rooms..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showClassRoomModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="class-rooms-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Room No</th>
+              <th>Room Name</th>
+              <th>Building</th>
+              <th>Floor</th>
+              <th>Capacity</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (room of classRooms(); track room.id) {
+              <tr>
+                <td>
+                  <div class="room-name">
+                    <span>{{ getRoomInitial(room) }}</span>
+
+                    <div>
+                      <strong>{{ room.roomNo }}</strong>
+                      <p>{{ room.roomName }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>{{ room.roomName }}</td>
+                <td>{{ room.building || '-' }}</td>
+                <td>{{ room.floor || '-' }}</td>
+                <td>{{ room.capacity || '-' }}</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--inactive]="room.status === 'INACTIVE'"
+                    [class.status-pill--maintenance]="
+                      room.status === 'MAINTENANCE'
+                    "
+                  >
+                    {{ getStatusLabel(room.status) }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(room)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(room)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7">
+                  <div class="empty-state">
+                    <strong>No class rooms found</strong>
+                    <p>Add your first room or change your search keyword.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showClassRoomModal()) {
+  <div class="modal-backdrop">
+    <form
+      class="class-room-modal"
+      [formGroup]="classRoomForm"
+      (ngSubmit)="saveClassRoom()"
+    >
+      <div class="class-room-modal__header">
+        <div>
+          <h2>{{ isEditMode() ? 'Edit Class Room' : 'Add New Class Room' }}</h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update class room location and capacity details.'
+                : 'Enter class room location and capacity details.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeClassRoomModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Room No
+          <input
+            type="text"
+            formControlName="roomNo"
+            placeholder="Example: R-201"
+          />
+          @if (isInvalid('roomNo')) {
+            <small>Room number is required.</small>
+          }
+        </label>
+
+        <label>
+          Room Name
+          <input
+            type="text"
+            formControlName="roomName"
+            placeholder="Example: Main Class Room"
+          />
+          @if (isInvalid('roomName')) {
+            <small>Room name is required.</small>
+          }
+        </label>
+
+        <label>
+          Building
+          <input
+            type="text"
+            formControlName="building"
+            placeholder="Example: Academic Block A"
+          />
+        </label>
+
+        <label>
+          Floor
+          <input
+            type="text"
+            formControlName="floor"
+            placeholder="Example: 2nd Floor"
+          />
+        </label>
+
+        <label>
+          Capacity
+          <input
+            type="number"
+            formControlName="capacity"
+            placeholder="Example: 35"
+            min="1"
+          />
+          @if (isInvalid('capacity')) {
+            <small>Capacity must be at least 1.</small>
+          }
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+            <option value="MAINTENANCE">Maintenance</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="class-room-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeClassRoomModal()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Room'
+                : 'Save Room'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (classRoomToDelete(); as room) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Class Room?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ room.roomNo }} - {{ room.roomName }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteClassRoom()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Room' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}

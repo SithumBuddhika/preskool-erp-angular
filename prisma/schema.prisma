@@ -174,3 +174,24 @@ model SchoolClass {
   @@unique([className, section])
   @@map("classes")
 }
+
+enum ClassRoomStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+}
+
+model ClassRoom {
+  id       String          @id @default(uuid())
+  roomNo   String          @unique
+  roomName String
+  building String?
+  floor    String?
+  capacity Int?
+  status   ClassRoomStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("class_rooms")
+}
