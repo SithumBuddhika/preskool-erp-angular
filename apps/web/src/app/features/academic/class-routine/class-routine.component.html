@@ -1,0 +1,555 @@
+<section class="class-routine-page">
+  <div class="class-routine-page__header">
+    <div>
+      <h1>Class Routine</h1>
+      <p>Academic / Class Routine</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Routine
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">R</span>
+      <div>
+        <strong>{{ routines().length }}</strong>
+        <p>Total Routines</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ activeRoutines() }}</strong>
+        <p>Active Routines</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">I</span>
+      <div>
+        <strong>{{ inactiveRoutines() }}</strong>
+        <p>Inactive Routines</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">C</span>
+      <div>
+        <strong>{{ totalRoomsUsed() }}</strong>
+        <p>Rooms Used</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="routine-card">
+    <div class="routine-card__top">
+      <div>
+        <h2>Class Routine List</h2>
+        <p>
+          Manage routine ID, class section, subjects, teachers, rooms, days, and
+          time slots.
+        </p>
+      </div>
+
+      <div class="routine-search">
+        <input
+          type="text"
+          placeholder="Search routines..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showRoutineModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="routine-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Routine ID</th>
+              <th>Class</th>
+              <th>Section</th>
+              <th>Subject</th>
+              <th>Teacher</th>
+              <th>Room No</th>
+              <th>Day</th>
+              <th>Time</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (routine of routines(); track routine.id) {
+              <tr>
+                <td>
+                  <span class="routine-code">{{ routine.routineCode }}</span>
+                </td>
+
+                <td>
+                  <div class="routine-name">
+                    <span>{{ getRoutineInitial(routine) }}</span>
+
+                    <div>
+                      <strong>{{ routine.className }}</strong>
+                      <p>{{ routine.day }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="section-badge">{{ routine.section }}</span>
+                </td>
+
+                <td>{{ routine.subjectName }}</td>
+                <td>{{ routine.teacherName }}</td>
+                <td>{{ routine.roomNo }}</td>
+                <td>{{ getDayLabel(routine.day) }}</td>
+                <td>{{ getTimeRange(routine) }}</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--inactive]="
+                      routine.status === 'INACTIVE'
+                    "
+                  >
+                    {{ getStatusLabel(routine.status) }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(routine)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(routine)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="10">
+                  <div class="empty-state">
+                    <strong>No class routines found</strong>
+                    <p>Add your first routine or change your search keyword.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showRoutineModal()) {
+  <div class="modal-backdrop">
+    <form
+      class="routine-modal"
+      [formGroup]="routineForm"
+      (ngSubmit)="saveRoutine()"
+    >
+      <div class="routine-modal__header">
+        <div>
+          <h2>
+            {{ isEditMode() ? 'Edit Class Routine' : 'Add New Class Routine' }}
+          </h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update routine ID, class, section, subject, teacher, room, and time details.'
+                : 'Create a new routine using existing class, subject, teacher, and room data.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeRoutineModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Routine ID
+          <input
+            type="text"
+            formControlName="routineCode"
+            placeholder="Example: RTN-0001"
+          />
+
+          @if (isInvalid('routineCode')) {
+            <small>Routine ID is required.</small>
+          }
+        </label>
+
+        <label class="autocomplete-field">
+          Class
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="className"
+              placeholder="Type class name..."
+              autocomplete="off"
+              (input)="onClassInput($event)"
+              (focus)="onClassFocus()"
+              (blur)="onClassBlur()"
+            />
+
+            @if (isInvalid('className')) {
+              <small>Class is required.</small>
+            }
+
+            @if (showClassSuggestions() && filteredClasses().length > 0) {
+              <div class="suggestions-panel">
+                @for (schoolClass of filteredClasses(); track schoolClass.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectClass(schoolClass)"
+                  >
+                    <span>{{ getClassInitial(schoolClass) }}</span>
+
+                    <div>
+                      <strong>{{ getClassLabel(schoolClass) }}</strong>
+                      <p>
+                        Section {{ schoolClass.section }}
+                        @if (schoolClass.classTeacher) {
+                          · {{ schoolClass.classTeacher }}
+                        }
+                        @if (schoolClass.roomNo) {
+                          · {{ schoolClass.roomNo }}
+                        }
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showClassSuggestions() &&
+              classSearchTerm().trim() &&
+              filteredClasses().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching class found
+              </div>
+            }
+          </div>
+        </label>
+
+        <label>
+          Section
+          <input
+            type="text"
+            formControlName="section"
+            placeholder="Auto-filled from class"
+            readonly
+          />
+
+          @if (isInvalid('section')) {
+            <small>Section is required.</small>
+          }
+        </label>
+
+        <label class="autocomplete-field">
+          Subject
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="subjectName"
+              placeholder="Type subject name..."
+              autocomplete="off"
+              (input)="onSubjectInput($event)"
+              (focus)="onSubjectFocus()"
+              (blur)="onSubjectBlur()"
+            />
+
+            @if (isInvalid('subjectName')) {
+              <small>Subject is required.</small>
+            }
+
+            @if (showSubjectSuggestions() && filteredSubjects().length > 0) {
+              <div class="suggestions-panel">
+                @for (subject of filteredSubjects(); track subject.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectSubject(subject)"
+                  >
+                    <span>{{ getSubjectInitial(subject) }}</span>
+
+                    <div>
+                      <strong>{{ subject.subjectName }}</strong>
+                      <p>
+                        {{ subject.subjectCode }}
+                        @if (subject.teacherName) {
+                          · {{ subject.teacherName }}
+                        }
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showSubjectSuggestions() &&
+              subjectSearchTerm().trim() &&
+              filteredSubjects().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching subject found
+              </div>
+            }
+          </div>
+        </label>
+
+        <label class="autocomplete-field">
+          Teacher
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="teacherName"
+              placeholder="Type teacher name..."
+              autocomplete="off"
+              (input)="onTeacherInput($event)"
+              (focus)="onTeacherFocus()"
+              (blur)="onTeacherBlur()"
+            />
+
+            @if (isInvalid('teacherName')) {
+              <small>Teacher is required.</small>
+            }
+
+            @if (showTeacherSuggestions() && filteredTeachers().length > 0) {
+              <div class="suggestions-panel">
+                @for (teacher of filteredTeachers(); track teacher.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectTeacher(teacher)"
+                  >
+                    <span>{{ getTeacherInitial(teacher) }}</span>
+
+                    <div>
+                      <strong>{{ teacher.fullName }}</strong>
+                      <p>
+                        {{ teacher.subject || 'Teacher' }}
+                        @if (teacher.email) {
+                          · {{ teacher.email }}
+                        }
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showTeacherSuggestions() &&
+              teacherSearchTerm().trim() &&
+              filteredTeachers().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching teacher found
+              </div>
+            }
+          </div>
+        </label>
+
+        <label class="autocomplete-field">
+          Room No
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="roomNo"
+              placeholder="Type room number..."
+              autocomplete="off"
+              (input)="onRoomInput($event)"
+              (focus)="onRoomFocus()"
+              (blur)="onRoomBlur()"
+            />
+
+            @if (isInvalid('roomNo')) {
+              <small>Room is required.</small>
+            }
+
+            @if (showRoomSuggestions() && filteredRooms().length > 0) {
+              <div class="suggestions-panel">
+                @for (room of filteredRooms(); track room.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectRoom(room)"
+                  >
+                    <span>{{ getRoomInitial(room) }}</span>
+
+                    <div>
+                      <strong>{{ getRoomLabel(room) }}</strong>
+                      <p>{{ getRoomMeta(room) }}</p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showRoomSuggestions() &&
+              roomSearchTerm().trim() &&
+              filteredRooms().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching room found
+              </div>
+            }
+          </div>
+        </label>
+
+        <label>
+          Day
+          <select formControlName="day">
+            @for (day of days; track day.value) {
+              <option [value]="day.value">{{ day.label }}</option>
+            }
+          </select>
+
+          @if (isInvalid('day')) {
+            <small>Day is required.</small>
+          }
+        </label>
+
+        <label>
+          Start Time
+          <input type="time" formControlName="startTime" />
+
+          @if (isInvalid('startTime')) {
+            <small>Start time is required.</small>
+          }
+        </label>
+
+        <label>
+          End Time
+          <input type="time" formControlName="endTime" />
+
+          @if (isInvalid('endTime')) {
+            <small>End time is required.</small>
+          }
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="routine-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeRoutineModal()"
+          [disabled]="isSubmitting()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Routine'
+                : 'Save Routine'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (routineToDelete(); as routine) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Class Routine?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ routine.routineCode }} - {{ routine.className }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteRoutine()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Routine' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}
