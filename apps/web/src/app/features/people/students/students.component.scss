@@ -1,6 +1,8 @@
 .students-page {
   display: grid;
   gap: 24px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .students-page__header {
@@ -66,8 +68,9 @@
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
+  min-width: 0;
 }
 
 .summary-card {
@@ -80,6 +83,7 @@
   align-items: center;
   gap: 16px;
   box-shadow: 0 10px 28px rgba(16, 24, 40, 0.04);
+  min-width: 0;
 }
 
 .summary-card__icon {
@@ -89,6 +93,7 @@
   display: grid;
   place-items: center;
   font-weight: 700;
+  flex: 0 0 auto;
 }
 
 .summary-card__icon--blue {
@@ -104,6 +109,11 @@
 .summary-card__icon--orange {
   background: #fff7ed;
   color: #f59e0b;
+}
+
+.summary-card__icon--purple {
+  background: #f4ebff;
+  color: #7f56d9;
 }
 
 .summary-card strong {
@@ -123,6 +133,9 @@
 }
 
 .students-card {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   background: #ffffff;
   border: 1px solid #edf1f7;
   border-radius: 12px;
@@ -155,6 +168,7 @@
 
 .students-search {
   width: min(100%, 360px);
+  flex: 0 0 auto;
 }
 
 .students-search input {
@@ -184,13 +198,16 @@
 
 .table-wrap {
   width: 100%;
+  max-width: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 950px;
+  min-width: 980px;
 }
 
 th {
@@ -198,21 +215,37 @@ th {
   color: #667085;
   font-size: 12px;
   text-align: left;
-  padding: 14px;
+  padding: 13px 12px;
   font-weight: 600;
   border-bottom: 1px solid #edf1f7;
+  white-space: nowrap;
 }
 
 td {
-  padding: 16px 14px;
+  padding: 14px 12px;
   color: #253858;
   font-size: 13px;
   font-weight: 400;
   border-bottom: 1px solid #edf1f7;
+  white-space: nowrap;
 }
 
 .text-right {
   text-align: right;
+}
+
+.student-code {
+  min-width: 82px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef2ff;
+  color: var(--erp-primary);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .student-name {
@@ -231,6 +264,8 @@ td {
   place-items: center;
   font-size: 12px;
   font-weight: 700;
+  text-transform: uppercase;
+  flex: 0 0 auto;
 }
 
 .student-name strong {
@@ -245,6 +280,31 @@ td {
   color: #667085;
   font-size: 12px;
   font-weight: 400;
+}
+
+.class-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.class-info strong {
+  color: var(--erp-text-main);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.class-info span {
+  min-width: 30px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: var(--erp-text-main);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
 }
 
 .status-pill {
@@ -330,7 +390,7 @@ td {
 }
 
 .student-modal {
-  width: min(100%, 860px);
+  width: min(100%, 900px);
   max-height: 90vh;
   overflow-y: auto;
   background: #ffffff;
@@ -379,6 +439,10 @@ td {
   gap: 16px 18px;
 }
 
+.form-grid__full {
+  grid-column: 1 / -1;
+}
+
 .form-grid label {
   display: grid;
   gap: 8px;
@@ -407,6 +471,7 @@ td {
 }
 
 .form-grid textarea {
+  min-height: 90px;
   padding-top: 12px;
   resize: vertical;
 }
@@ -425,14 +490,93 @@ td {
   box-shadow: 0 0 0 3px rgba(56, 99, 255, 0.08);
 }
 
+.form-grid input[readonly] {
+  background: #f8fafc;
+  color: #667085;
+  cursor: not-allowed;
+}
+
 .form-grid small {
   color: #ef4444;
   font-size: 12px;
   font-weight: 500;
 }
 
-.form-grid__full {
-  grid-column: 1 / -1;
+.autocomplete-field {
+  position: relative;
+}
+
+.suggestion-input-wrap {
+  position: relative;
+}
+
+.suggestions-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 120;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #dfe5ef;
+  border-radius: 12px;
+  box-shadow: 0 18px 50px rgba(16, 24, 40, 0.16);
+}
+
+.suggestion-option {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.suggestion-option:hover {
+  background: #f8fafc;
+}
+
+.suggestion-option + .suggestion-option {
+  border-top: 1px solid #edf1f7;
+}
+
+.suggestion-option > span {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #eef4ff;
+  color: var(--erp-primary);
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex: 0 0 auto;
+  text-transform: uppercase;
+}
+
+.suggestion-option strong {
+  display: block;
+  color: var(--erp-text-main);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.suggestion-option p {
+  margin: 3px 0 0;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.suggestions-panel--empty {
+  padding: 12px 14px;
+  color: #667085;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .student-modal__actions {
@@ -550,11 +694,13 @@ td {
   }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 1200px) {
   .summary-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
 
+@media (max-width: 991px) {
   .students-card__top,
   .students-page__header {
     align-items: flex-start;
@@ -563,10 +709,16 @@ td {
 
   .students-search {
     width: 100%;
+    flex: none;
+  }
+
+  table {
+    min-width: 920px;
   }
 }
 
 @media (max-width: 575px) {
+  .summary-grid,
   .form-grid {
     grid-template-columns: 1fr;
   }
