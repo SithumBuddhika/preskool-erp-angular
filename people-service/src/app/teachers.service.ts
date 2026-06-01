@@ -21,6 +21,8 @@ export class TeachersService {
               { email: { contains: search, mode: 'insensitive' } },
               { phone: { contains: search, mode: 'insensitive' } },
               { subject: { contains: search, mode: 'insensitive' } },
+              { qualification: { contains: search, mode: 'insensitive' } },
+              { address: { contains: search, mode: 'insensitive' } },
             ],
           }
         : undefined,
@@ -40,6 +42,25 @@ export class TeachersService {
     }
 
     return teacher;
+  }
+
+  async generateNextCode() {
+    const teachers = await this.prisma.teacher.findMany({
+      select: {
+        employeeNo: true,
+      },
+    });
+
+    const highestNumber = teachers.reduce((highest, teacher) => {
+      const match = teacher.employeeNo.match(/\d+/);
+      const codeNumber = match ? Number(match[0]) : 0;
+
+      return codeNumber > highest ? codeNumber : highest;
+    }, 0);
+
+    return {
+      employeeNo: `TCH-${String(highestNumber + 1).padStart(4, '0')}`,
+    };
   }
 
   async create(createTeacherDto: CreateTeacherDto) {
@@ -78,15 +99,25 @@ export class TeachersService {
       data: {
         employeeNo: updateTeacherDto.employeeNo?.trim(),
         fullName: updateTeacherDto.fullName?.trim(),
-        email: updateTeacherDto.email?.toLowerCase().trim(),
+        email:
+          updateTeacherDto.email !== undefined
+            ? updateTeacherDto.email.toLowerCase().trim()
+            : undefined,
         phone: updateTeacherDto.phone?.trim(),
         gender: updateTeacherDto.gender,
         subject: updateTeacherDto.subject?.trim(),
-        qualification: updateTeacherDto.qualification?.trim(),
-        joiningDate: updateTeacherDto.joiningDate
-          ? new Date(updateTeacherDto.joiningDate)
-          : undefined,
-        address: updateTeacherDto.address?.trim(),
+        qualification:
+          updateTeacherDto.qualification !== undefined
+            ? updateTeacherDto.qualification?.trim() || null
+            : undefined,
+        joiningDate:
+          updateTeacherDto.joiningDate !== undefined
+            ? new Date(updateTeacherDto.joiningDate)
+            : undefined,
+        address:
+          updateTeacherDto.address !== undefined
+            ? updateTeacherDto.address?.trim() || null
+            : undefined,
         status: updateTeacherDto.status,
       },
     });

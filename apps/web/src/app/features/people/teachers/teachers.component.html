@@ -34,13 +34,23 @@
         <p>Inactive Teachers</p>
       </div>
     </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">S</span>
+      <div>
+        <strong>{{ uniqueSubjects() }}</strong>
+        <p>Subjects Covered</p>
+      </div>
+    </article>
   </div>
 
   <div class="teachers-card">
     <div class="teachers-card__top">
       <div>
         <h2>Teacher List</h2>
-        <p>Manage teacher employment details and subject information.</p>
+        <p>
+          Manage teacher employment details, subjects, and contact information.
+        </p>
       </div>
 
       <div class="teachers-search">
@@ -85,7 +95,7 @@
             @for (teacher of teachers(); track teacher.id) {
               <tr>
                 <td>
-                  <strong class="employee-no">{{ teacher.employeeNo }}</strong>
+                  <span class="employee-no">{{ teacher.employeeNo }}</span>
                 </td>
 
                 <td>
@@ -101,7 +111,10 @@
                   </div>
                 </td>
 
-                <td>{{ teacher.subject }}</td>
+                <td>
+                  <span class="subject-pill">{{ teacher.subject }}</span>
+                </td>
+
                 <td>{{ getGenderLabel(teacher.gender) }}</td>
                 <td>{{ teacher.phone }}</td>
                 <td>{{ teacher.email }}</td>
@@ -112,7 +125,7 @@
                     class="status-pill"
                     [class.status-pill--inactive]="teacher.status !== 'ACTIVE'"
                   >
-                    {{ teacher.status }}
+                    {{ getStatusLabel(teacher.status) }}
                   </span>
                 </td>
 
@@ -166,8 +179,8 @@
           <p>
             {{
               isEditMode()
-                ? 'Update teacher employment and subject details.'
-                : 'Enter teacher employment and subject details.'
+                ? 'Update teacher employment, subject, and contact details.'
+                : 'Create a teacher using existing subject suggestions.'
             }}
           </p>
         </div>
@@ -194,6 +207,7 @@
             formControlName="employeeNo"
             placeholder="Example: TCH-0001"
           />
+
           @if (isInvalid('employeeNo')) {
             <small>Employee number is required.</small>
           }
@@ -206,6 +220,7 @@
             formControlName="fullName"
             placeholder="Enter teacher full name"
           />
+
           @if (isInvalid('fullName')) {
             <small>Full name is required.</small>
           }
@@ -218,6 +233,7 @@
             formControlName="email"
             placeholder="Enter email address"
           />
+
           @if (isInvalid('email')) {
             <small>Enter a valid email address.</small>
           }
@@ -230,6 +246,7 @@
             formControlName="phone"
             placeholder="Enter phone number"
           />
+
           @if (isInvalid('phone')) {
             <small>Phone number is required.</small>
           }
@@ -244,16 +261,61 @@
           </select>
         </label>
 
-        <label>
+        <label class="autocomplete-field">
           Subject
-          <input
-            type="text"
-            formControlName="subject"
-            placeholder="Example: Mathematics"
-          />
-          @if (isInvalid('subject')) {
-            <small>Subject is required.</small>
-          }
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="subject"
+              placeholder="Type subject name..."
+              autocomplete="off"
+              (input)="onSubjectInput($event)"
+              (focus)="onSubjectFocus()"
+              (blur)="onSubjectBlur()"
+            />
+
+            @if (isInvalid('subject')) {
+              <small>Subject is required.</small>
+            }
+
+            @if (showSubjectSuggestions() && filteredSubjects().length > 0) {
+              <div class="suggestions-panel">
+                @for (subject of filteredSubjects(); track subject.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectSubject(subject)"
+                  >
+                    <span>{{ getSubjectInitial(subject) }}</span>
+
+                    <div>
+                      <strong>{{ subject.subjectName }}</strong>
+                      <p>
+                        {{ subject.subjectCode }}
+                        @if (subject.className) {
+                          · {{ subject.className }}
+                        }
+                        @if (subject.teacherName) {
+                          · {{ subject.teacherName }}
+                        }
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showSubjectSuggestions() &&
+              subjectSearchTerm().trim() &&
+              filteredSubjects().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching subject found
+              </div>
+            }
+          </div>
         </label>
 
         <label>
@@ -268,6 +330,7 @@
         <label>
           Joining Date
           <input type="date" formControlName="joiningDate" />
+
           @if (isInvalid('joiningDate')) {
             <small>Joining date is required.</small>
           }
@@ -296,6 +359,7 @@
           class="secondary-btn"
           type="button"
           (click)="closeTeacherModal()"
+          [disabled]="isSubmitting()"
         >
           Cancel
         </button>
@@ -325,7 +389,7 @@
 
       <p>
         Are you sure you want to delete
-        <strong>{{ teacher.fullName }}</strong
+        <strong>{{ teacher.employeeNo }} - {{ teacher.fullName }}</strong
         >? This action cannot be undone.
       </p>
 

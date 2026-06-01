@@ -21,6 +21,11 @@ export class TeachersController {
     return this.teachersService.findAll(search);
   }
 
+  @Get('next-code')
+  generateNextCode() {
+    return this.teachersService.generateNextCode();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.teachersService.findOne(id);

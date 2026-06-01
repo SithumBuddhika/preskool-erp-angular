@@ -5,11 +5,14 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { Subject } from '../../../core/models/subject.model';
 import {
   CreateTeacherPayload,
   Teacher,
   TeacherGender,
+  TeacherStatus,
 } from '../../../core/models/teacher.model';
+import { SubjectsService } from '../../../core/services/subjects.service';
 import { TeachersService } from '../../../core/services/teachers.service';
 
 type ToastType = 'success' | 'error';
@@ -23,6 +26,8 @@ type ToastType = 'success' | 'error';
 })
 export class TeachersComponent implements OnInit {
   teachers = signal<Teacher[]>([]);
+  subjects = signal<Subject[]>([]);
+
   selectedTeacher = signal<Teacher | null>(null);
   teacherToDelete = signal<Teacher | null>(null);
 
@@ -32,6 +37,9 @@ export class TeachersComponent implements OnInit {
   showTeacherModal = signal(false);
   serverError = signal('');
   searchTerm = signal('');
+
+  showSubjectSuggestions = signal(false);
+  subjectSearchTerm = signal('');
 
   toast = signal<{ message: string; type: ToastType } | null>(null);
   private toastTimer: ReturnType<typeof setTimeout> | null = null;
@@ -47,6 +55,42 @@ export class TeachersComponent implements OnInit {
     () =>
       this.teachers().filter((teacher) => teacher.status !== 'ACTIVE').length,
   );
+
+  uniqueSubjects = computed(() => {
+    const subjects = this.teachers()
+      .map((teacher) => teacher.subject)
+      .filter(Boolean);
+
+    return new Set(subjects).size;
+  });
+
+  filteredSubjects = computed(() => {
+    const keyword = this.subjectSearchTerm().trim().toLowerCase();
+
+    const activeSubjects = this.subjects().filter(
+      (subject) => subject.status !== 'INACTIVE',
+    );
+
+    if (!keyword) {
+      return activeSubjects.slice(0, 6);
+    }
+
+    return activeSubjects
+      .filter((subject) => {
+        const searchableText = [
+          subject.subjectName,
+          subject.subjectCode,
+          subject.className,
+          subject.teacherName,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+
+        return searchableText.includes(keyword);
+      })
+      .slice(0, 6);
+  });
 
   teacherForm = new FormGroup({
     employeeNo: new FormControl('', {
@@ -83,15 +127,20 @@ export class TeachersComponent implements OnInit {
     address: new FormControl('', {
       nonNullable: true,
     }),
-    status: new FormControl<'ACTIVE' | 'INACTIVE'>('ACTIVE', {
+    status: new FormControl<TeacherStatus>('ACTIVE', {
       nonNullable: true,
+      validators: [Validators.required],
     }),
   });
 
-  constructor(private readonly teachersService: TeachersService) {}
+  constructor(
+    private readonly teachersService: TeachersService,
+    private readonly subjectsService: SubjectsService,
+  ) {}
 
   ngOnInit(): void {
     this.loadTeachers();
+    this.loadSubjects();
   }
 
   loadTeachers(search = this.searchTerm()): void {
@@ -113,10 +162,45 @@ export class TeachersComponent implements OnInit {
     });
   }
 
+  loadSubjects(): void {
+    this.subjectsService.getSubjects().subscribe({
+      next: (subjects) => {
+        this.subjects.set(subjects);
+      },
+      error: () => {
+        this.showToast('Subject suggestions could not load.', 'error');
+      },
+    });
+  }
+
   onSearchInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.searchTerm.set(value);
     this.loadTeachers(value);
+  }
+
+  onSubjectInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.subjectSearchTerm.set(value);
+    this.showSubjectSuggestions.set(true);
+  }
+
+  onSubjectFocus(): void {
+    const value = this.teacherForm.controls.subject.value;
+    this.subjectSearchTerm.set(value);
+    this.showSubjectSuggestions.set(true);
+  }
+
+  onSubjectBlur(): void {
+    setTimeout(() => {
+      this.showSubjectSuggestions.set(false);
+    }, 160);
+  }
+
+  selectSubject(subject: Subject): void {
+    this.teacherForm.controls.subject.setValue(subject.subjectName);
+    this.subjectSearchTerm.set(subject.subjectName);
+    this.showSubjectSuggestions.set(false);
   }
 
   openCreateModal(): void {
@@ -135,6 +219,17 @@ export class TeachersComponent implements OnInit {
       status: 'ACTIVE',
     });
 
+    this.teachersService.generateNextEmployeeNo().subscribe({
+      next: (employeeNo) => {
+        this.teacherForm.controls.employeeNo.setValue(employeeNo);
+      },
+      error: () => {
+        this.teacherForm.controls.employeeNo.setValue('TCH-0001');
+        this.showToast('Could not generate next teacher ID.', 'error');
+      },
+    });
+
+    this.resetSuggestionState();
     this.serverError.set('');
     this.showTeacherModal.set(true);
   }
@@ -155,13 +250,21 @@ export class TeachersComponent implements OnInit {
       status: teacher.status,
     });
 
+    this.subjectSearchTerm.set(teacher.subject);
+    this.showSubjectSuggestions.set(false);
+
     this.serverError.set('');
     this.showTeacherModal.set(true);
   }
 
   closeTeacherModal(): void {
+    if (this.isSubmitting()) {
+      return;
+    }
+
     this.showTeacherModal.set(false);
     this.selectedTeacher.set(null);
+    this.resetSuggestionState();
     this.serverError.set('');
   }
 
@@ -266,8 +369,16 @@ export class TeachersComponent implements OnInit {
       .toUpperCase();
   }
 
+  getSubjectInitial(subject: Subject): string {
+    return subject.subjectName.charAt(0).toUpperCase();
+  }
+
   getGenderLabel(gender: TeacherGender): string {
     return gender.charAt(0) + gender.slice(1).toLowerCase();
+  }
+
+  getStatusLabel(status: TeacherStatus): string {
+    return status.charAt(0) + status.slice(1).toLowerCase();
   }
 
   formatDisplayDate(date: string): string {
@@ -309,7 +420,16 @@ export class TeachersComponent implements OnInit {
   }
 
   private formatDateForInput(date: string): string {
+    if (!date) {
+      return '';
+    }
+
     return new Date(date).toISOString().split('T')[0];
+  }
+
+  private resetSuggestionState(): void {
+    this.subjectSearchTerm.set('');
+    this.showSubjectSuggestions.set(false);
   }
 
   private showToast(message: string, type: ToastType): void {

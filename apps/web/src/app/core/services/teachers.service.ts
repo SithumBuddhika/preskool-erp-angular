@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { CreateTeacherPayload, Teacher } from '../models/teacher.model';
 
 @Injectable({
@@ -34,5 +34,11 @@ export class TeachersService {
 
   deleteTeacher(id: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
+  }
+
+  generateNextEmployeeNo(): Observable<string> {
+    return this.http
+      .get<{ employeeNo: string }>(`${this.apiUrl}/next-code`)
+      .pipe(map((response) => response.employeeNo));
   }
 }
