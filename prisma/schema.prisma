@@ -175,6 +175,45 @@ model Department {
   @@map("departments")
 }
 
+enum StaffGender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum StaffEmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+}
+
+enum StaffStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Staff {
+  id             String              @id @default(uuid())
+  staffCode      String              @unique
+  fullName       String
+  email          String              @unique
+  phone          String
+  gender         StaffGender
+  departmentCode String?
+  departmentName String
+  designation    String
+  employmentType StaffEmploymentType @default(FULL_TIME)
+  joiningDate    DateTime
+  salary         Float?
+  address        String?
+  status         StaffStatus         @default(ACTIVE)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@map("staffs")
+}
+
 enum ClassStatus {
   ACTIVE
   INACTIVE
