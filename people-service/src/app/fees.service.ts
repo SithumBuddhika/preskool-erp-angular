@@ -18,6 +18,8 @@ export class FeesService {
         ? {
             OR: [
               { receiptNo: { contains: search, mode: 'insensitive' } },
+              { feeGroupCode: { contains: search, mode: 'insensitive' } },
+              { feeGroupName: { contains: search, mode: 'insensitive' } },
               { studentAdmissionNo: { contains: search, mode: 'insensitive' } },
               { studentName: { contains: search, mode: 'insensitive' } },
               { className: { contains: search, mode: 'insensitive' } },
@@ -75,6 +77,8 @@ export class FeesService {
     return this.prisma.fee.create({
       data: {
         receiptNo: createFeeDto.receiptNo.trim(),
+        feeGroupCode: createFeeDto.feeGroupCode?.trim() || null,
+        feeGroupName: createFeeDto.feeGroupName?.trim() || null,
         studentAdmissionNo: createFeeDto.studentAdmissionNo?.trim() || null,
         studentName: createFeeDto.studentName.trim(),
         className: createFeeDto.className.trim(),
@@ -112,6 +116,14 @@ export class FeesService {
       where: { id },
       data: {
         receiptNo: updateFeeDto.receiptNo?.trim(),
+        feeGroupCode:
+          updateFeeDto.feeGroupCode !== undefined
+            ? updateFeeDto.feeGroupCode?.trim() || null
+            : undefined,
+        feeGroupName:
+          updateFeeDto.feeGroupName !== undefined
+            ? updateFeeDto.feeGroupName?.trim() || null
+            : undefined,
         studentAdmissionNo:
           updateFeeDto.studentAdmissionNo !== undefined
             ? updateFeeDto.studentAdmissionNo?.trim() || null

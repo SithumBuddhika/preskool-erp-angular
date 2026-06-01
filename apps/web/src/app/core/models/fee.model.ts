@@ -19,6 +19,8 @@ export type FeePaymentMethod =
 export type Fee = {
   id: string;
   receiptNo: string;
+  feeGroupCode?: string | null;
+  feeGroupName?: string | null;
   studentAdmissionNo?: string | null;
   studentName: string;
   className: string;
@@ -38,6 +40,8 @@ export type Fee = {
 
 export type CreateFeePayload = {
   receiptNo: string;
+  feeGroupCode?: string;
+  feeGroupName?: string;
   studentAdmissionNo?: string;
   studentName: string;
   className: string;

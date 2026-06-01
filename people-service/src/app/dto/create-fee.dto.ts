@@ -1,6 +1,5 @@
 import {
   IsDateString,
-  IsEmail,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -17,6 +16,14 @@ export class CreateFeeDto {
   @IsString()
   @IsNotEmpty()
   receiptNo!: string;
+
+  @IsOptional()
+  @IsString()
+  feeGroupCode?: string;
+
+  @IsOptional()
+  @IsString()
+  feeGroupName?: string;
 
   @IsOptional()
   @IsString()

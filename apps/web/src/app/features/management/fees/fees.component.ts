@@ -12,8 +12,10 @@ import {
   FeePaymentStatus,
   FeeType,
 } from '../../../core/models/fee.model';
+import { FeeGroup } from '../../../core/models/fee-group.model';
 import { Student } from '../../../core/models/student.model';
 import { FeesService } from '../../../core/services/fees.service';
+import { FeeGroupsService } from '../../../core/services/fee-groups.service';
 import { StudentsService } from '../../../core/services/students.service';
 
 type ToastType = 'success' | 'error';
@@ -28,6 +30,7 @@ type ToastType = 'success' | 'error';
 export class FeesComponent implements OnInit {
   fees = signal<Fee[]>([]);
   students = signal<Student[]>([]);
+  feeGroups = signal<FeeGroup[]>([]);
 
   selectedFee = signal<Fee | null>(null);
   feeToDelete = signal<Fee | null>(null);
@@ -42,6 +45,9 @@ export class FeesComponent implements OnInit {
 
   showStudentSuggestions = signal(false);
   studentSearchTerm = signal('');
+
+  showFeeGroupSuggestions = signal(false);
+  feeGroupSearchTerm = signal('');
 
   toast = signal<{ message: string; type: ToastType } | null>(null);
   private toastTimer: ReturnType<typeof setTimeout> | null = null;
@@ -99,10 +105,66 @@ export class FeesComponent implements OnInit {
       .slice(0, 8);
   });
 
+  filteredFeeGroups = computed(() => {
+    const keyword = this.feeGroupSearchTerm().trim().toLowerCase();
+    const selectedClass = this.feeForm.controls.className.value
+      .trim()
+      .toLowerCase();
+    const selectedSection = this.feeForm.controls.section.value
+      .trim()
+      .toLowerCase();
+
+    const activeGroups = this.feeGroups().filter(
+      (group) => group.status === 'ACTIVE',
+    );
+
+    const classMatchingGroups = activeGroups.filter((group) => {
+      const groupClass = (group.className || '').trim().toLowerCase();
+      const groupSection = (group.section || '').trim().toLowerCase();
+
+      const commonGroup = !groupClass;
+      const classMatches = groupClass === selectedClass;
+      const sectionMatches = !groupSection || groupSection === selectedSection;
+
+      return commonGroup || (classMatches && sectionMatches);
+    });
+
+    const source = selectedClass ? classMatchingGroups : activeGroups;
+
+    if (!keyword) {
+      return source.slice(0, 8);
+    }
+
+    return source
+      .filter((group) => {
+        const searchableText = [
+          group.feeGroupCode,
+          group.feeGroupName,
+          group.className,
+          group.section,
+          group.feeType,
+          group.amount,
+          group.description,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+
+        return searchableText.includes(keyword);
+      })
+      .slice(0, 8);
+  });
+
   feeForm = new FormGroup({
     receiptNo: new FormControl('', {
       nonNullable: true,
       validators: [Validators.required],
+    }),
+    feeGroupCode: new FormControl('', {
+      nonNullable: true,
+    }),
+    feeGroupName: new FormControl('', {
+      nonNullable: true,
     }),
     studentAdmissionNo: new FormControl('', {
       nonNullable: true,
@@ -147,11 +209,13 @@ export class FeesComponent implements OnInit {
   constructor(
     private readonly feesService: FeesService,
     private readonly studentsService: StudentsService,
+    private readonly feeGroupsService: FeeGroupsService,
   ) {}
 
   ngOnInit(): void {
     this.loadFees();
     this.loadStudents();
+    this.loadFeeGroups();
   }
 
   loadFees(search = this.searchTerm()): void {
@@ -182,6 +246,17 @@ export class FeesComponent implements OnInit {
     });
   }
 
+  loadFeeGroups(): void {
+    this.feeGroupsService.getFeeGroups().subscribe({
+      next: (feeGroups) => {
+        this.feeGroups.set(feeGroups);
+      },
+      error: () => {
+        this.showToast('Fee group suggestions could not load.', 'error');
+      },
+    });
+  }
+
   onSearchInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.searchTerm.set(value);
@@ -197,6 +272,7 @@ export class FeesComponent implements OnInit {
       this.feeForm.controls.studentAdmissionNo.setValue('');
       this.feeForm.controls.className.setValue('');
       this.feeForm.controls.section.setValue('');
+      this.clearFeeGroupSelection();
     }
   }
 
@@ -220,8 +296,57 @@ export class FeesComponent implements OnInit {
     this.feeForm.controls.className.setValue(student.className);
     this.feeForm.controls.section.setValue(student.section || '');
 
+    this.clearFeeGroupSelection();
+
     this.studentSearchTerm.set(`${student.admissionNo} - ${studentName}`);
     this.showStudentSuggestions.set(false);
+  }
+
+  onFeeGroupInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.feeGroupSearchTerm.set(value);
+    this.showFeeGroupSuggestions.set(true);
+
+    if (!value.trim()) {
+      this.clearFeeGroupSelection();
+    }
+  }
+
+  onFeeGroupFocus(): void {
+    const value = this.feeForm.controls.feeGroupName.value;
+    this.feeGroupSearchTerm.set(value);
+    this.showFeeGroupSuggestions.set(true);
+  }
+
+  onFeeGroupBlur(): void {
+    setTimeout(() => {
+      this.showFeeGroupSuggestions.set(false);
+    }, 160);
+  }
+
+  selectFeeGroup(feeGroup: FeeGroup): void {
+    this.feeForm.controls.feeGroupCode.setValue(feeGroup.feeGroupCode);
+    this.feeForm.controls.feeGroupName.setValue(feeGroup.feeGroupName);
+    this.feeForm.controls.feeType.setValue(feeGroup.feeType);
+    this.feeForm.controls.amount.setValue(String(feeGroup.amount));
+
+    if (feeGroup.dueDays !== null && feeGroup.dueDays !== undefined) {
+      this.feeForm.controls.dueDate.setValue(
+        this.calculateDueDate(feeGroup.dueDays),
+      );
+    }
+
+    this.feeGroupSearchTerm.set(
+      `${feeGroup.feeGroupCode} - ${feeGroup.feeGroupName}`,
+    );
+    this.showFeeGroupSuggestions.set(false);
+  }
+
+  clearFeeGroupSelection(): void {
+    this.feeForm.controls.feeGroupCode.setValue('');
+    this.feeForm.controls.feeGroupName.setValue('');
+    this.feeGroupSearchTerm.set('');
+    this.showFeeGroupSuggestions.set(false);
   }
 
   openCreateModal(): void {
@@ -229,6 +354,8 @@ export class FeesComponent implements OnInit {
 
     this.feeForm.reset({
       receiptNo: '',
+      feeGroupCode: '',
+      feeGroupName: '',
       studentAdmissionNo: '',
       studentName: '',
       className: '',
@@ -262,6 +389,8 @@ export class FeesComponent implements OnInit {
 
     this.feeForm.reset({
       receiptNo: fee.receiptNo,
+      feeGroupCode: fee.feeGroupCode || '',
+      feeGroupName: fee.feeGroupName || '',
       studentAdmissionNo: fee.studentAdmissionNo || '',
       studentName: fee.studentName,
       className: fee.className,
@@ -281,7 +410,14 @@ export class FeesComponent implements OnInit {
         : fee.studentName,
     );
 
+    this.feeGroupSearchTerm.set(
+      fee.feeGroupCode
+        ? `${fee.feeGroupCode} - ${fee.feeGroupName || ''}`.trim()
+        : fee.feeGroupName || '',
+    );
+
     this.showStudentSuggestions.set(false);
+    this.showFeeGroupSuggestions.set(false);
     this.serverError.set('');
     this.showFeeModal.set(true);
   }
@@ -396,6 +532,10 @@ export class FeesComponent implements OnInit {
       .trim();
   }
 
+  getFeeGroupInitial(feeGroup: FeeGroup): string {
+    return feeGroup.feeGroupName.charAt(0).toUpperCase();
+  }
+
   getFeeTypeLabel(type: FeeType): string {
     return type
       .toLowerCase()
@@ -420,6 +560,14 @@ export class FeesComponent implements OnInit {
 
   getClassLabel(fee: Fee): string {
     return `${fee.className} ${fee.section || ''}`.trim();
+  }
+
+  getFeeGroupLabel(fee: Fee): string {
+    if (fee.feeGroupCode && fee.feeGroupName) {
+      return `${fee.feeGroupCode} - ${fee.feeGroupName}`;
+    }
+
+    return fee.feeGroupName || 'Manual Fee';
   }
 
   getCurrentBalance(): number {
@@ -478,6 +626,14 @@ export class FeesComponent implements OnInit {
       paymentStatus: this.getCurrentPaymentStatus(),
     };
 
+    if (formValue.feeGroupCode.trim()) {
+      payload.feeGroupCode = formValue.feeGroupCode.trim();
+    }
+
+    if (formValue.feeGroupName.trim()) {
+      payload.feeGroupName = formValue.feeGroupName.trim();
+    }
+
     if (formValue.studentAdmissionNo.trim()) {
       payload.studentAdmissionNo = formValue.studentAdmissionNo.trim();
     }
@@ -505,6 +661,13 @@ export class FeesComponent implements OnInit {
     return payload;
   }
 
+  private calculateDueDate(dueDays: number): string {
+    const date = new Date();
+    date.setDate(date.getDate() + dueDays);
+
+    return date.toISOString().split('T')[0];
+  }
+
   private formatDateForInput(date?: string | null): string {
     if (!date) {
       return '';
@@ -515,7 +678,9 @@ export class FeesComponent implements OnInit {
 
   private resetSuggestionState(): void {
     this.studentSearchTerm.set('');
+    this.feeGroupSearchTerm.set('');
     this.showStudentSuggestions.set(false);
+    this.showFeeGroupSuggestions.set(false);
   }
 
   private showToast(message: string, type: ToastType): void {

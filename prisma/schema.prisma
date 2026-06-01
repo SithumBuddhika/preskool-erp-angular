@@ -241,6 +241,8 @@ enum FeePaymentMethod {
 model Fee {
   id                 String            @id @default(uuid())
   receiptNo          String            @unique
+  feeGroupCode       String?
+  feeGroupName       String?
   studentAdmissionNo String?
   studentName        String
   className          String
