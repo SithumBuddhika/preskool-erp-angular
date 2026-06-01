@@ -207,7 +207,7 @@
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1380px;
+  min-width: 1520px;
 }
 
 th {
@@ -280,6 +280,33 @@ td {
   color: #667085;
   font-size: 12px;
   font-weight: 400;
+}
+
+.fee-group-info {
+  display: grid;
+  gap: 5px;
+}
+
+.fee-group-info strong {
+  max-width: 210px;
+  color: var(--erp-text-main);
+  font-size: 13px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fee-group-info span {
+  width: fit-content;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #667085;
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .class-info {
@@ -406,7 +433,7 @@ td {
 }
 
 .fee-modal {
-  width: min(100%, 920px);
+  width: min(100%, 980px);
   max-height: 90vh;
   overflow-y: auto;
   background: #ffffff;
@@ -595,6 +622,21 @@ td {
   font-weight: 500;
 }
 
+.fee-group-clear-row {
+  margin-top: -6px;
+}
+
+.clear-link-btn {
+  width: fit-content;
+  border: 0;
+  background: transparent;
+  color: var(--erp-primary);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+
 .fee-modal__actions {
   margin-top: 22px;
   display: flex;
@@ -729,7 +771,7 @@ td {
   }
 
   table {
-    min-width: 1220px;
+    min-width: 1320px;
   }
 }
 

@@ -49,8 +49,8 @@
       <div>
         <h2>Fee Collection List</h2>
         <p>
-          Manage student fee records, paid amounts, balances, and payment
-          details.
+          Manage student fee records, fee groups, paid amounts, balances, and
+          payment details.
         </p>
       </div>
 
@@ -82,6 +82,7 @@
             <tr>
               <th>Receipt ID</th>
               <th>Student</th>
+              <th>Fee Group</th>
               <th>Class</th>
               <th>Fee Type</th>
               <th>Amount</th>
@@ -114,6 +115,15 @@
                 </td>
 
                 <td>
+                  <div class="fee-group-info">
+                    <strong>{{ getFeeGroupLabel(fee) }}</strong>
+                    @if (!fee.feeGroupCode && !fee.feeGroupName) {
+                      <span>Manual Entry</span>
+                    }
+                  </div>
+                </td>
+
+                <td>
                   <div class="class-info">
                     <strong>{{ fee.className }}</strong>
                     @if (fee.section) {
@@ -123,9 +133,9 @@
                 </td>
 
                 <td>
-                  <span class="type-pill">{{
-                    getFeeTypeLabel(fee.feeType)
-                  }}</span>
+                  <span class="type-pill">
+                    {{ getFeeTypeLabel(fee.feeType) }}
+                  </span>
                 </td>
 
                 <td>{{ formatMoney(fee.amount) }}</td>
@@ -171,7 +181,7 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="12">
+                <td colspan="13">
                   <div class="empty-state">
                     <strong>No fee records found</strong>
                     <p>
@@ -197,8 +207,8 @@
           <p>
             {{
               isEditMode()
-                ? 'Update student fee, payment, and receipt details.'
-                : 'Create a fee record using existing student suggestions.'
+                ? 'Update student fee, fee group, payment, and receipt details.'
+                : 'Create a fee record using existing student and fee group suggestions.'
             }}
           </p>
         </div>
@@ -318,6 +328,83 @@
             readonly
           />
         </label>
+
+        <label class="autocomplete-field">
+          Fee Group
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="feeGroupName"
+              placeholder="Type fee group name..."
+              autocomplete="off"
+              (input)="onFeeGroupInput($event)"
+              (focus)="onFeeGroupFocus()"
+              (blur)="onFeeGroupBlur()"
+            />
+
+            @if (showFeeGroupSuggestions() && filteredFeeGroups().length > 0) {
+              <div class="suggestions-panel">
+                @for (feeGroup of filteredFeeGroups(); track feeGroup.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectFeeGroup(feeGroup)"
+                  >
+                    <span>{{ getFeeGroupInitial(feeGroup) }}</span>
+
+                    <div>
+                      <strong>{{ feeGroup.feeGroupName }}</strong>
+                      <p>
+                        {{ feeGroup.feeGroupCode }} ·
+                        {{ getFeeTypeLabel(feeGroup.feeType) }} ·
+                        {{ formatMoney(feeGroup.amount) }}
+                        @if (feeGroup.className) {
+                          · {{ feeGroup.className }}
+                          @if (feeGroup.section) {
+                            {{ feeGroup.section }}
+                          }
+                        } @else {
+                          · Common
+                        }
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showFeeGroupSuggestions() &&
+              feeGroupSearchTerm().trim() &&
+              filteredFeeGroups().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching fee group found
+              </div>
+            }
+          </div>
+        </label>
+
+        <label>
+          Fee Group ID
+          <input
+            type="text"
+            formControlName="feeGroupCode"
+            placeholder="Auto-filled from fee group"
+            readonly
+          />
+        </label>
+
+        <div class="form-grid__full fee-group-clear-row">
+          <button
+            type="button"
+            class="clear-link-btn"
+            (click)="clearFeeGroupSelection()"
+          >
+            Clear fee group and enter fee manually
+          </button>
+        </div>
 
         <label>
           Fee Type

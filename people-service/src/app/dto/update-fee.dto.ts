@@ -18,6 +18,14 @@ export class UpdateFeeDto {
 
   @IsOptional()
   @IsString()
+  feeGroupCode?: string;
+
+  @IsOptional()
+  @IsString()
+  feeGroupName?: string;
+
+  @IsOptional()
+  @IsString()
   studentAdmissionNo?: string;
 
   @IsOptional()
