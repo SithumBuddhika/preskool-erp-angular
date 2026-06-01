@@ -1,0 +1,405 @@
+<section class="library-page">
+  <div class="library-page__header">
+    <div>
+      <h1>Library</h1>
+      <p>Management / Library</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Book
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">B</span>
+      <div>
+        <strong>{{ books().length }}</strong>
+        <p>Total Books</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ availableBooks() }}</strong>
+        <p>Available Books</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">U</span>
+      <div>
+        <strong>{{ unavailableBooks() }}</strong>
+        <p>Unavailable Books</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">C</span>
+      <div>
+        <strong>{{ availableCopies() }} / {{ totalCopies() }}</strong>
+        <p>Available Copies</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="library-card">
+    <div class="library-card__top">
+      <div>
+        <h2>Book List</h2>
+        <p>
+          Manage library books, ISBNs, authors, categories, copies, and shelf
+          locations.
+        </p>
+      </div>
+
+      <div class="library-search">
+        <input
+          type="text"
+          placeholder="Search books..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showBookModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="library-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Book ID</th>
+              <th>Book Title</th>
+              <th>ISBN</th>
+              <th>Author</th>
+              <th>Category</th>
+              <th>Publisher</th>
+              <th>Copies</th>
+              <th>Shelf No</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (book of books(); track book.id) {
+              <tr>
+                <td>
+                  <span class="book-code">{{ book.bookCode }}</span>
+                </td>
+
+                <td>
+                  <div class="book-info">
+                    <span>{{ getInitials(book) }}</span>
+
+                    <div>
+                      <strong>{{ book.bookTitle }}</strong>
+                      <p>{{ book.description || 'No description added' }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>{{ book.isbn || 'Not added' }}</td>
+                <td>{{ book.author }}</td>
+
+                <td>
+                  <span class="category-pill">{{ book.category }}</span>
+                </td>
+
+                <td>{{ book.publisher || 'Not added' }}</td>
+
+                <td>
+                  <div class="copies-info">
+                    <strong>{{ getAvailabilityText(book) }}</strong>
+                    <span>Available / Total</span>
+                  </div>
+                </td>
+
+                <td>{{ book.shelfNo || 'Not added' }}</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--unavailable]="
+                      book.status !== 'AVAILABLE'
+                    "
+                  >
+                    {{ getStatusLabel(book.status) }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(book)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(book)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="10">
+                  <div class="empty-state">
+                    <strong>No library books found</strong>
+                    <p>Add your first book or change your search keyword.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showBookModal()) {
+  <div class="modal-backdrop">
+    <form class="book-modal" [formGroup]="bookForm" (ngSubmit)="saveBook()">
+      <div class="book-modal__header">
+        <div>
+          <h2>{{ isEditMode() ? 'Edit Book' : 'Add New Book' }}</h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update book details, copy count, and shelf information.'
+                : 'Create a new library book record.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeBookModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Book ID
+          <input
+            type="text"
+            formControlName="bookCode"
+            placeholder="Example: LIB-0001"
+          />
+
+          @if (isInvalid('bookCode')) {
+            <small>Book ID is required.</small>
+          }
+        </label>
+
+        <label>
+          Book Title
+          <input
+            type="text"
+            formControlName="bookTitle"
+            placeholder="Enter book title"
+          />
+
+          @if (isInvalid('bookTitle')) {
+            <small>Book title is required.</small>
+          }
+        </label>
+
+        <label>
+          ISBN
+          <input
+            type="text"
+            formControlName="isbn"
+            placeholder="Example: 978-0000000000"
+          />
+        </label>
+
+        <label>
+          Author
+          <input
+            type="text"
+            formControlName="author"
+            placeholder="Enter author name"
+          />
+
+          @if (isInvalid('author')) {
+            <small>Author is required.</small>
+          }
+        </label>
+
+        <label>
+          Category
+          <input
+            type="text"
+            formControlName="category"
+            placeholder="Example: Story Books"
+          />
+
+          @if (isInvalid('category')) {
+            <small>Category is required.</small>
+          }
+        </label>
+
+        <label>
+          Publisher
+          <input
+            type="text"
+            formControlName="publisher"
+            placeholder="Enter publisher name"
+          />
+        </label>
+
+        <label>
+          Total Copies
+          <input
+            type="number"
+            formControlName="totalCopies"
+            placeholder="Example: 10"
+            min="0"
+          />
+
+          @if (isInvalid('totalCopies')) {
+            <small>Total copies is required.</small>
+          }
+        </label>
+
+        <label>
+          Available Copies
+          <input
+            type="number"
+            formControlName="availableCopies"
+            placeholder="Example: 8"
+            min="0"
+          />
+
+          @if (isInvalid('availableCopies')) {
+            <small>Available copies is required.</small>
+          }
+
+          @if (!isCopyCountValid()) {
+            <small>Available copies cannot exceed total copies.</small>
+          }
+        </label>
+
+        <label>
+          Shelf No
+          <input
+            type="text"
+            formControlName="shelfNo"
+            placeholder="Example: A-12"
+          />
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="AVAILABLE">Available</option>
+            <option value="UNAVAILABLE">Unavailable</option>
+          </select>
+        </label>
+
+        <label class="form-grid__full">
+          Description
+          <textarea
+            formControlName="description"
+            rows="3"
+            placeholder="Short description about this book"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="book-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeBookModal()"
+          [disabled]="isSubmitting()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Book'
+                : 'Save Book'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (bookToDelete(); as book) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Book?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ book.bookCode }} - {{ book.bookTitle }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteBook()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Book' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}

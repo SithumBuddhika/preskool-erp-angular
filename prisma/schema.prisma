@@ -260,6 +260,30 @@ model Fee {
   @@map("fees")
 }
 
+enum LibraryBookStatus {
+  AVAILABLE
+  UNAVAILABLE
+}
+
+model LibraryBook {
+  id              String            @id @default(uuid())
+  bookCode        String            @unique
+  bookTitle       String
+  isbn            String?           @unique
+  author          String
+  category        String
+  publisher       String?
+  totalCopies     Int               @default(1)
+  availableCopies Int               @default(1)
+  shelfNo         String?
+  status          LibraryBookStatus @default(AVAILABLE)
+  description     String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@map("library_books")
+}
+
 enum ClassStatus {
   ACTIVE
   INACTIVE
