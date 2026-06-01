@@ -147,7 +147,6 @@ export const appRoutes: Routes = [
             (m) => m.ClassesComponent,
           ),
       },
-
       {
         path: 'academic/class-room',
         pathMatch: 'full',
@@ -160,7 +159,6 @@ export const appRoutes: Routes = [
             (m) => m.ClassRoomsComponent,
           ),
       },
-
       {
         path: 'academic/subject',
         pathMatch: 'full',
@@ -173,7 +171,6 @@ export const appRoutes: Routes = [
             (m) => m.SubjectsComponent,
           ),
       },
-
       {
         path: 'academic/class-routine',
         loadComponent: () =>
@@ -186,7 +183,6 @@ export const appRoutes: Routes = [
         pathMatch: 'full',
         redirectTo: 'academic/class-routine',
       },
-
       {
         path: 'academic/exam-schedule',
         loadComponent: () =>
@@ -199,7 +195,6 @@ export const appRoutes: Routes = [
         pathMatch: 'full',
         redirectTo: 'academic/exam-schedule',
       },
-
       {
         path: 'academic/grades',
         loadComponent: () =>
@@ -212,7 +207,6 @@ export const appRoutes: Routes = [
         pathMatch: 'full',
         redirectTo: 'academic/grades',
       },
-
       {
         path: 'academic/syllabus-subject-groups',
         loadComponent: () =>
@@ -230,7 +224,6 @@ export const appRoutes: Routes = [
         pathMatch: 'full',
         redirectTo: 'academic/syllabus-subject-groups',
       },
-
       {
         path: 'academic/time-table',
         loadComponent: () =>
@@ -269,17 +262,29 @@ export const appRoutes: Routes = [
       {
         path: 'hrm',
         pathMatch: 'full',
-        redirectTo: 'dashboard/admin',
+        redirectTo: 'hrm/departments',
+      },
+      {
+        path: 'hrm/departments',
+        loadComponent: () =>
+          import('./features/hrm/departments/departments.component').then(
+            (m) => m.DepartmentsComponent,
+          ),
+      },
+      {
+        path: 'hrm/department',
+        pathMatch: 'full',
+        redirectTo: 'hrm/departments',
       },
       {
         path: 'hrm/staff',
         pathMatch: 'full',
-        redirectTo: 'dashboard/admin',
+        redirectTo: 'hrm/departments',
       },
       {
-        path: 'hrm/departments',
+        path: 'hrm/staffs',
         pathMatch: 'full',
-        redirectTo: 'dashboard/admin',
+        redirectTo: 'hrm/departments',
       },
 
       {

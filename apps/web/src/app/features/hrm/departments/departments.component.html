@@ -1,0 +1,359 @@
+<section class="departments-page">
+  <div class="departments-page__header">
+    <div>
+      <h1>Departments</h1>
+      <p>HRM / Departments</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Department
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">D</span>
+      <div>
+        <strong>{{ departments().length }}</strong>
+        <p>Total Departments</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ activeDepartments() }}</strong>
+        <p>Active Departments</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">I</span>
+      <div>
+        <strong>{{ inactiveDepartments() }}</strong>
+        <p>Inactive Departments</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">H</span>
+      <div>
+        <strong>{{ headedDepartments() }}</strong>
+        <p>Departments With Head</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="departments-card">
+    <div class="departments-card__top">
+      <div>
+        <h2>Department List</h2>
+        <p>
+          Manage HRM departments, department heads, locations, and contact
+          details.
+        </p>
+      </div>
+
+      <div class="departments-search">
+        <input
+          type="text"
+          placeholder="Search departments..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showDepartmentModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="departments-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Department ID</th>
+              <th>Department Name</th>
+              <th>Head</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (department of departments(); track department.id) {
+              <tr>
+                <td>
+                  <span class="department-code">
+                    {{ department.departmentCode }}
+                  </span>
+                </td>
+
+                <td>
+                  <div class="department-name">
+                    <span>{{ getInitials(department) }}</span>
+
+                    <div>
+                      <strong>{{ department.departmentName }}</strong>
+                      <p>
+                        {{ department.description || 'No description added' }}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>{{ department.headOfDepartment || 'Not assigned' }}</td>
+                <td>{{ department.phone || 'Not added' }}</td>
+                <td>{{ department.email || 'No email added' }}</td>
+                <td>{{ department.location || 'Not added' }}</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--inactive]="
+                      department.status !== 'ACTIVE'
+                    "
+                  >
+                    {{ getStatusLabel(department.status) }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(department)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(department)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8">
+                  <div class="empty-state">
+                    <strong>No departments found</strong>
+                    <p>
+                      Add your first department or change your search keyword.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showDepartmentModal()) {
+  <div class="modal-backdrop">
+    <form
+      class="department-modal"
+      [formGroup]="departmentForm"
+      (ngSubmit)="saveDepartment()"
+    >
+      <div class="department-modal__header">
+        <div>
+          <h2>
+            {{ isEditMode() ? 'Edit Department' : 'Add New Department' }}
+          </h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update department information and contact details.'
+                : 'Create a department before assigning staffs.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeDepartmentModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Department ID
+          <input
+            type="text"
+            formControlName="departmentCode"
+            placeholder="Example: DPT-0001"
+          />
+
+          @if (isInvalid('departmentCode')) {
+            <small>Department ID is required.</small>
+          }
+        </label>
+
+        <label>
+          Department Name
+          <input
+            type="text"
+            formControlName="departmentName"
+            placeholder="Example: Academic Department"
+          />
+
+          @if (isInvalid('departmentName')) {
+            <small>Department name is required.</small>
+          }
+        </label>
+
+        <label>
+          Head of Department
+          <input
+            type="text"
+            formControlName="headOfDepartment"
+            placeholder="Example: Amali Silva"
+          />
+        </label>
+
+        <label>
+          Phone
+          <input
+            type="text"
+            formControlName="phone"
+            placeholder="Enter phone number"
+          />
+        </label>
+
+        <label>
+          Email
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="Enter department email"
+          />
+
+          @if (isInvalid('email')) {
+            <small>Enter a valid email address.</small>
+          }
+        </label>
+
+        <label>
+          Location
+          <input
+            type="text"
+            formControlName="location"
+            placeholder="Example: Building A - Floor 2"
+          />
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+          </select>
+        </label>
+
+        <label class="form-grid__full">
+          Description
+          <textarea
+            formControlName="description"
+            rows="3"
+            placeholder="Short description about this department"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="department-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDepartmentModal()"
+          [disabled]="isSubmitting()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Department'
+                : 'Save Department'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (departmentToDelete(); as department) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Department?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong
+          >{{ department.departmentCode }} -
+          {{ department.departmentName }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteDepartment()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Department' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}
