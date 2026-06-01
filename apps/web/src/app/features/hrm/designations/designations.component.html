@@ -1,0 +1,401 @@
+<section class="designations-page">
+  <div class="designations-page__header">
+    <div>
+      <h1>Designations</h1>
+      <p>HRM / Designations</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Designation
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">D</span>
+      <div>
+        <strong>{{ designations().length }}</strong>
+        <p>Total Designations</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ activeDesignations() }}</strong>
+        <p>Active Designations</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">I</span>
+      <div>
+        <strong>{{ inactiveDesignations() }}</strong>
+        <p>Inactive Designations</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">C</span>
+      <div>
+        <strong>{{ commonDesignations() }}</strong>
+        <p>Common Designations</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="designations-card">
+    <div class="designations-card__top">
+      <div>
+        <h2>Designation List</h2>
+        <p>Manage staff designations and connect them with departments.</p>
+      </div>
+
+      <div class="designations-search">
+        <input
+          type="text"
+          placeholder="Search designations..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showDesignationModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="designations-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Designation ID</th>
+              <th>Designation</th>
+              <th>Department</th>
+              <th>Description</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (designation of designations(); track designation.id) {
+              <tr>
+                <td>
+                  <span class="designation-code">
+                    {{ designation.designationCode }}
+                  </span>
+                </td>
+
+                <td>
+                  <div class="designation-info">
+                    <span>{{ getInitials(designation) }}</span>
+
+                    <div>
+                      <strong>{{ designation.designationName }}</strong>
+                      <p>{{ designation.designationCode }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="department-info">
+                    <strong>{{ getDepartmentLabel(designation) }}</strong>
+
+                    @if (designation.departmentCode) {
+                      <span>{{ designation.departmentCode }}</span>
+                    } @else {
+                      <span>All Departments</span>
+                    }
+                  </div>
+                </td>
+
+                <td>
+                  {{ designation.description || 'No description added' }}
+                </td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--inactive]="
+                      designation.status !== 'ACTIVE'
+                    "
+                  >
+                    {{ getStatusLabel(designation.status) }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(designation)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(designation)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6">
+                  <div class="empty-state">
+                    <strong>No designations found</strong>
+                    <p>
+                      Add your first designation or change your search keyword.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showDesignationModal()) {
+  <div class="modal-backdrop">
+    <form
+      class="designation-modal"
+      [formGroup]="designationForm"
+      (ngSubmit)="saveDesignation()"
+    >
+      <div class="designation-modal__header">
+        <div>
+          <h2>
+            {{ isEditMode() ? 'Edit Designation' : 'Add New Designation' }}
+          </h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update designation information and department mapping.'
+                : 'Create reusable staff designations for HRM.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeDesignationModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Designation ID
+          <input
+            type="text"
+            formControlName="designationCode"
+            placeholder="Example: DES-0001"
+          />
+
+          @if (isInvalid('designationCode')) {
+            <small>Designation ID is required.</small>
+          }
+        </label>
+
+        <label>
+          Designation Name
+          <input
+            type="text"
+            formControlName="designationName"
+            placeholder="Example: HR Executive"
+          />
+
+          @if (isInvalid('designationName')) {
+            <small>Designation name is required.</small>
+          }
+        </label>
+
+        <label class="autocomplete-field">
+          Department
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="departmentName"
+              placeholder="Type department name or leave empty for common"
+              autocomplete="off"
+              (input)="onDepartmentInput($event)"
+              (focus)="onDepartmentFocus()"
+              (blur)="onDepartmentBlur()"
+            />
+
+            @if (
+              showDepartmentSuggestions() && filteredDepartments().length > 0
+            ) {
+              <div class="suggestions-panel">
+                @for (
+                  department of filteredDepartments();
+                  track department.id
+                ) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectDepartment(department)"
+                  >
+                    <span>{{ getDepartmentInitial(department) }}</span>
+
+                    <div>
+                      <strong>{{ department.departmentName }}</strong>
+                      <p>
+                        {{ department.departmentCode }}
+                        @if (department.headOfDepartment) {
+                          · {{ department.headOfDepartment }}
+                        }
+                        @if (department.location) {
+                          · {{ department.location }}
+                        }
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showDepartmentSuggestions() &&
+              departmentSearchTerm().trim() &&
+              filteredDepartments().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching department found
+              </div>
+            }
+          </div>
+        </label>
+
+        <label>
+          Department ID
+          <input
+            type="text"
+            formControlName="departmentCode"
+            placeholder="Auto-filled from department"
+            readonly
+          />
+        </label>
+
+        <div class="form-grid__full department-clear-row">
+          <button
+            type="button"
+            class="clear-link-btn"
+            (click)="clearDepartmentSelection()"
+          >
+            Clear department and make this a common designation
+          </button>
+        </div>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+          </select>
+        </label>
+
+        <label class="form-grid__full">
+          Description
+          <textarea
+            formControlName="description"
+            rows="3"
+            placeholder="Short description about this designation"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="designation-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDesignationModal()"
+          [disabled]="isSubmitting()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Designation'
+                : 'Save Designation'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (designationToDelete(); as designation) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Designation?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong
+          >{{ designation.designationCode }} -
+          {{ designation.designationName }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteDesignation()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Designation' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}

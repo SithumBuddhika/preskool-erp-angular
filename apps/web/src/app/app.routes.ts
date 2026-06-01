@@ -297,6 +297,18 @@ export const appRoutes: Routes = [
         redirectTo: 'hrm/departments',
       },
       {
+        path: 'hrm/designations',
+        loadComponent: () =>
+          import('./features/hrm/designations/designations.component').then(
+            (m) => m.DesignationsComponent,
+          ),
+      },
+      {
+        path: 'hrm/designation',
+        pathMatch: 'full',
+        redirectTo: 'hrm/designations',
+      },
+      {
         path: 'hrm/staffs',
         loadComponent: () =>
           import('./features/hrm/staffs/staffs.component').then(
