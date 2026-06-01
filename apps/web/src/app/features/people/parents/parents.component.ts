@@ -5,12 +5,13 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { ParentsService } from '../../../core/services/parents.service';
 import {
   CreateParentPayload,
   Parent,
   ParentRelation,
+  ParentStatus,
 } from '../../../core/models/parent.model';
+import { ParentsService } from '../../../core/services/parents.service';
 
 type ToastType = 'success' | 'error';
 
@@ -46,6 +47,16 @@ export class ParentsComponent implements OnInit {
     () => this.parents().filter((parent) => parent.status !== 'ACTIVE').length,
   );
 
+  fatherParents = computed(
+    () =>
+      this.parents().filter((parent) => parent.relation === 'FATHER').length,
+  );
+
+  motherParents = computed(
+    () =>
+      this.parents().filter((parent) => parent.relation === 'MOTHER').length,
+  );
+
   parentForm = new FormGroup({
     fullName: new FormControl('', {
       nonNullable: true,
@@ -69,8 +80,9 @@ export class ParentsComponent implements OnInit {
     address: new FormControl('', {
       nonNullable: true,
     }),
-    status: new FormControl<'ACTIVE' | 'INACTIVE'>('ACTIVE', {
+    status: new FormControl<ParentStatus>('ACTIVE', {
       nonNullable: true,
+      validators: [Validators.required],
     }),
   });
 
@@ -140,6 +152,10 @@ export class ParentsComponent implements OnInit {
   }
 
   closeParentModal(): void {
+    if (this.isSubmitting()) {
+      return;
+    }
+
     this.showParentModal.set(false);
     this.selectedParent.set(null);
     this.serverError.set('');
@@ -245,7 +261,14 @@ export class ParentsComponent implements OnInit {
   }
 
   getRelationLabel(relation: ParentRelation): string {
-    return relation.charAt(0) + relation.slice(1).toLowerCase();
+    return relation
+      .toLowerCase()
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (letter) => letter.toUpperCase());
+  }
+
+  getStatusLabel(status: ParentStatus): string {
+    return status.charAt(0) + status.slice(1).toLowerCase();
   }
 
   isInvalid(controlName: keyof typeof this.parentForm.controls): boolean {

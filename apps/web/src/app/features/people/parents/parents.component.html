@@ -34,6 +34,14 @@
         <p>Inactive Parents</p>
       </div>
     </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">R</span>
+      <div>
+        <strong>{{ fatherParents() }} / {{ motherParents() }}</strong>
+        <p>Father / Mother</p>
+      </div>
+    </article>
   </div>
 
   <div class="parents-card">
@@ -93,7 +101,12 @@
                   </div>
                 </td>
 
-                <td>{{ getRelationLabel(parent.relation) }}</td>
+                <td>
+                  <span class="relation-pill">
+                    {{ getRelationLabel(parent.relation) }}
+                  </span>
+                </td>
+
                 <td>{{ parent.occupation || 'Not added' }}</td>
                 <td>{{ parent.phone }}</td>
                 <td>{{ parent.email || 'No email added' }}</td>
@@ -103,7 +116,7 @@
                     class="status-pill"
                     [class.status-pill--inactive]="parent.status !== 'ACTIVE'"
                   >
-                    {{ parent.status }}
+                    {{ getStatusLabel(parent.status) }}
                   </span>
                 </td>
 
@@ -185,6 +198,7 @@
             formControlName="fullName"
             placeholder="Enter parent full name"
           />
+
           @if (isInvalid('fullName')) {
             <small>Full name is required.</small>
           }
@@ -197,6 +211,7 @@
             formControlName="email"
             placeholder="Enter email address"
           />
+
           @if (isInvalid('email')) {
             <small>Enter a valid email address.</small>
           }
@@ -209,6 +224,7 @@
             formControlName="phone"
             placeholder="Enter phone number"
           />
+
           @if (isInvalid('phone')) {
             <small>Phone number is required.</small>
           }
@@ -256,6 +272,7 @@
           class="secondary-btn"
           type="button"
           (click)="closeParentModal()"
+          [disabled]="isSubmitting()"
         >
           Cancel
         </button>
