@@ -4,6 +4,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DepartmentsController } from './departments.controller';
 import { DepartmentsService } from './departments.service';
+import { FeesController } from './fees.controller';
+import { FeesService } from './fees.service';
 import { GuardiansController } from './guardians.controller';
 import { GuardiansService } from './guardians.service';
 import { ParentsController } from './parents.controller';
@@ -31,6 +33,7 @@ import { TeachersService } from './teachers.service';
     TeachersController,
     DepartmentsController,
     StaffsController,
+    FeesController,
   ],
   providers: [
     AppService,
@@ -40,6 +43,7 @@ import { TeachersService } from './teachers.service';
     TeachersService,
     DepartmentsService,
     StaffsService,
+    FeesService,
     PrismaService,
   ],
 })

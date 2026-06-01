@@ -214,6 +214,52 @@ model Staff {
   @@map("staffs")
 }
 
+enum FeeType {
+  ADMISSION
+  TUITION
+  EXAM
+  LIBRARY
+  TRANSPORT
+  ACTIVITY
+  OTHER
+}
+
+enum FeePaymentStatus {
+  PENDING
+  PARTIAL
+  PAID
+}
+
+enum FeePaymentMethod {
+  CASH
+  CARD
+  BANK_TRANSFER
+  ONLINE
+  CHEQUE
+}
+
+model Fee {
+  id                 String            @id @default(uuid())
+  receiptNo          String            @unique
+  studentAdmissionNo String?
+  studentName        String
+  className          String
+  section            String?
+  feeType            FeeType
+  amount             Float
+  paidAmount         Float             @default(0)
+  balance            Float
+  dueDate            DateTime?
+  paidDate           DateTime?
+  paymentStatus      FeePaymentStatus  @default(PENDING)
+  paymentMethod      FeePaymentMethod?
+  notes              String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@map("fees")
+}
+
 enum ClassStatus {
   ACTIVE
   INACTIVE

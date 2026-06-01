@@ -246,12 +246,19 @@ export const appRoutes: Routes = [
       {
         path: 'management',
         pathMatch: 'full',
-        redirectTo: 'dashboard/admin',
+        redirectTo: 'management/fees',
       },
       {
         path: 'management/fees',
+        loadComponent: () =>
+          import('./features/management/fees/fees.component').then(
+            (m) => m.FeesComponent,
+          ),
+      },
+      {
+        path: 'management/fees-collection',
         pathMatch: 'full',
-        redirectTo: 'dashboard/admin',
+        redirectTo: 'management/fees',
       },
       {
         path: 'management/library',

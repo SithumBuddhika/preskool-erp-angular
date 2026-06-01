@@ -1,0 +1,475 @@
+<section class="fees-page">
+  <div class="fees-page__header">
+    <div>
+      <h1>Fees Collection</h1>
+      <p>Management / Fees Collection</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Fee
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">F</span>
+      <div>
+        <strong>{{ fees().length }}</strong>
+        <p>Total Records</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">P</span>
+      <div>
+        <strong>{{ paidFees() }}</strong>
+        <p>Paid Fees</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">D</span>
+      <div>
+        <strong>{{ pendingFees() }}</strong>
+        <p>Due / Partial</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">Rs</span>
+      <div>
+        <strong>{{ formatMoney(totalCollected()) }}</strong>
+        <p>Total Collected</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="fees-card">
+    <div class="fees-card__top">
+      <div>
+        <h2>Fee Collection List</h2>
+        <p>
+          Manage student fee records, paid amounts, balances, and payment
+          details.
+        </p>
+      </div>
+
+      <div class="fees-search">
+        <input
+          type="text"
+          placeholder="Search fees..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showFeeModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="fees-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Receipt ID</th>
+              <th>Student</th>
+              <th>Class</th>
+              <th>Fee Type</th>
+              <th>Amount</th>
+              <th>Paid</th>
+              <th>Balance</th>
+              <th>Method</th>
+              <th>Due Date</th>
+              <th>Paid Date</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (fee of fees(); track fee.id) {
+              <tr>
+                <td>
+                  <span class="receipt-no">{{ fee.receiptNo }}</span>
+                </td>
+
+                <td>
+                  <div class="student-info">
+                    <span>{{ fee.studentName.charAt(0).toUpperCase() }}</span>
+
+                    <div>
+                      <strong>{{ fee.studentName }}</strong>
+                      <p>{{ fee.studentAdmissionNo || 'No admission no' }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="class-info">
+                    <strong>{{ fee.className }}</strong>
+                    @if (fee.section) {
+                      <span>{{ fee.section }}</span>
+                    }
+                  </div>
+                </td>
+
+                <td>
+                  <span class="type-pill">{{
+                    getFeeTypeLabel(fee.feeType)
+                  }}</span>
+                </td>
+
+                <td>{{ formatMoney(fee.amount) }}</td>
+                <td>{{ formatMoney(fee.paidAmount) }}</td>
+                <td>{{ formatMoney(fee.balance) }}</td>
+                <td>{{ getPaymentMethodLabel(fee.paymentMethod) }}</td>
+                <td>{{ formatDisplayDate(fee.dueDate) }}</td>
+                <td>{{ formatDisplayDate(fee.paidDate) }}</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--pending]="
+                      fee.paymentStatus === 'PENDING'
+                    "
+                    [class.status-pill--partial]="
+                      fee.paymentStatus === 'PARTIAL'
+                    "
+                  >
+                    {{ getPaymentStatusLabel(fee.paymentStatus) }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(fee)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(fee)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="12">
+                  <div class="empty-state">
+                    <strong>No fee records found</strong>
+                    <p>
+                      Add your first fee record or change your search keyword.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showFeeModal()) {
+  <div class="modal-backdrop">
+    <form class="fee-modal" [formGroup]="feeForm" (ngSubmit)="saveFee()">
+      <div class="fee-modal__header">
+        <div>
+          <h2>{{ isEditMode() ? 'Edit Fee Record' : 'Add New Fee Record' }}</h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update student fee, payment, and receipt details.'
+                : 'Create a fee record using existing student suggestions.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeFeeModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Receipt ID
+          <input
+            type="text"
+            formControlName="receiptNo"
+            placeholder="Example: FEE-0001"
+          />
+
+          @if (isInvalid('receiptNo')) {
+            <small>Receipt ID is required.</small>
+          }
+        </label>
+
+        <label class="autocomplete-field">
+          Student
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="studentName"
+              placeholder="Type student name..."
+              autocomplete="off"
+              (input)="onStudentInput($event)"
+              (focus)="onStudentFocus()"
+              (blur)="onStudentBlur()"
+            />
+
+            @if (isInvalid('studentName')) {
+              <small>Student name is required.</small>
+            }
+
+            @if (showStudentSuggestions() && filteredStudents().length > 0) {
+              <div class="suggestions-panel">
+                @for (student of filteredStudents(); track student.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectStudent(student)"
+                  >
+                    <span>{{ getStudentInitial(student) }}</span>
+
+                    <div>
+                      <strong>{{ getStudentFullName(student) }}</strong>
+                      <p>
+                        {{ student.admissionNo }} · {{ student.className }}
+                        @if (student.section) {
+                          {{ student.section }}
+                        }
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showStudentSuggestions() &&
+              studentSearchTerm().trim() &&
+              filteredStudents().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching student found
+              </div>
+            }
+          </div>
+        </label>
+
+        <label>
+          Admission No
+          <input
+            type="text"
+            formControlName="studentAdmissionNo"
+            placeholder="Auto-filled from student"
+            readonly
+          />
+        </label>
+
+        <label>
+          Class
+          <input
+            type="text"
+            formControlName="className"
+            placeholder="Auto-filled from student"
+            readonly
+          />
+
+          @if (isInvalid('className')) {
+            <small>Class is required.</small>
+          }
+        </label>
+
+        <label>
+          Section
+          <input
+            type="text"
+            formControlName="section"
+            placeholder="Auto-filled from student"
+            readonly
+          />
+        </label>
+
+        <label>
+          Fee Type
+          <select formControlName="feeType">
+            <option value="ADMISSION">Admission</option>
+            <option value="TUITION">Tuition</option>
+            <option value="EXAM">Exam</option>
+            <option value="LIBRARY">Library</option>
+            <option value="TRANSPORT">Transport</option>
+            <option value="ACTIVITY">Activity</option>
+            <option value="OTHER">Other</option>
+          </select>
+        </label>
+
+        <label>
+          Amount
+          <input
+            type="number"
+            formControlName="amount"
+            placeholder="Example: 25000"
+            min="0"
+          />
+
+          @if (isInvalid('amount')) {
+            <small>Amount is required.</small>
+          }
+        </label>
+
+        <label>
+          Paid Amount
+          <input
+            type="number"
+            formControlName="paidAmount"
+            placeholder="Example: 10000"
+            min="0"
+          />
+        </label>
+
+        <label>
+          Balance
+          <input
+            type="text"
+            [value]="formatMoney(getCurrentBalance())"
+            readonly
+          />
+        </label>
+
+        <label>
+          Payment Status
+          <input
+            type="text"
+            [value]="getPaymentStatusLabel(getCurrentPaymentStatus())"
+            readonly
+          />
+        </label>
+
+        <label>
+          Payment Method
+          <select formControlName="paymentMethod">
+            <option value="">Select method</option>
+            <option value="CASH">Cash</option>
+            <option value="CARD">Card</option>
+            <option value="BANK_TRANSFER">Bank Transfer</option>
+            <option value="ONLINE">Online</option>
+            <option value="CHEQUE">Cheque</option>
+          </select>
+        </label>
+
+        <label>
+          Due Date
+          <input type="date" formControlName="dueDate" />
+        </label>
+
+        <label>
+          Paid Date
+          <input type="date" formControlName="paidDate" />
+        </label>
+
+        <label class="form-grid__full">
+          Notes
+          <textarea
+            formControlName="notes"
+            rows="3"
+            placeholder="Optional payment notes"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="fee-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeFeeModal()"
+          [disabled]="isSubmitting()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Fee'
+                : 'Save Fee'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (feeToDelete(); as fee) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Fee Record?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ fee.receiptNo }} - {{ fee.studentName }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteFee()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Fee' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}
