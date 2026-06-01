@@ -9,6 +9,8 @@ import { GuardiansService } from './guardians.service';
 import { ParentsController } from './parents.controller';
 import { ParentsService } from './parents.service';
 import { PrismaService } from './prisma.service';
+import { StaffsController } from './staffs.controller';
+import { StaffsService } from './staffs.service';
 import { StudentsController } from './students.controller';
 import { StudentsService } from './students.service';
 import { TeachersController } from './teachers.controller';
@@ -28,6 +30,7 @@ import { TeachersService } from './teachers.service';
     GuardiansController,
     TeachersController,
     DepartmentsController,
+    StaffsController,
   ],
   providers: [
     AppService,
@@ -36,6 +39,7 @@ import { TeachersService } from './teachers.service';
     GuardiansService,
     TeachersService,
     DepartmentsService,
+    StaffsService,
     PrismaService,
   ],
 })

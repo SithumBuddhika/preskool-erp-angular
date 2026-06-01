@@ -147,7 +147,7 @@ export class SidebarComponent {
       items: [
         {
           label: 'Staffs',
-          route: '/hrm/staff',
+          route: '/hrm/staffs',
           icon: 'briefcase',
         },
         {

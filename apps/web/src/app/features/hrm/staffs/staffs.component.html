@@ -1,0 +1,474 @@
+<section class="staffs-page">
+  <div class="staffs-page__header">
+    <div>
+      <h1>Staffs</h1>
+      <p>HRM / Staffs</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Staff
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">S</span>
+      <div>
+        <strong>{{ staffs().length }}</strong>
+        <p>Total Staffs</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ activeStaffs() }}</strong>
+        <p>Active Staffs</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">I</span>
+      <div>
+        <strong>{{ inactiveStaffs() }}</strong>
+        <p>Inactive Staffs</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">D</span>
+      <div>
+        <strong>{{ totalDepartmentsUsed() }}</strong>
+        <p>Departments Used</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="staffs-card">
+    <div class="staffs-card__top">
+      <div>
+        <h2>Staff List</h2>
+        <p>
+          Manage staff details, department assignment, designation, and
+          employment information.
+        </p>
+      </div>
+
+      <div class="staffs-search">
+        <input
+          type="text"
+          placeholder="Search staffs..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showStaffModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="staffs-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Staff ID</th>
+              <th>Staff Name</th>
+              <th>Department</th>
+              <th>Designation</th>
+              <th>Employment</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>Joining Date</th>
+              <th>Salary</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (staff of staffs(); track staff.id) {
+              <tr>
+                <td>
+                  <span class="staff-code">{{ staff.staffCode }}</span>
+                </td>
+
+                <td>
+                  <div class="staff-name">
+                    <span>{{ getInitials(staff) }}</span>
+
+                    <div>
+                      <strong>{{ staff.fullName }}</strong>
+                      <p>{{ getGenderLabel(staff.gender) }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="department-info">
+                    <strong>{{ staff.departmentName }}</strong>
+                    @if (staff.departmentCode) {
+                      <span>{{ staff.departmentCode }}</span>
+                    }
+                  </div>
+                </td>
+
+                <td>{{ staff.designation }}</td>
+
+                <td>
+                  <span class="employment-pill">
+                    {{ getEmploymentTypeLabel(staff.employmentType) }}
+                  </span>
+                </td>
+
+                <td>{{ staff.phone }}</td>
+                <td>{{ staff.email }}</td>
+                <td>{{ formatDisplayDate(staff.joiningDate) }}</td>
+                <td>{{ formatSalary(staff.salary) }}</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--inactive]="staff.status !== 'ACTIVE'"
+                  >
+                    {{ getStatusLabel(staff.status) }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(staff)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(staff)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="11">
+                  <div class="empty-state">
+                    <strong>No staffs found</strong>
+                    <p>
+                      Add your first staff member or change your search keyword.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showStaffModal()) {
+  <div class="modal-backdrop">
+    <form class="staff-modal" [formGroup]="staffForm" (ngSubmit)="saveStaff()">
+      <div class="staff-modal__header">
+        <div>
+          <h2>{{ isEditMode() ? 'Edit Staff' : 'Add New Staff' }}</h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update staff employment and department details.'
+                : 'Create a staff member using existing department suggestions.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeStaffModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Staff ID
+          <input
+            type="text"
+            formControlName="staffCode"
+            placeholder="Example: STF-0001"
+          />
+
+          @if (isInvalid('staffCode')) {
+            <small>Staff ID is required.</small>
+          }
+        </label>
+
+        <label>
+          Full Name
+          <input
+            type="text"
+            formControlName="fullName"
+            placeholder="Enter staff full name"
+          />
+
+          @if (isInvalid('fullName')) {
+            <small>Full name is required.</small>
+          }
+        </label>
+
+        <label>
+          Email
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="Enter email address"
+          />
+
+          @if (isInvalid('email')) {
+            <small>Enter a valid email address.</small>
+          }
+        </label>
+
+        <label>
+          Phone
+          <input
+            type="text"
+            formControlName="phone"
+            placeholder="Enter phone number"
+          />
+
+          @if (isInvalid('phone')) {
+            <small>Phone number is required.</small>
+          }
+        </label>
+
+        <label>
+          Gender
+          <select formControlName="gender">
+            <option value="MALE">Male</option>
+            <option value="FEMALE">Female</option>
+            <option value="OTHER">Other</option>
+          </select>
+        </label>
+
+        <label class="autocomplete-field">
+          Department
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="departmentName"
+              placeholder="Type department name..."
+              autocomplete="off"
+              (input)="onDepartmentInput($event)"
+              (focus)="onDepartmentFocus()"
+              (blur)="onDepartmentBlur()"
+            />
+
+            @if (isInvalid('departmentName')) {
+              <small>Department is required.</small>
+            }
+
+            @if (
+              showDepartmentSuggestions() && filteredDepartments().length > 0
+            ) {
+              <div class="suggestions-panel">
+                @for (
+                  department of filteredDepartments();
+                  track department.id
+                ) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectDepartment(department)"
+                  >
+                    <span>{{ getDepartmentInitial(department) }}</span>
+
+                    <div>
+                      <strong>{{ department.departmentName }}</strong>
+                      <p>
+                        {{ department.departmentCode }}
+                        @if (department.headOfDepartment) {
+                          · {{ department.headOfDepartment }}
+                        }
+                        @if (department.location) {
+                          · {{ department.location }}
+                        }
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showDepartmentSuggestions() &&
+              departmentSearchTerm().trim() &&
+              filteredDepartments().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching department found
+              </div>
+            }
+          </div>
+        </label>
+
+        <label>
+          Department ID
+          <input
+            type="text"
+            formControlName="departmentCode"
+            placeholder="Auto-filled from department"
+            readonly
+          />
+        </label>
+
+        <label>
+          Designation
+          <input
+            type="text"
+            formControlName="designation"
+            placeholder="Example: HR Executive"
+          />
+
+          @if (isInvalid('designation')) {
+            <small>Designation is required.</small>
+          }
+        </label>
+
+        <label>
+          Employment Type
+          <select formControlName="employmentType">
+            <option value="FULL_TIME">Full Time</option>
+            <option value="PART_TIME">Part Time</option>
+            <option value="CONTRACT">Contract</option>
+            <option value="INTERNSHIP">Internship</option>
+          </select>
+        </label>
+
+        <label>
+          Joining Date
+          <input type="date" formControlName="joiningDate" />
+
+          @if (isInvalid('joiningDate')) {
+            <small>Joining date is required.</small>
+          }
+        </label>
+
+        <label>
+          Salary
+          <input
+            type="number"
+            formControlName="salary"
+            placeholder="Example: 85000"
+            min="0"
+          />
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+          </select>
+        </label>
+
+        <label class="form-grid__full">
+          Address
+          <textarea
+            formControlName="address"
+            rows="3"
+            placeholder="Enter staff address"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="staff-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeStaffModal()"
+          [disabled]="isSubmitting()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Staff'
+                : 'Save Staff'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (staffToDelete(); as staff) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Staff?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ staff.staffCode }} - {{ staff.fullName }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteStaff()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Staff' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}
