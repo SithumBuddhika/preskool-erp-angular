@@ -293,7 +293,7 @@ export class SubjectsComponent implements OnInit {
       subjectName: subject.subjectName,
       className: subject.className || '',
       teacherName: subject.teacherName || '',
-      weeklyHours: subject.weeklyHours || null,
+      weeklyHours: subject.weeklyHours ?? null,
       status: subject.status,
     });
 
@@ -457,19 +457,15 @@ export class SubjectsComponent implements OnInit {
     const payload: CreateSubjectPayload = {
       subjectCode: formValue.subjectCode.trim(),
       subjectName: formValue.subjectName.trim(),
+      className: formValue.className.trim(),
+      teacherName: formValue.teacherName.trim(),
       status: formValue.status,
     };
 
-    if (formValue.className.trim()) {
-      payload.className = formValue.className.trim();
-    }
-
-    if (formValue.teacherName.trim()) {
-      payload.teacherName = formValue.teacherName.trim();
-    }
-
     if (formValue.weeklyHours !== null && formValue.weeklyHours !== undefined) {
       payload.weeklyHours = Number(formValue.weeklyHours);
+    } else {
+      payload.weeklyHours = null;
     }
 
     return payload;

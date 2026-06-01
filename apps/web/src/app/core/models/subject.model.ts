@@ -17,6 +17,6 @@ export type CreateSubjectPayload = {
   subjectName: string;
   className?: string;
   teacherName?: string;
-  weeklyHours?: number;
+  weeklyHours?: number | null;
   status?: SubjectStatus;
 };
