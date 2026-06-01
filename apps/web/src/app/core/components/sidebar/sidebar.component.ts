@@ -156,6 +156,11 @@ export class SidebarComponent {
           icon: 'briefcase',
         },
         {
+          label: 'Designations',
+          route: '/hrm/designations',
+          icon: 'briefcase',
+        },
+        {
           label: 'Departments',
           route: '/hrm/departments',
           icon: 'briefcase',

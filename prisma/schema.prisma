@@ -175,6 +175,25 @@ model Department {
   @@map("departments")
 }
 
+enum DesignationStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Designation {
+  id              String            @id @default(uuid())
+  designationCode String            @unique
+  designationName String
+  departmentCode  String?
+  departmentName  String?
+  description     String?
+  status          DesignationStatus @default(ACTIVE)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@map("designations")
+}
+
 enum StaffGender {
   MALE
   FEMALE
