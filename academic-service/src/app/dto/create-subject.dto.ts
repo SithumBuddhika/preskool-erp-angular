@@ -28,7 +28,7 @@ export class CreateSubjectDto {
   @IsOptional()
   @IsInt()
   @Min(1)
-  weeklyHours?: number;
+  weeklyHours?: number | null;
 
   @IsOptional()
   @IsEnum(SubjectStatus)

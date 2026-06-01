@@ -12,14 +12,16 @@ export class SubjectsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(search?: string) {
+    const keyword = search?.trim();
+
     return this.prisma.subject.findMany({
-      where: search
+      where: keyword
         ? {
             OR: [
-              { subjectCode: { contains: search, mode: 'insensitive' } },
-              { subjectName: { contains: search, mode: 'insensitive' } },
-              { className: { contains: search, mode: 'insensitive' } },
-              { teacherName: { contains: search, mode: 'insensitive' } },
+              { subjectCode: { contains: keyword, mode: 'insensitive' } },
+              { subjectName: { contains: keyword, mode: 'insensitive' } },
+              { className: { contains: keyword, mode: 'insensitive' } },
+              { teacherName: { contains: keyword, mode: 'insensitive' } },
             ],
           }
         : undefined,
@@ -48,8 +50,8 @@ export class SubjectsService {
       data: {
         subjectCode: createSubjectDto.subjectCode.trim(),
         subjectName: createSubjectDto.subjectName.trim(),
-        className: createSubjectDto.className?.trim() || null,
-        teacherName: createSubjectDto.teacherName?.trim() || null,
+        className: this.emptyToNull(createSubjectDto.className),
+        teacherName: this.emptyToNull(createSubjectDto.teacherName),
         weeklyHours: createSubjectDto.weeklyHours ?? null,
         status: createSubjectDto.status || 'ACTIVE',
       },
@@ -68,9 +70,18 @@ export class SubjectsService {
       data: {
         subjectCode: updateSubjectDto.subjectCode?.trim(),
         subjectName: updateSubjectDto.subjectName?.trim(),
-        className: updateSubjectDto.className?.trim(),
-        teacherName: updateSubjectDto.teacherName?.trim(),
-        weeklyHours: updateSubjectDto.weeklyHours,
+        className:
+          updateSubjectDto.className !== undefined
+            ? this.emptyToNull(updateSubjectDto.className)
+            : undefined,
+        teacherName:
+          updateSubjectDto.teacherName !== undefined
+            ? this.emptyToNull(updateSubjectDto.teacherName)
+            : undefined,
+        weeklyHours:
+          updateSubjectDto.weeklyHours !== undefined
+            ? updateSubjectDto.weeklyHours
+            : undefined,
         status: updateSubjectDto.status,
       },
     });
@@ -101,5 +112,11 @@ export class SubjectsService {
     if (existingSubject && existingSubject.id !== ignoreSubjectId) {
       throw new BadRequestException('Subject code already exists');
     }
+  }
+
+  private emptyToNull(value?: string | null): string | null {
+    const cleanedValue = value?.trim();
+
+    return cleanedValue ? cleanedValue : null;
   }
 }

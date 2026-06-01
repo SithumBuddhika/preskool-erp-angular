@@ -49,7 +49,8 @@
       <div>
         <h2>Subject List</h2>
         <p>
-          Manage subject codes, class allocation, teachers, and weekly hours.
+          Manage subject codes, optional class allocation, teacher assignment,
+          and weekly hours.
         </p>
       </div>
 
@@ -169,8 +170,8 @@
           <p>
             {{
               isEditMode()
-                ? 'Update subject code, class, teacher, and weekly hours.'
-                : 'Enter subject code, class, teacher, and weekly hours.'
+                ? 'Update subject details. Class and teacher can be assigned now or later.'
+                : 'Create a subject first. Class and teacher can be assigned now or later.'
             }}
           </p>
         </div>
@@ -213,13 +214,13 @@
           </label>
 
           <label class="autocomplete-field">
-            <span>Class</span>
+            <span>Class (Optional)</span>
 
             <div class="teacher-autocomplete">
               <input
                 type="text"
                 formControlName="className"
-                placeholder="Type class name..."
+                placeholder="Select class or leave blank"
                 autocomplete="off"
                 (input)="onClassInput($event)"
                 (focus)="onClassFocus()"
@@ -266,13 +267,13 @@
           </label>
 
           <label class="autocomplete-field">
-            <span>Teacher Name</span>
+            <span>Teacher Name (Optional)</span>
 
             <div class="teacher-autocomplete">
               <input
                 type="text"
                 formControlName="teacherName"
-                placeholder="Type teacher name..."
+                placeholder="Select teacher or leave blank"
                 autocomplete="off"
                 (input)="onTeacherInput($event)"
                 (focus)="onTeacherFocus()"
