@@ -1,0 +1,443 @@
+<section class="fee-groups-page">
+  <div class="fee-groups-page__header">
+    <div>
+      <h1>Fee Groups</h1>
+      <p>Management / Fee Groups</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Fee Group
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">F</span>
+      <div>
+        <strong>{{ feeGroups().length }}</strong>
+        <p>Total Fee Groups</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ activeFeeGroups() }}</strong>
+        <p>Active Groups</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">I</span>
+      <div>
+        <strong>{{ inactiveFeeGroups() }}</strong>
+        <p>Inactive Groups</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">C</span>
+      <div>
+        <strong>{{ classSpecificGroups() }}</strong>
+        <p>Class Specific</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="fee-groups-card">
+    <div class="fee-groups-card__top">
+      <div>
+        <h2>Fee Group List</h2>
+        <p>
+          Manage reusable fee structures for classes, fee types, and collection
+          amounts.
+        </p>
+      </div>
+
+      <div class="fee-groups-search">
+        <input
+          type="text"
+          placeholder="Search fee groups..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showFeeGroupModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="fee-groups-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Group ID</th>
+              <th>Fee Group</th>
+              <th>Class</th>
+              <th>Fee Type</th>
+              <th>Amount</th>
+              <th>Due Days</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (feeGroup of feeGroups(); track feeGroup.id) {
+              <tr>
+                <td>
+                  <span class="group-code">{{ feeGroup.feeGroupCode }}</span>
+                </td>
+
+                <td>
+                  <div class="group-info">
+                    <span>{{
+                      feeGroup.feeGroupName.charAt(0).toUpperCase()
+                    }}</span>
+
+                    <div>
+                      <strong>{{ feeGroup.feeGroupName }}</strong>
+                      <p>
+                        {{ feeGroup.description || 'No description added' }}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="class-info">
+                    <strong>{{ getGroupClassLabel(feeGroup) }}</strong>
+                    @if (!feeGroup.className) {
+                      <span>Common</span>
+                    }
+                  </div>
+                </td>
+
+                <td>
+                  <span class="type-pill">{{
+                    getFeeTypeLabel(feeGroup.feeType)
+                  }}</span>
+                </td>
+
+                <td>{{ formatMoney(feeGroup.amount) }}</td>
+                <td>
+                  {{
+                    feeGroup.dueDays !== null && feeGroup.dueDays !== undefined
+                      ? feeGroup.dueDays + ' days'
+                      : 'Not set'
+                  }}
+                </td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--inactive]="feeGroup.status !== 'ACTIVE'"
+                  >
+                    {{ getStatusLabel(feeGroup.status) }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(feeGroup)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(feeGroup)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8">
+                  <div class="empty-state">
+                    <strong>No fee groups found</strong>
+                    <p>
+                      Add your first fee group or change your search keyword.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showFeeGroupModal()) {
+  <div class="modal-backdrop">
+    <form
+      class="fee-group-modal"
+      [formGroup]="feeGroupForm"
+      (ngSubmit)="saveFeeGroup()"
+    >
+      <div class="fee-group-modal__header">
+        <div>
+          <h2>{{ isEditMode() ? 'Edit Fee Group' : 'Add New Fee Group' }}</h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update reusable fee group information.'
+                : 'Create reusable fee groups for fees collection.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeFeeGroupModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Group ID
+          <input
+            type="text"
+            formControlName="feeGroupCode"
+            placeholder="Example: FGP-0001"
+          />
+
+          @if (isInvalid('feeGroupCode')) {
+            <small>Fee group ID is required.</small>
+          }
+        </label>
+
+        <label>
+          Fee Group Name
+          <input
+            type="text"
+            formControlName="feeGroupName"
+            placeholder="Example: Grade 8 Tuition Fee"
+          />
+
+          @if (isInvalid('feeGroupName')) {
+            <small>Fee group name is required.</small>
+          }
+        </label>
+
+        <label class="autocomplete-field">
+          Class
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="className"
+              placeholder="Type class name or leave empty for all classes"
+              autocomplete="off"
+              (input)="onClassInput($event)"
+              (focus)="onClassFocus()"
+              (blur)="onClassBlur()"
+            />
+
+            @if (showClassSuggestions() && filteredClasses().length > 0) {
+              <div class="suggestions-panel">
+                @for (schoolClass of filteredClasses(); track schoolClass.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectClass(schoolClass)"
+                  >
+                    <span>{{ getClassInitial(schoolClass) }}</span>
+
+                    <div>
+                      <strong>{{ getClassLabel(schoolClass) }}</strong>
+                      <p>
+                        Section {{ schoolClass.section }}
+                        @if (schoolClass.classTeacher) {
+                          · {{ schoolClass.classTeacher }}
+                        }
+                        @if (schoolClass.roomNo) {
+                          · {{ schoolClass.roomNo }}
+                        }
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showClassSuggestions() &&
+              classSearchTerm().trim() &&
+              filteredClasses().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching class found
+              </div>
+            }
+          </div>
+        </label>
+
+        <label>
+          Section
+          <input
+            type="text"
+            formControlName="section"
+            placeholder="Auto-filled from class"
+            readonly
+          />
+        </label>
+
+        <div class="form-grid__full class-clear-row">
+          <button
+            type="button"
+            class="clear-link-btn"
+            (click)="clearClassSelection()"
+          >
+            Clear class and make this a common fee group
+          </button>
+        </div>
+
+        <label>
+          Fee Type
+          <select formControlName="feeType">
+            <option value="ADMISSION">Admission</option>
+            <option value="TUITION">Tuition</option>
+            <option value="EXAM">Exam</option>
+            <option value="LIBRARY">Library</option>
+            <option value="TRANSPORT">Transport</option>
+            <option value="ACTIVITY">Activity</option>
+            <option value="OTHER">Other</option>
+          </select>
+        </label>
+
+        <label>
+          Amount
+          <input
+            type="number"
+            formControlName="amount"
+            placeholder="Example: 25000"
+            min="0"
+          />
+
+          @if (isInvalid('amount')) {
+            <small>Amount is required.</small>
+          }
+        </label>
+
+        <label>
+          Due Days
+          <input
+            type="number"
+            formControlName="dueDays"
+            placeholder="Example: 10"
+            min="0"
+          />
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+          </select>
+        </label>
+
+        <label class="form-grid__full">
+          Description
+          <textarea
+            formControlName="description"
+            rows="3"
+            placeholder="Short description about this fee group"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="fee-group-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeFeeGroupModal()"
+          [disabled]="isSubmitting()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Fee Group'
+                : 'Save Fee Group'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (feeGroupToDelete(); as feeGroup) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Fee Group?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong
+          >{{ feeGroup.feeGroupCode }} - {{ feeGroup.feeGroupName }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteFeeGroup()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Fee Group' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}
