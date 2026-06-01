@@ -43,6 +43,10 @@ export class UpdateStaffDto {
 
   @IsOptional()
   @IsString()
+  designationCode?: string;
+
+  @IsOptional()
+  @IsString()
   designation?: string;
 
   @IsOptional()

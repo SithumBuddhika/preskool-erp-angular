@@ -207,7 +207,7 @@
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1320px;
+  min-width: 1380px;
 }
 
 th {
@@ -282,18 +282,21 @@ td {
   font-weight: 400;
 }
 
-.department-info {
+.department-info,
+.designation-info {
   display: grid;
   gap: 5px;
 }
 
-.department-info strong {
+.department-info strong,
+.designation-info strong {
   color: var(--erp-text-main);
   font-size: 13px;
   font-weight: 700;
 }
 
-.department-info span {
+.department-info span,
+.designation-info span {
   width: fit-content;
   height: 24px;
   padding: 0 8px;
@@ -401,7 +404,7 @@ td {
 }
 
 .staff-modal {
-  width: min(100%, 920px);
+  width: min(100%, 980px);
   max-height: 90vh;
   overflow-y: auto;
   background: #ffffff;
@@ -588,6 +591,21 @@ td {
   color: #667085;
   font-size: 13px;
   font-weight: 500;
+}
+
+.designation-clear-row {
+  margin-top: -6px;
+}
+
+.clear-link-btn {
+  width: fit-content;
+  border: 0;
+  background: transparent;
+  color: var(--erp-primary);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
 }
 
 .staff-modal__actions {
