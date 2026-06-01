@@ -87,7 +87,6 @@ export const appRoutes: Routes = [
         pathMatch: 'full',
         redirectTo: 'dashboard/admin',
       },
-
       {
         path: 'dashboard',
         pathMatch: 'full',
@@ -262,8 +261,10 @@ export const appRoutes: Routes = [
       },
       {
         path: 'management/library',
-        pathMatch: 'full',
-        redirectTo: 'dashboard/admin',
+        loadComponent: () =>
+          import('./features/management/library/library.component').then(
+            (m) => m.LibraryComponent,
+          ),
       },
 
       {
