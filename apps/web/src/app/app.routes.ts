@@ -248,6 +248,18 @@ export const appRoutes: Routes = [
         redirectTo: 'management/fees',
       },
       {
+        path: 'management/fee-groups',
+        loadComponent: () =>
+          import('./features/management/fee-groups/fee-groups.component').then(
+            (m) => m.FeeGroupsComponent,
+          ),
+      },
+      {
+        path: 'management/fee-group',
+        pathMatch: 'full',
+        redirectTo: 'management/fee-groups',
+      },
+      {
         path: 'management/fees',
         loadComponent: () =>
           import('./features/management/fees/fees.component').then(

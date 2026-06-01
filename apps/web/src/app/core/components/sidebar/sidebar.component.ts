@@ -131,6 +131,11 @@ export class SidebarComponent {
       title: 'Management',
       items: [
         {
+          label: 'Fee Groups',
+          route: '/management/fee-groups',
+          icon: 'briefcase',
+        },
+        {
           label: 'Fees Collection',
           route: '/management/fees',
           icon: 'briefcase',

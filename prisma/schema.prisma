@@ -260,6 +260,28 @@ model Fee {
   @@map("fees")
 }
 
+enum FeeGroupStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model FeeGroup {
+  id           String         @id @default(uuid())
+  feeGroupCode String         @unique
+  feeGroupName String
+  className    String?
+  section      String?
+  feeType      FeeType
+  amount       Float
+  dueDays      Int?
+  description  String?
+  status       FeeGroupStatus @default(ACTIVE)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@map("fee_groups")
+}
+
 enum LibraryBookStatus {
   AVAILABLE
   UNAVAILABLE
