@@ -9,6 +9,7 @@ import {
   CreateGuardianPayload,
   Guardian,
   GuardianRelation,
+  GuardianStatus,
 } from '../../../core/models/guardian.model';
 import { GuardiansService } from '../../../core/services/guardians.service';
 
@@ -50,6 +51,26 @@ export class GuardiansComponent implements OnInit {
         .length,
   );
 
+  familyGuardians = computed(
+    () =>
+      this.guardians().filter((guardian) =>
+        [
+          'UNCLE',
+          'AUNT',
+          'GRANDFATHER',
+          'GRANDMOTHER',
+          'BROTHER',
+          'SISTER',
+        ].includes(guardian.relation),
+      ).length,
+  );
+
+  otherGuardians = computed(
+    () =>
+      this.guardians().filter((guardian) => guardian.relation === 'OTHER')
+        .length,
+  );
+
   guardianForm = new FormGroup({
     fullName: new FormControl('', {
       nonNullable: true,
@@ -73,8 +94,9 @@ export class GuardiansComponent implements OnInit {
     address: new FormControl('', {
       nonNullable: true,
     }),
-    status: new FormControl<'ACTIVE' | 'INACTIVE'>('ACTIVE', {
+    status: new FormControl<GuardianStatus>('ACTIVE', {
       nonNullable: true,
+      validators: [Validators.required],
     }),
   });
 
@@ -144,6 +166,10 @@ export class GuardiansComponent implements OnInit {
   }
 
   closeGuardianModal(): void {
+    if (this.isSubmitting()) {
+      return;
+    }
+
     this.showGuardianModal.set(false);
     this.selectedGuardian.set(null);
     this.serverError.set('');
@@ -255,6 +281,10 @@ export class GuardiansComponent implements OnInit {
       .toLowerCase()
       .replace(/_/g, ' ')
       .replace(/\b\w/g, (letter) => letter.toUpperCase());
+  }
+
+  getStatusLabel(status: GuardianStatus): string {
+    return status.charAt(0) + status.slice(1).toLowerCase();
   }
 
   isInvalid(controlName: keyof typeof this.guardianForm.controls): boolean {

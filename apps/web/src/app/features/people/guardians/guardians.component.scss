@@ -66,8 +66,9 @@
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
+  min-width: 0;
 }
 
 .summary-card {
@@ -89,6 +90,7 @@
   display: grid;
   place-items: center;
   font-weight: 700;
+  flex: 0 0 auto;
 }
 
 .summary-card__icon--blue {
@@ -550,11 +552,13 @@ td {
   }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 1200px) {
   .summary-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
 
+@media (max-width: 991px) {
   .guardians-card__top,
   .guardians-page__header {
     align-items: flex-start;

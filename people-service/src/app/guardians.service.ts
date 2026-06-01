@@ -20,6 +20,7 @@ export class GuardiansService {
               { email: { contains: search, mode: 'insensitive' } },
               { phone: { contains: search, mode: 'insensitive' } },
               { occupation: { contains: search, mode: 'insensitive' } },
+              { address: { contains: search, mode: 'insensitive' } },
             ],
           }
         : undefined,
@@ -70,11 +71,20 @@ export class GuardiansService {
       where: { id },
       data: {
         fullName: updateGuardianDto.fullName?.trim(),
-        email: updateGuardianDto.email?.toLowerCase().trim(),
+        email:
+          updateGuardianDto.email !== undefined
+            ? updateGuardianDto.email?.toLowerCase().trim() || null
+            : undefined,
         phone: updateGuardianDto.phone?.trim(),
         relation: updateGuardianDto.relation,
-        occupation: updateGuardianDto.occupation?.trim(),
-        address: updateGuardianDto.address?.trim(),
+        occupation:
+          updateGuardianDto.occupation !== undefined
+            ? updateGuardianDto.occupation?.trim() || null
+            : undefined,
+        address:
+          updateGuardianDto.address !== undefined
+            ? updateGuardianDto.address?.trim() || null
+            : undefined,
         status: updateGuardianDto.status,
       },
     });

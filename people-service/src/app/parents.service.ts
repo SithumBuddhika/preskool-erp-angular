@@ -20,6 +20,7 @@ export class ParentsService {
               { email: { contains: search, mode: 'insensitive' } },
               { phone: { contains: search, mode: 'insensitive' } },
               { occupation: { contains: search, mode: 'insensitive' } },
+              { address: { contains: search, mode: 'insensitive' } },
             ],
           }
         : undefined,
@@ -70,11 +71,20 @@ export class ParentsService {
       where: { id },
       data: {
         fullName: updateParentDto.fullName?.trim(),
-        email: updateParentDto.email?.toLowerCase().trim(),
+        email:
+          updateParentDto.email !== undefined
+            ? updateParentDto.email?.toLowerCase().trim() || null
+            : undefined,
         phone: updateParentDto.phone?.trim(),
         relation: updateParentDto.relation,
-        occupation: updateParentDto.occupation?.trim(),
-        address: updateParentDto.address?.trim(),
+        occupation:
+          updateParentDto.occupation !== undefined
+            ? updateParentDto.occupation?.trim() || null
+            : undefined,
+        address:
+          updateParentDto.address !== undefined
+            ? updateParentDto.address?.trim() || null
+            : undefined,
         status: updateParentDto.status,
       },
     });
