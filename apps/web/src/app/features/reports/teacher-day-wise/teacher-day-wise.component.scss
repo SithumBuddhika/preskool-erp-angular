@@ -183,19 +183,34 @@
   font-weight: 800;
 }
 
-.legend-dot--active {
+.legend-dot--present {
   background: #ecfdf3;
   color: #039855;
 }
 
-.legend-dot--inactive {
+.legend-dot--absent {
   background: #fff1f2;
   color: #e11d48;
 }
 
+.legend-dot--late {
+  background: #fff7ed;
+  color: #f59e0b;
+}
+
+.legend-dot--half {
+  background: #f4ebff;
+  color: #7f56d9;
+}
+
+.legend-dot--empty {
+  background: #f1f5f9;
+  color: #667085;
+}
+
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 18px;
   min-width: 0;
 }
@@ -238,9 +253,19 @@
   color: #e11d48;
 }
 
+.summary-card__icon--orange {
+  background: #fff7ed;
+  color: #f59e0b;
+}
+
 .summary-card__icon--purple {
   background: #f4ebff;
   color: #7f56d9;
+}
+
+.summary-card__icon--teal {
+  background: #ecfeff;
+  color: #0891b2;
 }
 
 .summary-card strong {
@@ -407,23 +432,6 @@ thead .sticky-col {
   font-weight: 700;
 }
 
-.status-pill {
-  display: inline-flex;
-  align-items: center;
-  height: 26px;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: #ecfdf3;
-  color: #039855;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.status-pill--inactive {
-  background: #fff1f2;
-  color: #e11d48;
-}
-
 .mini-count {
   width: fit-content;
   min-width: 30px;
@@ -437,14 +445,24 @@ thead .sticky-col {
   font-weight: 800;
 }
 
-.mini-count--active {
+.mini-count--present {
   background: #ecfdf3;
   color: #039855;
 }
 
-.mini-count--inactive {
+.mini-count--absent {
   background: #fff1f2;
   color: #e11d48;
+}
+
+.mini-count--late {
+  background: #fff7ed;
+  color: #f59e0b;
+}
+
+.mini-count--half {
+  background: #f4ebff;
+  color: #7f56d9;
 }
 
 .day-heading,
@@ -460,15 +478,33 @@ thead .sticky-col {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #ecfdf3;
-  color: #039855;
   font-size: 11px;
   font-weight: 800;
 }
 
-.day-status--inactive {
+.day-status--present {
+  background: #ecfdf3;
+  color: #039855;
+}
+
+.day-status--absent {
   background: #fff1f2;
   color: #e11d48;
+}
+
+.day-status--late {
+  background: #fff7ed;
+  color: #f59e0b;
+}
+
+.day-status--half {
+  background: #f4ebff;
+  color: #7f56d9;
+}
+
+.day-status--empty {
+  background: #f1f5f9;
+  color: #667085;
 }
 
 .empty-state {
@@ -509,7 +545,7 @@ thead .sticky-col {
 
 @media (max-width: 1400px) {
   .summary-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .filters-card {
