@@ -195,6 +195,11 @@ export class SidebarComponent {
           route: '/reports/student-attendance-type',
           icon: 'report-analytics',
         },
+        {
+          label: 'Daily Attendance',
+          route: '/reports/daily-attendance',
+          icon: 'report-analytics',
+        },
       ],
     },
   ];
