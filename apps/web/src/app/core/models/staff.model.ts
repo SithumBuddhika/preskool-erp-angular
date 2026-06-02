@@ -17,6 +17,7 @@ export type Staff = {
   gender: StaffGender;
   departmentCode?: string | null;
   departmentName: string;
+  designationCode?: string | null;
   designation: string;
   employmentType: StaffEmploymentType;
   joiningDate: string;
@@ -35,6 +36,7 @@ export type CreateStaffPayload = {
   gender: StaffGender;
   departmentCode?: string;
   departmentName: string;
+  designationCode?: string;
   designation: string;
   employmentType: StaffEmploymentType;
   joiningDate: string;

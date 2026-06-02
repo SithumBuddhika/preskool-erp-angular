@@ -121,7 +121,16 @@
                   </div>
                 </td>
 
-                <td>{{ staff.designation }}</td>
+                <td>
+                  <div class="designation-info">
+                    <strong>{{ staff.designation }}</strong>
+                    @if (staff.designationCode) {
+                      <span>{{ staff.designationCode }}</span>
+                    } @else {
+                      <span>Manual</span>
+                    }
+                  </div>
+                </td>
 
                 <td>
                   <span class="employment-pill">
@@ -191,8 +200,8 @@
           <p>
             {{
               isEditMode()
-                ? 'Update staff employment and department details.'
-                : 'Create a staff member using existing department suggestions.'
+                ? 'Update staff employment, department, and designation details.'
+                : 'Create a staff member using existing department and designation suggestions.'
             }}
           </p>
         </div>
@@ -345,18 +354,86 @@
           />
         </label>
 
-        <label>
+        <label class="autocomplete-field">
           Designation
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="designation"
+              placeholder="Type designation name..."
+              autocomplete="off"
+              (input)="onDesignationInput($event)"
+              (focus)="onDesignationFocus()"
+              (blur)="onDesignationBlur()"
+            />
+
+            @if (isInvalid('designation')) {
+              <small>Designation is required.</small>
+            }
+
+            @if (
+              showDesignationSuggestions() && filteredDesignations().length > 0
+            ) {
+              <div class="suggestions-panel">
+                @for (
+                  designation of filteredDesignations();
+                  track designation.id
+                ) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectDesignation(designation)"
+                  >
+                    <span>{{ getDesignationInitial(designation) }}</span>
+
+                    <div>
+                      <strong>{{ designation.designationName }}</strong>
+                      <p>
+                        {{ designation.designationCode }}
+                        @if (designation.departmentName) {
+                          · {{ designation.departmentName }}
+                        } @else {
+                          · Common
+                        }
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showDesignationSuggestions() &&
+              designationSearchTerm().trim() &&
+              filteredDesignations().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching designation found
+              </div>
+            }
+          </div>
+        </label>
+
+        <label>
+          Designation ID
           <input
             type="text"
-            formControlName="designation"
-            placeholder="Example: HR Executive"
+            formControlName="designationCode"
+            placeholder="Auto-filled from designation"
+            readonly
           />
-
-          @if (isInvalid('designation')) {
-            <small>Designation is required.</small>
-          }
         </label>
+
+        <div class="form-grid__full designation-clear-row">
+          <button
+            type="button"
+            class="clear-link-btn"
+            (click)="clearDesignationSelection()"
+          >
+            Clear designation and enter manually
+          </button>
+        </div>
 
         <label>
           Employment Type

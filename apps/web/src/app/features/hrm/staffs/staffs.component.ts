@@ -6,6 +6,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Department } from '../../../core/models/department.model';
+import { Designation } from '../../../core/models/designation.model';
 import {
   CreateStaffPayload,
   Staff,
@@ -14,6 +15,7 @@ import {
   StaffStatus,
 } from '../../../core/models/staff.model';
 import { DepartmentsService } from '../../../core/services/departments.service';
+import { DesignationsService } from '../../../core/services/designations.service';
 import { StaffsService } from '../../../core/services/staffs.service';
 
 type ToastType = 'success' | 'error';
@@ -28,6 +30,7 @@ type ToastType = 'success' | 'error';
 export class StaffsComponent implements OnInit {
   staffs = signal<Staff[]>([]);
   departments = signal<Department[]>([]);
+  designations = signal<Designation[]>([]);
 
   selectedStaff = signal<Staff | null>(null);
   staffToDelete = signal<Staff | null>(null);
@@ -42,6 +45,9 @@ export class StaffsComponent implements OnInit {
 
   showDepartmentSuggestions = signal(false);
   departmentSearchTerm = signal('');
+
+  showDesignationSuggestions = signal(false);
+  designationSearchTerm = signal('');
 
   toast = signal<{ message: string; type: ToastType } | null>(null);
   private toastTimer: ReturnType<typeof setTimeout> | null = null;
@@ -69,6 +75,61 @@ export class StaffsComponent implements OnInit {
       this.staffs().filter((staff) => staff.employmentType === 'FULL_TIME')
         .length,
   );
+
+  staffForm = new FormGroup({
+    staffCode: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    fullName: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    email: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.email],
+    }),
+    phone: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    gender: new FormControl<StaffGender>('MALE', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    departmentCode: new FormControl('', {
+      nonNullable: true,
+    }),
+    departmentName: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    designationCode: new FormControl('', {
+      nonNullable: true,
+    }),
+    designation: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    employmentType: new FormControl<StaffEmploymentType>('FULL_TIME', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    joiningDate: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    salary: new FormControl('', {
+      nonNullable: true,
+    }),
+    address: new FormControl('', {
+      nonNullable: true,
+    }),
+    status: new FormControl<StaffStatus>('ACTIVE', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+  });
 
   filteredDepartments = computed(() => {
     const keyword = this.departmentSearchTerm().trim().toLowerCase();
@@ -100,66 +161,65 @@ export class StaffsComponent implements OnInit {
       .slice(0, 6);
   });
 
-  staffForm = new FormGroup({
-    staffCode: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required],
-    }),
-    fullName: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required],
-    }),
-    email: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, Validators.email],
-    }),
-    phone: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required],
-    }),
-    gender: new FormControl<StaffGender>('MALE', {
-      nonNullable: true,
-      validators: [Validators.required],
-    }),
-    departmentCode: new FormControl('', {
-      nonNullable: true,
-    }),
-    departmentName: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required],
-    }),
-    designation: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required],
-    }),
-    employmentType: new FormControl<StaffEmploymentType>('FULL_TIME', {
-      nonNullable: true,
-      validators: [Validators.required],
-    }),
-    joiningDate: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required],
-    }),
-    salary: new FormControl('', {
-      nonNullable: true,
-    }),
-    address: new FormControl('', {
-      nonNullable: true,
-    }),
-    status: new FormControl<StaffStatus>('ACTIVE', {
-      nonNullable: true,
-      validators: [Validators.required],
-    }),
+  filteredDesignations = computed(() => {
+    const keyword = this.designationSearchTerm().trim().toLowerCase();
+    const selectedDepartment = this.staffForm.controls.departmentName.value
+      .trim()
+      .toLowerCase();
+
+    const activeDesignations = this.designations().filter(
+      (designation) => designation.status === 'ACTIVE',
+    );
+
+    const departmentMatchingDesignations = activeDesignations.filter(
+      (designation) => {
+        const designationDepartment = (designation.departmentName || '')
+          .trim()
+          .toLowerCase();
+
+        const commonDesignation = !designationDepartment;
+        const departmentMatches = designationDepartment === selectedDepartment;
+
+        return commonDesignation || departmentMatches;
+      },
+    );
+
+    const source = selectedDepartment
+      ? departmentMatchingDesignations
+      : activeDesignations;
+
+    if (!keyword) {
+      return source.slice(0, 6);
+    }
+
+    return source
+      .filter((designation) => {
+        const searchableText = [
+          designation.designationCode,
+          designation.designationName,
+          designation.departmentCode,
+          designation.departmentName,
+          designation.description,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+
+        return searchableText.includes(keyword);
+      })
+      .slice(0, 6);
   });
 
   constructor(
     private readonly staffsService: StaffsService,
     private readonly departmentsService: DepartmentsService,
+    private readonly designationsService: DesignationsService,
   ) {}
 
   ngOnInit(): void {
     this.loadStaffs();
     this.loadDepartments();
+    this.loadDesignations();
   }
 
   loadStaffs(search = this.searchTerm()): void {
@@ -190,6 +250,17 @@ export class StaffsComponent implements OnInit {
     });
   }
 
+  loadDesignations(): void {
+    this.designationsService.getDesignations().subscribe({
+      next: (designations) => {
+        this.designations.set(designations);
+      },
+      error: () => {
+        this.showToast('Designation suggestions could not load.', 'error');
+      },
+    });
+  }
+
   onSearchInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.searchTerm.set(value);
@@ -203,6 +274,7 @@ export class StaffsComponent implements OnInit {
 
     if (!value.trim()) {
       this.staffForm.controls.departmentCode.setValue('');
+      this.clearDesignationSelection();
     }
   }
 
@@ -223,6 +295,61 @@ export class StaffsComponent implements OnInit {
     this.staffForm.controls.departmentName.setValue(department.departmentName);
     this.departmentSearchTerm.set(department.departmentName);
     this.showDepartmentSuggestions.set(false);
+    this.clearDesignationSelection();
+  }
+
+  onDesignationInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.designationSearchTerm.set(value);
+    this.showDesignationSuggestions.set(true);
+
+    if (!value.trim()) {
+      this.staffForm.controls.designationCode.setValue('');
+    }
+  }
+
+  onDesignationFocus(): void {
+    const value = this.staffForm.controls.designation.value;
+    this.designationSearchTerm.set(value);
+    this.showDesignationSuggestions.set(true);
+  }
+
+  onDesignationBlur(): void {
+    setTimeout(() => {
+      this.showDesignationSuggestions.set(false);
+    }, 160);
+  }
+
+  selectDesignation(designation: Designation): void {
+    this.staffForm.controls.designationCode.setValue(
+      designation.designationCode,
+    );
+    this.staffForm.controls.designation.setValue(designation.designationName);
+
+    if (designation.departmentName) {
+      this.staffForm.controls.departmentName.setValue(
+        designation.departmentName,
+      );
+      this.departmentSearchTerm.set(designation.departmentName);
+    }
+
+    if (designation.departmentCode) {
+      this.staffForm.controls.departmentCode.setValue(
+        designation.departmentCode,
+      );
+    }
+
+    this.designationSearchTerm.set(
+      `${designation.designationCode} - ${designation.designationName}`,
+    );
+    this.showDesignationSuggestions.set(false);
+  }
+
+  clearDesignationSelection(): void {
+    this.staffForm.controls.designationCode.setValue('');
+    this.staffForm.controls.designation.setValue('');
+    this.designationSearchTerm.set('');
+    this.showDesignationSuggestions.set(false);
   }
 
   openCreateModal(): void {
@@ -236,6 +363,7 @@ export class StaffsComponent implements OnInit {
       gender: 'MALE',
       departmentCode: '',
       departmentName: '',
+      designationCode: '',
       designation: '',
       employmentType: 'FULL_TIME',
       joiningDate: '',
@@ -270,6 +398,7 @@ export class StaffsComponent implements OnInit {
       gender: staff.gender,
       departmentCode: staff.departmentCode || '',
       departmentName: staff.departmentName,
+      designationCode: staff.designationCode || '',
       designation: staff.designation,
       employmentType: staff.employmentType,
       joiningDate: this.formatDateForInput(staff.joiningDate),
@@ -282,7 +411,14 @@ export class StaffsComponent implements OnInit {
     });
 
     this.departmentSearchTerm.set(staff.departmentName);
+    this.designationSearchTerm.set(
+      staff.designationCode
+        ? `${staff.designationCode} - ${staff.designation}`
+        : staff.designation,
+    );
+
     this.showDepartmentSuggestions.set(false);
+    this.showDesignationSuggestions.set(false);
 
     this.serverError.set('');
     this.showStaffModal.set(true);
@@ -408,6 +544,16 @@ export class StaffsComponent implements OnInit {
       .toUpperCase();
   }
 
+  getDesignationInitial(designation: Designation): string {
+    return designation.designationName
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((word) => word[0])
+      .join('')
+      .toUpperCase();
+  }
+
   getGenderLabel(gender: StaffGender): string {
     return gender.charAt(0) + gender.slice(1).toLowerCase();
   }
@@ -464,6 +610,10 @@ export class StaffsComponent implements OnInit {
       payload.departmentCode = formValue.departmentCode.trim();
     }
 
+    if (formValue.designationCode.trim()) {
+      payload.designationCode = formValue.designationCode.trim();
+    }
+
     if (formValue.salary.trim()) {
       payload.salary = Number(formValue.salary);
     }
@@ -485,7 +635,9 @@ export class StaffsComponent implements OnInit {
 
   private resetSuggestionState(): void {
     this.departmentSearchTerm.set('');
+    this.designationSearchTerm.set('');
     this.showDepartmentSuggestions.set(false);
+    this.showDesignationSuggestions.set(false);
   }
 
   private showToast(message: string, type: ToastType): void {

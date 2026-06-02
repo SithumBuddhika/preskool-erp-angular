@@ -22,6 +22,7 @@ export class StaffsService {
               { phone: { contains: search, mode: 'insensitive' } },
               { departmentCode: { contains: search, mode: 'insensitive' } },
               { departmentName: { contains: search, mode: 'insensitive' } },
+              { designationCode: { contains: search, mode: 'insensitive' } },
               { designation: { contains: search, mode: 'insensitive' } },
               { address: { contains: search, mode: 'insensitive' } },
             ],
@@ -77,6 +78,7 @@ export class StaffsService {
         gender: createStaffDto.gender,
         departmentCode: createStaffDto.departmentCode?.trim() || null,
         departmentName: createStaffDto.departmentName.trim(),
+        designationCode: createStaffDto.designationCode?.trim() || null,
         designation: createStaffDto.designation.trim(),
         employmentType: createStaffDto.employmentType,
         joiningDate: new Date(createStaffDto.joiningDate),
@@ -114,6 +116,10 @@ export class StaffsService {
             ? updateStaffDto.departmentCode?.trim() || null
             : undefined,
         departmentName: updateStaffDto.departmentName?.trim(),
+        designationCode:
+          updateStaffDto.designationCode !== undefined
+            ? updateStaffDto.designationCode?.trim() || null
+            : undefined,
         designation: updateStaffDto.designation?.trim(),
         employmentType: updateStaffDto.employmentType,
         joiningDate:

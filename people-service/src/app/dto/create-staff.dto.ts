@@ -40,6 +40,10 @@ export class CreateStaffDto {
   @IsNotEmpty()
   departmentName!: string;
 
+  @IsOptional()
+  @IsString()
+  designationCode?: string;
+
   @IsString()
   @IsNotEmpty()
   designation!: string;
