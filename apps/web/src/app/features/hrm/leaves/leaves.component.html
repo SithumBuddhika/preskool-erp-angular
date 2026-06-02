@@ -1,0 +1,488 @@
+<section class="leaves-page">
+  <div class="leaves-page__header">
+    <div>
+      <h1>Leave</h1>
+      <p>HRM / Leave</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Leave
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">L</span>
+      <div>
+        <strong>{{ leaves().length }}</strong>
+        <p>Total Leaves</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">P</span>
+      <div>
+        <strong>{{ pendingLeaves() }}</strong>
+        <p>Pending Leaves</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ approvedLeaves() }}</strong>
+        <p>Approved Leaves</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">D</span>
+      <div>
+        <strong>{{ totalLeaveDays() }}</strong>
+        <p>Total Leave Days</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="leaves-card">
+    <div class="leaves-card__top">
+      <div>
+        <h2>Leave List</h2>
+        <p>Manage staff leave requests, approval status, and leave duration.</p>
+      </div>
+
+      <div class="leaves-search">
+        <input
+          type="text"
+          placeholder="Search leaves..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showLeaveModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="leaves-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Leave ID</th>
+              <th>Staff</th>
+              <th>Department</th>
+              <th>Designation</th>
+              <th>Leave Type</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Total Days</th>
+              <th>Status</th>
+              <th>Approved By</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (leave of leaves(); track leave.id) {
+              <tr>
+                <td>
+                  <span class="leave-code">{{ leave.leaveCode }}</span>
+                </td>
+
+                <td>
+                  <div class="staff-info">
+                    <span>{{ getLeaveInitial(leave) }}</span>
+
+                    <div>
+                      <strong>{{ leave.staffName }}</strong>
+                      <p>{{ leave.staffCode || 'No staff ID' }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="meta-info">
+                    <strong>{{ leave.departmentName || 'Not added' }}</strong>
+                    @if (leave.departmentCode) {
+                      <span>{{ leave.departmentCode }}</span>
+                    }
+                  </div>
+                </td>
+
+                <td>
+                  <div class="meta-info">
+                    <strong>{{ leave.designation || 'Not added' }}</strong>
+                    @if (leave.designationCode) {
+                      <span>{{ leave.designationCode }}</span>
+                    }
+                  </div>
+                </td>
+
+                <td>
+                  <span class="type-pill">
+                    {{ getLeaveTypeLabel(leave.leaveType) }}
+                  </span>
+                </td>
+
+                <td>{{ formatDisplayDate(leave.startDate) }}</td>
+                <td>{{ formatDisplayDate(leave.endDate) }}</td>
+                <td>{{ leave.totalDays }} day(s)</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--approved]="leave.status === 'APPROVED'"
+                    [class.status-pill--rejected]="leave.status === 'REJECTED'"
+                  >
+                    {{ getStatusLabel(leave.status) }}
+                  </span>
+                </td>
+
+                <td>{{ leave.approvedBy || 'Not added' }}</td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(leave)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(leave)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="11">
+                  <div class="empty-state">
+                    <strong>No leave records found</strong>
+                    <p>
+                      Add your first leave record or change your search keyword.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showLeaveModal()) {
+  <div class="modal-backdrop">
+    <form class="leave-modal" [formGroup]="leaveForm" (ngSubmit)="saveLeave()">
+      <div class="leave-modal__header">
+        <div>
+          <h2>{{ isEditMode() ? 'Edit Leave' : 'Add New Leave' }}</h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update staff leave request and approval details.'
+                : 'Create a leave request using existing staff suggestions.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeLeaveModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Leave ID
+          <input
+            type="text"
+            formControlName="leaveCode"
+            placeholder="Example: LEV-0001"
+          />
+
+          @if (isInvalid('leaveCode')) {
+            <small>Leave ID is required.</small>
+          }
+        </label>
+
+        <label class="autocomplete-field">
+          Staff
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="staffName"
+              placeholder="Type staff name..."
+              autocomplete="off"
+              (input)="onStaffInput($event)"
+              (focus)="onStaffFocus()"
+              (blur)="onStaffBlur()"
+            />
+
+            @if (isInvalid('staffName')) {
+              <small>Staff name is required.</small>
+            }
+
+            @if (showStaffSuggestions() && filteredStaffs().length > 0) {
+              <div class="suggestions-panel">
+                @for (staff of filteredStaffs(); track staff.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectStaff(staff)"
+                  >
+                    <span>{{ getStaffInitial(staff) }}</span>
+
+                    <div>
+                      <strong>{{ staff.fullName }}</strong>
+                      <p>
+                        {{ staff.staffCode }} · {{ staff.departmentName }}
+                        @if (staff.designation) {
+                          · {{ staff.designation }}
+                        }
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showStaffSuggestions() &&
+              staffSearchTerm().trim() &&
+              filteredStaffs().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching staff found
+              </div>
+            }
+          </div>
+        </label>
+
+        <label>
+          Staff ID
+          <input
+            type="text"
+            formControlName="staffCode"
+            placeholder="Auto-filled from staff"
+            readonly
+          />
+        </label>
+
+        <label>
+          Department
+          <input
+            type="text"
+            formControlName="departmentName"
+            placeholder="Auto-filled from staff"
+            readonly
+          />
+        </label>
+
+        <label>
+          Department ID
+          <input
+            type="text"
+            formControlName="departmentCode"
+            placeholder="Auto-filled from staff"
+            readonly
+          />
+        </label>
+
+        <label>
+          Designation
+          <input
+            type="text"
+            formControlName="designation"
+            placeholder="Auto-filled from staff"
+            readonly
+          />
+        </label>
+
+        <label>
+          Designation ID
+          <input
+            type="text"
+            formControlName="designationCode"
+            placeholder="Auto-filled from staff"
+            readonly
+          />
+        </label>
+
+        <label>
+          Leave Type
+          <select formControlName="leaveType">
+            <option value="SICK">Sick</option>
+            <option value="CASUAL">Casual</option>
+            <option value="ANNUAL">Annual</option>
+            <option value="MATERNITY">Maternity</option>
+            <option value="EMERGENCY">Emergency</option>
+            <option value="OTHER">Other</option>
+          </select>
+        </label>
+
+        <label>
+          Start Date
+          <input type="date" formControlName="startDate" />
+
+          @if (isInvalid('startDate')) {
+            <small>Start date is required.</small>
+          }
+        </label>
+
+        <label>
+          End Date
+          <input type="date" formControlName="endDate" />
+
+          @if (isInvalid('endDate')) {
+            <small>End date is required.</small>
+          }
+
+          @if (!isDateRangeValid()) {
+            <small>End date cannot be before start date.</small>
+          }
+        </label>
+
+        <label>
+          Total Days
+          <input
+            type="text"
+            [value]="getCurrentTotalDays() + ' day(s)'"
+            readonly
+          />
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="PENDING">Pending</option>
+            <option value="APPROVED">Approved</option>
+            <option value="REJECTED">Rejected</option>
+          </select>
+        </label>
+
+        <label>
+          Approved By
+          <input
+            type="text"
+            formControlName="approvedBy"
+            placeholder="Example: Principal"
+          />
+        </label>
+
+        <label class="form-grid__full">
+          Reason
+          <textarea
+            formControlName="reason"
+            rows="3"
+            placeholder="Reason for leave"
+          ></textarea>
+
+          @if (isInvalid('reason')) {
+            <small>Reason is required.</small>
+          }
+        </label>
+
+        <label class="form-grid__full">
+          Remarks
+          <textarea
+            formControlName="remarks"
+            rows="3"
+            placeholder="Approval or rejection remarks"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="leave-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeLeaveModal()"
+          [disabled]="isSubmitting()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Leave'
+                : 'Save Leave'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (leaveToDelete(); as leave) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Leave?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ leave.leaveCode }} - {{ leave.staffName }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteLeave()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Leave' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}

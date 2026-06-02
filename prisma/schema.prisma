@@ -261,6 +261,44 @@ model Holiday {
   @@map("holidays")
 }
 
+enum LeaveType {
+  SICK
+  CASUAL
+  ANNUAL
+  MATERNITY
+  EMERGENCY
+  OTHER
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model StaffLeave {
+  id              String      @id @default(uuid())
+  leaveCode       String      @unique
+  staffCode       String?
+  staffName       String
+  departmentCode  String?
+  departmentName  String?
+  designationCode String?
+  designation     String?
+  leaveType       LeaveType
+  startDate       DateTime
+  endDate         DateTime
+  totalDays       Int
+  reason          String
+  status          LeaveStatus @default(PENDING)
+  approvedBy      String?
+  remarks         String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@map("staff_leaves")
+}
+
 enum FeeType {
   ADMISSION
   TUITION
