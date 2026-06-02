@@ -1,23 +1,33 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
-import { Teacher } from '../../../core/models/teacher.model';
-import { TeachersService } from '../../../core/services/teachers.service';
+import {
+  TeacherAttendance,
+  TeacherAttendanceStatus,
+} from '../../../core/models/teacher-attendance.model';
+import { TeacherAttendanceService } from '../../../core/services/teacher-attendance.service';
 import { ReportTabsComponent } from '../components/report-tabs/report-tabs.component';
 
 type DayColumn = {
   dayNumber: number;
+  dateKey: string;
   label: string;
 };
+
+type DayStatus = TeacherAttendanceStatus | '';
+
+type AttendanceStatusFilter = TeacherAttendanceStatus | 'ALL';
 
 type TeacherDayWiseRow = {
   teacherKey: string;
   employeeNo: string;
   teacherName: string;
   subject: string;
-  status: string;
-  totalDays: number;
-  activeDays: number;
-  inactiveDays: number;
-  dayMap: Record<number, string>;
+  total: number;
+  present: number;
+  absent: number;
+  late: number;
+  halfDay: number;
+  attendanceRate: number;
+  dayMap: Record<number, DayStatus>;
 };
 
 @Component({
@@ -28,7 +38,7 @@ type TeacherDayWiseRow = {
   styleUrl: './teacher-day-wise.component.scss',
 })
 export class TeacherDayWiseComponent implements OnInit {
-  teachers = signal<Teacher[]>([]);
+  attendanceRecords = signal<TeacherAttendance[]>([]);
 
   isLoading = signal(false);
   serverError = signal('');
@@ -36,7 +46,7 @@ export class TeacherDayWiseComponent implements OnInit {
   searchTerm = signal('');
   selectedMonth = signal('');
   selectedSubject = signal('ALL');
-  selectedStatus = signal('ALL');
+  selectedStatus = signal<AttendanceStatusFilter>('ALL');
 
   monthDays = computed<DayColumn[]>(() => {
     const monthValue = this.selectedMonth();
@@ -48,34 +58,55 @@ export class TeacherDayWiseComponent implements OnInit {
     const [year, month] = monthValue.split('-').map(Number);
     const daysInMonth = new Date(year, month, 0).getDate();
 
-    return Array.from({ length: daysInMonth }, (_, index) => ({
-      dayNumber: index + 1,
-      label: String(index + 1).padStart(2, '0'),
-    }));
+    return Array.from({ length: daysInMonth }, (_, index) => {
+      const dayNumber = index + 1;
+      const dateKey = `${year}-${String(month).padStart(2, '0')}-${String(
+        dayNumber,
+      ).padStart(2, '0')}`;
+
+      return {
+        dayNumber,
+        dateKey,
+        label: String(dayNumber).padStart(2, '0'),
+      };
+    });
+  });
+
+  monthRecords = computed(() => {
+    const monthValue = this.selectedMonth();
+
+    if (!monthValue) {
+      return this.attendanceRecords();
+    }
+
+    return this.attendanceRecords().filter((record) =>
+      this.formatDateForInput(record.attendanceDate).startsWith(monthValue),
+    );
   });
 
   subjectOptions = computed(() => {
-    const subjects = this.teachers()
-      .map((teacher) => teacher.subject)
+    const subjects = this.monthRecords()
+      .map((record) => record.subject || '')
       .filter(Boolean);
 
     return Array.from(new Set(subjects)).sort((a, b) => a.localeCompare(b));
   });
 
-  filteredTeachers = computed(() => {
+  filteredMonthRecords = computed(() => {
     const keyword = this.searchTerm().trim().toLowerCase();
     const subjectFilter = this.selectedSubject();
     const statusFilter = this.selectedStatus();
 
-    return this.teachers().filter((teacher) => {
+    return this.monthRecords().filter((record) => {
       const searchableText = [
-        teacher.employeeNo,
-        teacher.fullName,
-        teacher.email,
-        teacher.phone,
-        teacher.subject,
-        teacher.qualification,
-        teacher.status,
+        record.attendanceCode,
+        record.teacherEmployeeNo,
+        record.teacherName,
+        record.subject,
+        record.status,
+        record.checkInTime,
+        record.checkOutTime,
+        record.remarks,
       ]
         .filter(Boolean)
         .join(' ')
@@ -83,55 +114,113 @@ export class TeacherDayWiseComponent implements OnInit {
 
       const matchesSearch = !keyword || searchableText.includes(keyword);
       const matchesSubject =
-        subjectFilter === 'ALL' || teacher.subject === subjectFilter;
+        subjectFilter === 'ALL' || record.subject === subjectFilter;
       const matchesStatus =
-        statusFilter === 'ALL' || teacher.status === statusFilter;
+        statusFilter === 'ALL' || record.status === statusFilter;
 
       return matchesSearch && matchesSubject && matchesStatus;
     });
   });
 
-  teacherRows = computed<TeacherDayWiseRow[]>(() =>
-    this.filteredTeachers()
-      .map((teacher) => {
-        const dayMap: Record<number, string> = {};
+  teacherRows = computed<TeacherDayWiseRow[]>(() => {
+    const groupedRecords = new Map<string, TeacherAttendance[]>();
+
+    this.filteredMonthRecords().forEach((record) => {
+      const teacherKey =
+        record.teacherEmployeeNo ||
+        `${record.teacherName}-${record.subject || 'NO-SUBJECT'}`;
+
+      if (!groupedRecords.has(teacherKey)) {
+        groupedRecords.set(teacherKey, []);
+      }
+
+      groupedRecords.get(teacherKey)?.push(record);
+    });
+
+    return Array.from(groupedRecords.entries())
+      .map(([teacherKey, records]) => {
+        const firstRecord = records[0];
+
+        const present = records.filter(
+          (record) => record.status === 'PRESENT',
+        ).length;
+        const absent = records.filter(
+          (record) => record.status === 'ABSENT',
+        ).length;
+        const late = records.filter(
+          (record) => record.status === 'LATE',
+        ).length;
+        const halfDay = records.filter(
+          (record) => record.status === 'HALF_DAY',
+        ).length;
+
+        const total = records.length;
+        const attended = present + late + halfDay;
+        const attendanceRate =
+          total === 0 ? 0 : Math.round((attended / total) * 100);
+
+        const dayMap: Record<number, DayStatus> = {};
 
         this.monthDays().forEach((day) => {
-          dayMap[day.dayNumber] = teacher.status === 'ACTIVE' ? 'A' : 'I';
+          const recordForDay = records.find(
+            (record) =>
+              this.formatDateForInput(record.attendanceDate) === day.dateKey,
+          );
+
+          dayMap[day.dayNumber] = recordForDay?.status || '';
         });
 
-        const totalDays = this.monthDays().length;
-        const activeDays = teacher.status === 'ACTIVE' ? totalDays : 0;
-        const inactiveDays = teacher.status === 'INACTIVE' ? totalDays : 0;
-
         return {
-          teacherKey: teacher.id,
-          employeeNo: teacher.employeeNo,
-          teacherName: teacher.fullName,
-          subject: teacher.subject,
-          status: teacher.status,
-          totalDays,
-          activeDays,
-          inactiveDays,
+          teacherKey,
+          employeeNo: firstRecord.teacherEmployeeNo || 'Not added',
+          teacherName: firstRecord.teacherName,
+          subject: firstRecord.subject || 'Not added',
+          total,
+          present,
+          absent,
+          late,
+          halfDay,
+          attendanceRate,
           dayMap,
         };
       })
-      .sort((a, b) => a.teacherName.localeCompare(b.teacherName)),
-  );
+      .sort((a, b) => a.teacherName.localeCompare(b.teacherName));
+  });
 
   totalTeachers = computed(() => this.teacherRows().length);
 
-  activeTeachers = computed(
-    () => this.teacherRows().filter((row) => row.status === 'ACTIVE').length,
+  totalMarked = computed(() =>
+    this.teacherRows().reduce((total, row) => total + row.total, 0),
   );
 
-  inactiveTeachers = computed(
-    () => this.teacherRows().filter((row) => row.status === 'INACTIVE').length,
+  presentCount = computed(() =>
+    this.teacherRows().reduce((total, row) => total + row.present, 0),
   );
 
-  totalActiveDays = computed(() =>
-    this.teacherRows().reduce((total, row) => total + row.activeDays, 0),
+  absentCount = computed(() =>
+    this.teacherRows().reduce((total, row) => total + row.absent, 0),
   );
+
+  lateCount = computed(() =>
+    this.teacherRows().reduce((total, row) => total + row.late, 0),
+  );
+
+  halfDayCount = computed(() =>
+    this.teacherRows().reduce((total, row) => total + row.halfDay, 0),
+  );
+
+  attendanceRate = computed(() => {
+    const total = this.totalMarked();
+
+    if (total === 0) {
+      return 0;
+    }
+
+    const attended =
+      this.presentCount() + this.lateCount() + this.halfDayCount();
+
+    return Math.round((attended / total) * 100);
+  });
 
   selectedMonthLabel = computed(() => {
     const monthValue = this.selectedMonth();
@@ -148,20 +237,22 @@ export class TeacherDayWiseComponent implements OnInit {
     });
   });
 
-  constructor(private readonly teachersService: TeachersService) {}
+  constructor(
+    private readonly teacherAttendanceService: TeacherAttendanceService,
+  ) {}
 
   ngOnInit(): void {
     this.selectedMonth.set(this.getCurrentMonthForInput());
-    this.loadTeachers();
+    this.loadAttendanceRecords();
   }
 
-  loadTeachers(): void {
+  loadAttendanceRecords(): void {
     this.isLoading.set(true);
     this.serverError.set('');
 
-    this.teachersService.getTeachers().subscribe({
-      next: (teachers) => {
-        this.teachers.set(teachers);
+    this.teacherAttendanceService.getAttendanceRecords().subscribe({
+      next: (records) => {
+        this.attendanceRecords.set(records);
         this.isLoading.set(false);
       },
       error: (error) => {
@@ -181,6 +272,8 @@ export class TeacherDayWiseComponent implements OnInit {
   onMonthInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.selectedMonth.set(value);
+    this.selectedSubject.set('ALL');
+    this.selectedStatus.set('ALL');
   }
 
   onSubjectChange(event: Event): void {
@@ -189,7 +282,9 @@ export class TeacherDayWiseComponent implements OnInit {
   }
 
   onStatusChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
+    const value = (event.target as HTMLSelectElement)
+      .value as AttendanceStatusFilter;
+
     this.selectedStatus.set(value);
   }
 
@@ -212,10 +307,12 @@ export class TeacherDayWiseComponent implements OnInit {
       'Employee No',
       'Teacher Name',
       'Subject',
-      'Status',
-      'Total Days',
-      'Active Days',
-      'Inactive Days',
+      'Total',
+      'Present',
+      'Absent',
+      'Late',
+      'Half Day',
+      'Attendance Rate',
       ...days.map((day) => day.label),
     ];
 
@@ -223,11 +320,13 @@ export class TeacherDayWiseComponent implements OnInit {
       row.employeeNo,
       row.teacherName,
       row.subject,
-      this.getStatusLabel(row.status),
-      String(row.totalDays),
-      String(row.activeDays),
-      String(row.inactiveDays),
-      ...days.map((day) => row.dayMap[day.dayNumber] || '-'),
+      String(row.total),
+      String(row.present),
+      String(row.absent),
+      String(row.late),
+      String(row.halfDay),
+      `${row.attendanceRate}%`,
+      ...days.map((day) => this.getStatusShortLabel(row.dayMap[day.dayNumber])),
     ]);
 
     const csvContent = [headers, ...csvRows]
@@ -242,10 +341,34 @@ export class TeacherDayWiseComponent implements OnInit {
     const link = document.createElement('a');
 
     link.href = url;
-    link.download = `teacher-day-wise-${this.selectedMonth() || this.getCurrentMonthForInput()}.csv`;
+    link.download = `teacher-day-wise-${
+      this.selectedMonth() || this.getCurrentMonthForInput()
+    }.csv`;
     link.click();
 
     window.URL.revokeObjectURL(url);
+  }
+
+  getStatusShortLabel(status: DayStatus): string {
+    const labels: Record<TeacherAttendanceStatus, string> = {
+      PRESENT: 'P',
+      ABSENT: 'A',
+      LATE: 'L',
+      HALF_DAY: 'H',
+    };
+
+    return status ? labels[status] : '-';
+  }
+
+  getStatusTitle(status: DayStatus): string {
+    if (!status) {
+      return 'Not marked';
+    }
+
+    return status
+      .toLowerCase()
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (letter) => letter.toUpperCase());
   }
 
   getTeacherInitial(row: TeacherDayWiseRow): string {
@@ -258,14 +381,21 @@ export class TeacherDayWiseComponent implements OnInit {
       .toUpperCase();
   }
 
-  getStatusLabel(status: string): string {
-    return status.charAt(0) + status.slice(1).toLowerCase();
+  private formatDateForInput(date: string): string {
+    if (!date) {
+      return '';
+    }
+
+    return new Date(date).toISOString().split('T')[0];
   }
 
   private getCurrentMonthForInput(): string {
     const today = new Date();
 
-    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(
+      2,
+      '0',
+    )}`;
   }
 
   private escapeCsvValue(value: string): string {
