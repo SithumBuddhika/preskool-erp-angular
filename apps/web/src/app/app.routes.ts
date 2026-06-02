@@ -409,6 +409,13 @@ export const appRoutes: Routes = [
             './features/reports/teacher-day-wise/teacher-day-wise.component'
           ).then((m) => m.TeacherDayWiseComponent),
       },
+      {
+        path: 'reports/teacher-report',
+        loadComponent: () =>
+          import(
+            './features/reports/teacher-report/teacher-report.component'
+          ).then((m) => m.TeacherReportComponent),
+      },
 
       {
         path: '**',
