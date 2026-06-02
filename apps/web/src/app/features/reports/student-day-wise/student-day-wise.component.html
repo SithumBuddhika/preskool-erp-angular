@@ -1,0 +1,301 @@
+<section class="student-day-wise-page">
+  <div class="student-day-wise-page__header">
+    <div>
+      <h1>Student Day Wise</h1>
+      <p>Reports / Student Day Wise</p>
+    </div>
+
+    <div class="header-actions">
+      <button
+        class="secondary-btn"
+        type="button"
+        (click)="loadAttendanceRecords()"
+      >
+        Refresh
+      </button>
+
+      <button
+        class="primary-btn"
+        type="button"
+        (click)="exportCsv()"
+        [disabled]="studentRows().length === 0"
+      >
+        Export CSV
+      </button>
+    </div>
+  </div>
+
+  <nav class="report-tabs">
+    <a
+      routerLink="/reports/attendance"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      Attendance Report
+    </a>
+
+    <a
+      routerLink="/reports/student-attendance-type"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      Students Attendance Type
+    </a>
+
+    <a
+      routerLink="/reports/daily-attendance"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      Daily Attendance
+    </a>
+
+    <a
+      routerLink="/reports/student-day-wise"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      Student Day Wise
+    </a>
+
+    <a>Teacher Day Wise</a>
+    <a>Teacher Report</a>
+    <a>Staff Day Wise</a>
+    <a>Staff Report</a>
+  </nav>
+
+  <div class="filters-card">
+    <div class="filter-group filter-group--wide">
+      <label>Search Student</label>
+      <input
+        type="text"
+        placeholder="Search student, admission no, class..."
+        [value]="searchTerm()"
+        (input)="onSearchInput($event)"
+      />
+    </div>
+
+    <div class="filter-group">
+      <label>Month</label>
+      <input
+        type="month"
+        [value]="selectedMonth()"
+        (input)="onMonthInput($event)"
+      />
+    </div>
+
+    <div class="filter-group">
+      <label>Class</label>
+      <select [value]="selectedClass()" (change)="onClassChange($event)">
+        <option value="ALL">All Classes</option>
+
+        @for (className of classOptions(); track className) {
+          <option [value]="className">{{ className }}</option>
+        }
+      </select>
+    </div>
+
+    <button class="clear-btn" type="button" (click)="clearFilters()">
+      Clear Filters
+    </button>
+  </div>
+
+  <div class="month-card">
+    <div>
+      <span>Selected Month</span>
+      <strong>{{ selectedMonthLabel() }}</strong>
+    </div>
+
+    <p>
+      Showing {{ totalStudents() }} student(s), {{ totalMarked() }} marked
+      attendance record(s).
+    </p>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">S</span>
+      <div>
+        <strong>{{ totalStudents() }}</strong>
+        <p>Students</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">P</span>
+      <div>
+        <strong>{{ presentCount() }}</strong>
+        <p>Present</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--red">A</span>
+      <div>
+        <strong>{{ absentCount() }}</strong>
+        <p>Absent</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">L</span>
+      <div>
+        <strong>{{ lateCount() }}</strong>
+        <p>Late</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">H</span>
+      <div>
+        <strong>{{ halfDayCount() }}</strong>
+        <p>Half Day</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--teal">%</span>
+      <div>
+        <strong>{{ attendanceRate() }}%</strong>
+        <p>Attendance Rate</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="legend-card">
+    <span
+      ><strong class="legend-dot legend-dot--present">P</strong> Present</span
+    >
+    <span><strong class="legend-dot legend-dot--absent">A</strong> Absent</span>
+    <span><strong class="legend-dot legend-dot--late">L</strong> Late</span>
+    <span><strong class="legend-dot legend-dot--half">H</strong> Half Day</span>
+    <span
+      ><strong class="legend-dot legend-dot--empty">-</strong> Not Marked</span
+    >
+  </div>
+
+  <div class="report-card">
+    <div class="report-card__top">
+      <div>
+        <h2>Student Day Wise Attendance Matrix</h2>
+        <p>Monthly student attendance shown day by day.</p>
+      </div>
+
+      <span class="record-count"> {{ monthDays().length }} day column(s) </span>
+    </div>
+
+    @if (serverError()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="report-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="matrix-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="sticky-col sticky-student">Student</th>
+              <th>Class</th>
+              <th>%</th>
+              <th>P</th>
+              <th>A</th>
+              <th>L</th>
+              <th>H</th>
+
+              @for (day of monthDays(); track day.dateKey) {
+                <th class="day-heading">{{ day.label }}</th>
+              }
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (row of studentRows(); track row.studentKey) {
+              <tr>
+                <td class="sticky-col sticky-student">
+                  <div class="student-info">
+                    <span>{{ getStudentInitial(row) }}</span>
+
+                    <div>
+                      <strong>{{ row.studentName }}</strong>
+                      <p>{{ row.admissionNo }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="class-pill">{{ row.classLabel }}</span>
+                </td>
+
+                <td>
+                  <strong>{{ row.attendanceRate }}%</strong>
+                </td>
+
+                <td>
+                  <span class="mini-count mini-count--present">{{
+                    row.present
+                  }}</span>
+                </td>
+
+                <td>
+                  <span class="mini-count mini-count--absent">{{
+                    row.absent
+                  }}</span>
+                </td>
+
+                <td>
+                  <span class="mini-count mini-count--late">{{
+                    row.late
+                  }}</span>
+                </td>
+
+                <td>
+                  <span class="mini-count mini-count--half">{{
+                    row.halfDay
+                  }}</span>
+                </td>
+
+                @for (day of monthDays(); track day.dateKey) {
+                  <td class="day-cell">
+                    <span
+                      class="day-status"
+                      [title]="getStatusTitle(row.dayMap[day.dayNumber])"
+                      [class.day-status--present]="
+                        row.dayMap[day.dayNumber] === 'PRESENT'
+                      "
+                      [class.day-status--absent]="
+                        row.dayMap[day.dayNumber] === 'ABSENT'
+                      "
+                      [class.day-status--late]="
+                        row.dayMap[day.dayNumber] === 'LATE'
+                      "
+                      [class.day-status--half]="
+                        row.dayMap[day.dayNumber] === 'HALF_DAY'
+                      "
+                      [class.day-status--empty]="!row.dayMap[day.dayNumber]"
+                    >
+                      {{ getStatusShortLabel(row.dayMap[day.dayNumber]) }}
+                    </span>
+                  </td>
+                }
+              </tr>
+            } @empty {
+              <tr>
+                <td [attr.colspan]="7 + monthDays().length">
+                  <div class="empty-state">
+                    <strong>No student day-wise records found</strong>
+                    <p>Try changing the month, class, or search keyword.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>

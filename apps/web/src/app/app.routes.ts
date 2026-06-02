@@ -404,9 +404,21 @@ export const appRoutes: Routes = [
         redirectTo: 'reports/daily-attendance',
       },
       {
+        path: 'reports/student-day-wise',
+        loadComponent: () =>
+          import(
+            './features/reports/student-day-wise/student-day-wise.component'
+          ).then((m) => m.StudentDayWiseComponent),
+      },
+      {
+        path: 'reports/student-day',
+        pathMatch: 'full',
+        redirectTo: 'reports/student-day-wise',
+      },
+      {
         path: 'reports/student',
         pathMatch: 'full',
-        redirectTo: 'reports/attendance',
+        redirectTo: 'reports/student-day-wise',
       },
 
       {
