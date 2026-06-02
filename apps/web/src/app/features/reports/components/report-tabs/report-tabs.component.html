@@ -1,0 +1,11 @@
+<nav class="report-tabs" aria-label="Reports navigation">
+  @for (tab of tabs; track tab.route) {
+    <a
+      [routerLink]="tab.route"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      {{ tab.label }}
+    </a>
+  }
+</nav>

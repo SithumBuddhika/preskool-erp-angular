@@ -292,21 +292,11 @@ export const appRoutes: Routes = [
           ),
       },
       {
-        path: 'hrm/department',
-        pathMatch: 'full',
-        redirectTo: 'hrm/departments',
-      },
-      {
         path: 'hrm/designations',
         loadComponent: () =>
           import('./features/hrm/designations/designations.component').then(
             (m) => m.DesignationsComponent,
           ),
-      },
-      {
-        path: 'hrm/designation',
-        pathMatch: 'full',
-        redirectTo: 'hrm/designations',
       },
       {
         path: 'hrm/staffs',
@@ -316,21 +306,11 @@ export const appRoutes: Routes = [
           ),
       },
       {
-        path: 'hrm/staff',
-        pathMatch: 'full',
-        redirectTo: 'hrm/staffs',
-      },
-      {
         path: 'hrm/holidays',
         loadComponent: () =>
           import('./features/hrm/holidays/holidays.component').then(
             (m) => m.HolidaysComponent,
           ),
-      },
-      {
-        path: 'hrm/holiday',
-        pathMatch: 'full',
-        redirectTo: 'hrm/holidays',
       },
       {
         path: 'hrm/leaves',
@@ -340,26 +320,11 @@ export const appRoutes: Routes = [
           ),
       },
       {
-        path: 'hrm/leave',
-        pathMatch: 'full',
-        redirectTo: 'hrm/leaves',
-      },
-      {
         path: 'hrm/student-attendance',
         loadComponent: () =>
           import(
             './features/hrm/student-attendance/student-attendance.component'
           ).then((m) => m.StudentAttendanceComponent),
-      },
-      {
-        path: 'hrm/student-attendances',
-        pathMatch: 'full',
-        redirectTo: 'hrm/student-attendance',
-      },
-      {
-        path: 'hrm/attendance',
-        pathMatch: 'full',
-        redirectTo: 'hrm/student-attendance',
       },
 
       {
@@ -375,21 +340,11 @@ export const appRoutes: Routes = [
           ).then((m) => m.AttendanceReportComponent),
       },
       {
-        path: 'reports/attendance-report',
-        pathMatch: 'full',
-        redirectTo: 'reports/attendance',
-      },
-      {
         path: 'reports/student-attendance-type',
         loadComponent: () =>
           import(
             './features/reports/student-attendance-type/student-attendance-type.component'
           ).then((m) => m.StudentAttendanceTypeComponent),
-      },
-      {
-        path: 'reports/students-attendance-type',
-        pathMatch: 'full',
-        redirectTo: 'reports/student-attendance-type',
       },
       {
         path: 'reports/daily-attendance',
@@ -399,11 +354,6 @@ export const appRoutes: Routes = [
           ).then((m) => m.DailyAttendanceComponent),
       },
       {
-        path: 'reports/daily',
-        pathMatch: 'full',
-        redirectTo: 'reports/daily-attendance',
-      },
-      {
         path: 'reports/student-day-wise',
         loadComponent: () =>
           import(
@@ -411,14 +361,11 @@ export const appRoutes: Routes = [
           ).then((m) => m.StudentDayWiseComponent),
       },
       {
-        path: 'reports/student-day',
-        pathMatch: 'full',
-        redirectTo: 'reports/student-day-wise',
-      },
-      {
-        path: 'reports/student',
-        pathMatch: 'full',
-        redirectTo: 'reports/student-day-wise',
+        path: 'reports/teacher-day-wise',
+        loadComponent: () =>
+          import(
+            './features/reports/teacher-day-wise/teacher-day-wise.component'
+          ).then((m) => m.TeacherDayWiseComponent),
       },
 
       {

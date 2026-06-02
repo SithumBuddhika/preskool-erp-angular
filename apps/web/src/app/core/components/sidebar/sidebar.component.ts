@@ -205,6 +205,11 @@ export class SidebarComponent {
           route: '/reports/student-day-wise',
           icon: 'report-analytics',
         },
+        {
+          label: 'Teacher Day Wise',
+          route: '/reports/teacher-day-wise',
+          icon: 'report-analytics',
+        },
       ],
     },
   ];

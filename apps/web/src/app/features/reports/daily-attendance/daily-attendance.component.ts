@@ -1,10 +1,10 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
 import {
   StudentAttendance,
   StudentAttendanceStatus,
 } from '../../../core/models/student-attendance.model';
 import { StudentAttendanceService } from '../../../core/services/student-attendance.service';
+import { ReportTabsComponent } from '../components/report-tabs/report-tabs.component';
 
 type AttendanceStatusFilter = StudentAttendanceStatus | 'ALL';
 
@@ -21,7 +21,7 @@ type DailyClassSummary = {
 @Component({
   selector: 'app-daily-attendance',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [ReportTabsComponent],
   templateUrl: './daily-attendance.component.html',
   styleUrl: './daily-attendance.component.scss',
 })

@@ -1,10 +1,10 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
 import {
   StudentAttendance,
   StudentAttendanceStatus,
 } from '../../../core/models/student-attendance.model';
 import { StudentAttendanceService } from '../../../core/services/student-attendance.service';
+import { ReportTabsComponent } from '../components/report-tabs/report-tabs.component';
 
 type DayColumn = {
   dayNumber: number;
@@ -31,7 +31,7 @@ type StudentDayWiseRow = {
 @Component({
   selector: 'app-student-day-wise',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [ReportTabsComponent],
   templateUrl: './student-day-wise.component.html',
   styleUrl: './student-day-wise.component.scss',
 })
@@ -57,7 +57,9 @@ export class StudentDayWiseComponent implements OnInit {
 
     return Array.from({ length: daysInMonth }, (_, index) => {
       const dayNumber = index + 1;
-      const dateKey = `${year}-${String(month).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+      const dateKey = `${year}-${String(month).padStart(2, '0')}-${String(
+        dayNumber,
+      ).padStart(2, '0')}`;
 
       return {
         dayNumber,
@@ -324,7 +326,9 @@ export class StudentDayWiseComponent implements OnInit {
     const link = document.createElement('a');
 
     link.href = url;
-    link.download = `student-day-wise-${this.selectedMonth() || this.getCurrentMonthForInput()}.csv`;
+    link.download = `student-day-wise-${
+      this.selectedMonth() || this.getCurrentMonthForInput()
+    }.csv`;
     link.click();
 
     window.URL.revokeObjectURL(url);
@@ -377,7 +381,10 @@ export class StudentDayWiseComponent implements OnInit {
   private getCurrentMonthForInput(): string {
     const today = new Date();
 
-    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(
+      2,
+      '0',
+    )}`;
   }
 
   private escapeCsvValue(value: string): string {
