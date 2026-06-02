@@ -165,6 +165,11 @@ export class SidebarComponent {
           route: '/hrm/departments',
           icon: 'briefcase',
         },
+        {
+          label: 'Holidays',
+          route: '/hrm/holidays',
+          icon: 'briefcase',
+        },
       ],
     },
     {

@@ -234,6 +234,33 @@ model Staff {
   @@map("staffs")
 }
 
+enum HolidayType {
+  PUBLIC
+  SCHOOL
+  EVENT
+  OTHER
+}
+
+enum HolidayStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Holiday {
+  id          String        @id @default(uuid())
+  holidayCode String        @unique
+  title       String
+  startDate   DateTime
+  endDate     DateTime
+  holidayType HolidayType   @default(PUBLIC)
+  description String?
+  status      HolidayStatus @default(ACTIVE)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("holidays")
+}
+
 enum FeeType {
   ADMISSION
   TUITION

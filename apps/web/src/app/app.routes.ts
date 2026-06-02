@@ -320,6 +320,18 @@ export const appRoutes: Routes = [
         pathMatch: 'full',
         redirectTo: 'hrm/staffs',
       },
+      {
+        path: 'hrm/holidays',
+        loadComponent: () =>
+          import('./features/hrm/holidays/holidays.component').then(
+            (m) => m.HolidaysComponent,
+          ),
+      },
+      {
+        path: 'hrm/holiday',
+        pathMatch: 'full',
+        redirectTo: 'hrm/holidays',
+      },
 
       {
         path: 'reports',

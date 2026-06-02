@@ -1,0 +1,343 @@
+<section class="holidays-page">
+  <div class="holidays-page__header">
+    <div>
+      <h1>Holidays</h1>
+      <p>HRM / Holidays</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Holiday
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">H</span>
+      <div>
+        <strong>{{ holidays().length }}</strong>
+        <p>Total Holidays</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ activeHolidays() }}</strong>
+        <p>Active Holidays</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">P</span>
+      <div>
+        <strong>{{ publicHolidays() }}</strong>
+        <p>Public Holidays</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">U</span>
+      <div>
+        <strong>{{ upcomingHolidays() }}</strong>
+        <p>Upcoming Holidays</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="holidays-card">
+    <div class="holidays-card__top">
+      <div>
+        <h2>Holiday List</h2>
+        <p>
+          Manage school holidays, public holidays, events, and calendar breaks.
+        </p>
+      </div>
+
+      <div class="holidays-search">
+        <input
+          type="text"
+          placeholder="Search holidays..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showHolidayModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="holidays-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Holiday ID</th>
+              <th>Holiday</th>
+              <th>Type</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Duration</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (holiday of holidays(); track holiday.id) {
+              <tr>
+                <td>
+                  <span class="holiday-code">{{ holiday.holidayCode }}</span>
+                </td>
+
+                <td>
+                  <div class="holiday-info">
+                    <span>{{ getInitials(holiday) }}</span>
+
+                    <div>
+                      <strong>{{ holiday.title }}</strong>
+                      <p>{{ holiday.description || 'No description added' }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="type-pill">
+                    {{ getHolidayTypeLabel(holiday.holidayType) }}
+                  </span>
+                </td>
+
+                <td>{{ formatDisplayDate(holiday.startDate) }}</td>
+                <td>{{ formatDisplayDate(holiday.endDate) }}</td>
+                <td>{{ getDurationDays(holiday) }} day(s)</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--inactive]="holiday.status !== 'ACTIVE'"
+                  >
+                    {{ getStatusLabel(holiday.status) }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(holiday)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(holiday)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8">
+                  <div class="empty-state">
+                    <strong>No holidays found</strong>
+                    <p>Add your first holiday or change your search keyword.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showHolidayModal()) {
+  <div class="modal-backdrop">
+    <form
+      class="holiday-modal"
+      [formGroup]="holidayForm"
+      (ngSubmit)="saveHoliday()"
+    >
+      <div class="holiday-modal__header">
+        <div>
+          <h2>{{ isEditMode() ? 'Edit Holiday' : 'Add New Holiday' }}</h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update holiday information and calendar dates.'
+                : 'Create a holiday record for HRM and attendance planning.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeHolidayModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Holiday ID
+          <input
+            type="text"
+            formControlName="holidayCode"
+            placeholder="Example: HLD-0001"
+          />
+
+          @if (isInvalid('holidayCode')) {
+            <small>Holiday ID is required.</small>
+          }
+        </label>
+
+        <label>
+          Holiday Title
+          <input
+            type="text"
+            formControlName="title"
+            placeholder="Example: Sinhala and Tamil New Year"
+          />
+
+          @if (isInvalid('title')) {
+            <small>Holiday title is required.</small>
+          }
+        </label>
+
+        <label>
+          Start Date
+          <input type="date" formControlName="startDate" />
+
+          @if (isInvalid('startDate')) {
+            <small>Start date is required.</small>
+          }
+        </label>
+
+        <label>
+          End Date
+          <input type="date" formControlName="endDate" />
+
+          @if (isInvalid('endDate')) {
+            <small>End date is required.</small>
+          }
+
+          @if (!isDateRangeValid()) {
+            <small>End date cannot be before start date.</small>
+          }
+        </label>
+
+        <label>
+          Holiday Type
+          <select formControlName="holidayType">
+            <option value="PUBLIC">Public</option>
+            <option value="SCHOOL">School</option>
+            <option value="EVENT">Event</option>
+            <option value="OTHER">Other</option>
+          </select>
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+          </select>
+        </label>
+
+        <label class="form-grid__full">
+          Description
+          <textarea
+            formControlName="description"
+            rows="3"
+            placeholder="Short description about this holiday"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="holiday-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeHolidayModal()"
+          [disabled]="isSubmitting()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Holiday'
+                : 'Save Holiday'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (holidayToDelete(); as holiday) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Holiday?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ holiday.holidayCode }} - {{ holiday.title }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteHoliday()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Holiday' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}
