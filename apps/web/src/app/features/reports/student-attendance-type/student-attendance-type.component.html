@@ -25,30 +25,7 @@
     </div>
   </div>
 
-  <nav class="report-tabs">
-    <a
-      routerLink="/reports/attendance"
-      routerLinkActive="active"
-      [routerLinkActiveOptions]="{ exact: true }"
-    >
-      Attendance Report
-    </a>
-
-    <a
-      routerLink="/reports/student-attendance-type"
-      routerLinkActive="active"
-      [routerLinkActiveOptions]="{ exact: true }"
-    >
-      Students Attendance Type
-    </a>
-
-    <a>Daily Attendance</a>
-    <a>Student Day Wise</a>
-    <a>Teacher Day Wise</a>
-    <a>Teacher Report</a>
-    <a>Staff Day Wise</a>
-    <a>Staff Report</a>
-  </nav>
+  <app-report-tabs></app-report-tabs>
 
   <div class="filters-card">
     <div class="filter-group filter-group--wide">

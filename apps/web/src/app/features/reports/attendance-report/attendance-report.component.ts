@@ -4,13 +4,14 @@ import {
   StudentAttendanceStatus,
 } from '../../../core/models/student-attendance.model';
 import { StudentAttendanceService } from '../../../core/services/student-attendance.service';
+import { ReportTabsComponent } from '../components/report-tabs/report-tabs.component';
 
 type AttendanceStatusFilter = StudentAttendanceStatus | 'ALL';
 
 @Component({
   selector: 'app-attendance-report',
   standalone: true,
-  imports: [],
+  imports: [ReportTabsComponent],
   templateUrl: './attendance-report.component.html',
   styleUrl: './attendance-report.component.scss',
 })

@@ -1,10 +1,10 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
 import {
   StudentAttendance,
   StudentAttendanceStatus,
 } from '../../../core/models/student-attendance.model';
 import { StudentAttendanceService } from '../../../core/services/student-attendance.service';
+import { ReportTabsComponent } from '../components/report-tabs/report-tabs.component';
 
 type AttendanceStatusFilter = StudentAttendanceStatus | 'ALL';
 
@@ -28,7 +28,7 @@ type ClassWiseTypeSummary = {
 @Component({
   selector: 'app-student-attendance-type-report',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [ReportTabsComponent],
   templateUrl: './student-attendance-type.component.html',
   styleUrl: './student-attendance-type.component.scss',
 })

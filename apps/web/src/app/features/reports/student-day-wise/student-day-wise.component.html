@@ -25,44 +25,7 @@
     </div>
   </div>
 
-  <nav class="report-tabs">
-    <a
-      routerLink="/reports/attendance"
-      routerLinkActive="active"
-      [routerLinkActiveOptions]="{ exact: true }"
-    >
-      Attendance Report
-    </a>
-
-    <a
-      routerLink="/reports/student-attendance-type"
-      routerLinkActive="active"
-      [routerLinkActiveOptions]="{ exact: true }"
-    >
-      Students Attendance Type
-    </a>
-
-    <a
-      routerLink="/reports/daily-attendance"
-      routerLinkActive="active"
-      [routerLinkActiveOptions]="{ exact: true }"
-    >
-      Daily Attendance
-    </a>
-
-    <a
-      routerLink="/reports/student-day-wise"
-      routerLinkActive="active"
-      [routerLinkActiveOptions]="{ exact: true }"
-    >
-      Student Day Wise
-    </a>
-
-    <a>Teacher Day Wise</a>
-    <a>Teacher Report</a>
-    <a>Staff Day Wise</a>
-    <a>Staff Report</a>
-  </nav>
+  <app-report-tabs></app-report-tabs>
 
   <div class="filters-card">
     <div class="filter-group filter-group--wide">
@@ -236,27 +199,27 @@
                 </td>
 
                 <td>
-                  <span class="mini-count mini-count--present">{{
-                    row.present
-                  }}</span>
+                  <span class="mini-count mini-count--present">
+                    {{ row.present }}
+                  </span>
                 </td>
 
                 <td>
-                  <span class="mini-count mini-count--absent">{{
-                    row.absent
-                  }}</span>
+                  <span class="mini-count mini-count--absent">
+                    {{ row.absent }}
+                  </span>
                 </td>
 
                 <td>
-                  <span class="mini-count mini-count--late">{{
-                    row.late
-                  }}</span>
+                  <span class="mini-count mini-count--late">
+                    {{ row.late }}
+                  </span>
                 </td>
 
                 <td>
-                  <span class="mini-count mini-count--half">{{
-                    row.halfDay
-                  }}</span>
+                  <span class="mini-count mini-count--half">
+                    {{ row.halfDay }}
+                  </span>
                 </td>
 
                 @for (day of monthDays(); track day.dateKey) {
