@@ -27,6 +27,8 @@ import { StudentAttendanceController } from './student-attendance.controller';
 import { StudentAttendanceService } from './student-attendance.service';
 import { StudentsController } from './students.controller';
 import { StudentsService } from './students.service';
+import { TeacherAttendanceController } from './teacher-attendance.controller';
+import { TeacherAttendanceService } from './teacher-attendance.service';
 import { TeachersController } from './teachers.controller';
 import { TeachersService } from './teachers.service';
 
@@ -49,6 +51,7 @@ import { TeachersService } from './teachers.service';
     HolidaysController,
     LeavesController,
     StudentAttendanceController,
+    TeacherAttendanceController,
     FeesController,
     FeeGroupsController,
     LibraryController,
@@ -65,6 +68,7 @@ import { TeachersService } from './teachers.service';
     HolidaysService,
     LeavesService,
     StudentAttendanceService,
+    TeacherAttendanceService,
     FeesService,
     FeeGroupsService,
     LibraryService,

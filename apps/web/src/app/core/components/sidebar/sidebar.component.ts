@@ -180,6 +180,11 @@ export class SidebarComponent {
           route: '/hrm/student-attendance',
           icon: 'briefcase',
         },
+        {
+          label: 'Teacher Attendance',
+          route: '/hrm/teacher-attendance',
+          icon: 'briefcase',
+        },
       ],
     },
     {
