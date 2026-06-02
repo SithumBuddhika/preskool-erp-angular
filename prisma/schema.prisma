@@ -299,6 +299,32 @@ model StaffLeave {
   @@map("staff_leaves")
 }
 
+enum StudentAttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  HALF_DAY
+}
+
+model StudentAttendance {
+  id                 String                  @id @default(uuid())
+  attendanceCode     String                  @unique
+  studentAdmissionNo String?
+  studentName        String
+  className          String
+  section            String?
+  attendanceDate     DateTime
+  status             StudentAttendanceStatus @default(PRESENT)
+  checkInTime        String?
+  checkOutTime       String?
+  remarks            String?
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+
+  @@unique([studentAdmissionNo, attendanceDate])
+  @@map("student_attendance")
+}
+
 enum FeeType {
   ADMISSION
   TUITION

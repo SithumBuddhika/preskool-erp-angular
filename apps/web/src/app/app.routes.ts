@@ -344,6 +344,23 @@ export const appRoutes: Routes = [
         pathMatch: 'full',
         redirectTo: 'hrm/leaves',
       },
+      {
+        path: 'hrm/student-attendance',
+        loadComponent: () =>
+          import(
+            './features/hrm/student-attendance/student-attendance.component'
+          ).then((m) => m.StudentAttendanceComponent),
+      },
+      {
+        path: 'hrm/student-attendances',
+        pathMatch: 'full',
+        redirectTo: 'hrm/student-attendance',
+      },
+      {
+        path: 'hrm/attendance',
+        pathMatch: 'full',
+        redirectTo: 'hrm/student-attendance',
+      },
 
       {
         path: 'reports',

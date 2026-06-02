@@ -175,6 +175,11 @@ export class SidebarComponent {
           route: '/hrm/leaves',
           icon: 'briefcase',
         },
+        {
+          label: 'Student Attendance',
+          route: '/hrm/student-attendance',
+          icon: 'briefcase',
+        },
       ],
     },
     {
