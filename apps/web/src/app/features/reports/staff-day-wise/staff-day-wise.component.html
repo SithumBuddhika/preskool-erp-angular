@@ -1,0 +1,292 @@
+<section class="staff-day-wise-page">
+  <div class="staff-day-wise-page__header">
+    <div>
+      <h1>Staff Day Wise</h1>
+      <p>Reports / Staff Day Wise</p>
+    </div>
+
+    <div class="header-actions">
+      <button class="secondary-btn" type="button" (click)="loadStaffs()">
+        Refresh
+      </button>
+
+      <button
+        class="primary-btn"
+        type="button"
+        (click)="exportCsv()"
+        [disabled]="staffRows().length === 0"
+      >
+        Export CSV
+      </button>
+    </div>
+  </div>
+
+  <app-report-tabs></app-report-tabs>
+
+  <div class="filters-card">
+    <div class="filter-group filter-group--wide">
+      <label>Search Staff</label>
+      <input
+        type="text"
+        placeholder="Search staff, department, designation..."
+        [value]="searchTerm()"
+        (input)="onSearchInput($event)"
+      />
+    </div>
+
+    <div class="filter-group">
+      <label>Month</label>
+      <input
+        type="month"
+        [value]="selectedMonth()"
+        (input)="onMonthInput($event)"
+      />
+    </div>
+
+    <div class="filter-group">
+      <label>Department</label>
+      <select
+        [value]="selectedDepartment()"
+        (change)="onDepartmentChange($event)"
+      >
+        <option value="ALL">All Departments</option>
+
+        @for (department of departmentOptions(); track department) {
+          <option [value]="department">{{ department }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Designation</label>
+      <select
+        [value]="selectedDesignation()"
+        (change)="onDesignationChange($event)"
+      >
+        <option value="ALL">All Designations</option>
+
+        @for (designation of designationOptions(); track designation) {
+          <option [value]="designation">{{ designation }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Employment</label>
+      <select
+        [value]="selectedEmploymentType()"
+        (change)="onEmploymentTypeChange($event)"
+      >
+        <option value="ALL">All Types</option>
+
+        @for (employmentType of employmentTypeOptions(); track employmentType) {
+          <option [value]="employmentType">{{ employmentType }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Status</label>
+      <select [value]="selectedStatus()" (change)="onStatusChange($event)">
+        <option value="ALL">All Status</option>
+        <option value="ACTIVE">Active</option>
+        <option value="INACTIVE">Inactive</option>
+      </select>
+    </div>
+
+    <button class="clear-btn" type="button" (click)="clearFilters()">
+      Clear Filters
+    </button>
+  </div>
+
+  <div class="month-card">
+    <div>
+      <span>Selected Month</span>
+      <strong>{{ selectedMonthLabel() }}</strong>
+    </div>
+
+    <p>
+      Showing {{ totalStaffs() }} staff member(s),
+      {{ totalActiveDays() }} active day marker(s),
+      {{ totalInactiveDays() }} inactive day marker(s).
+    </p>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">S</span>
+      <div>
+        <strong>{{ totalStaffs() }}</strong>
+        <p>Total Staffs</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ activeStaffs() }}</strong>
+        <p>Active Staffs</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--red">I</span>
+      <div>
+        <strong>{{ inactiveStaffs() }}</strong>
+        <p>Inactive Staffs</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">D</span>
+      <div>
+        <strong>{{ departmentOptions().length }}</strong>
+        <p>Departments</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">G</span>
+      <div>
+        <strong>{{ designationOptions().length }}</strong>
+        <p>Designations</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--teal">M</span>
+      <div>
+        <strong>{{ monthDays().length }}</strong>
+        <p>Month Days</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="legend-card">
+    <span><strong class="legend-dot legend-dot--active">A</strong> Active</span>
+    <span
+      ><strong class="legend-dot legend-dot--inactive">I</strong> Inactive</span
+    >
+  </div>
+
+  <div class="report-card">
+    <div class="report-card__top">
+      <div>
+        <h2>Staff Day Wise Matrix</h2>
+        <p>
+          Month-wise staff view based on current staff status. This can be
+          upgraded later after adding real staff attendance.
+        </p>
+      </div>
+
+      <span class="record-count"> {{ monthDays().length }} day column(s) </span>
+    </div>
+
+    @if (serverError()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="report-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="matrix-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="sticky-col sticky-staff">Staff</th>
+              <th>Department</th>
+              <th>Designation</th>
+              <th>Employment</th>
+              <th>Status</th>
+              <th>%</th>
+              <th>A</th>
+              <th>I</th>
+
+              @for (day of monthDays(); track day.dayNumber) {
+                <th class="day-heading">{{ day.label }}</th>
+              }
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (row of staffRows(); track row.staffKey) {
+              <tr>
+                <td class="sticky-col sticky-staff">
+                  <div class="staff-info">
+                    <span>{{ getStaffInitial(row) }}</span>
+
+                    <div>
+                      <strong>{{ row.staffName }}</strong>
+                      <p>{{ row.staffCode }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="department-pill">{{ row.department }}</span>
+                </td>
+
+                <td>{{ row.designation }}</td>
+                <td>{{ row.employmentType }}</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--inactive]="row.status === 'INACTIVE'"
+                  >
+                    {{ getStatusLabel(row.status) }}
+                  </span>
+                </td>
+
+                <td>
+                  <strong>{{ row.activeRate }}%</strong>
+                </td>
+
+                <td>
+                  <span class="mini-count mini-count--active">
+                    {{ row.activeDays }}
+                  </span>
+                </td>
+
+                <td>
+                  <span class="mini-count mini-count--inactive">
+                    {{ row.inactiveDays }}
+                  </span>
+                </td>
+
+                @for (day of monthDays(); track day.dayNumber) {
+                  <td class="day-cell">
+                    <span
+                      class="day-status"
+                      [class.day-status--inactive]="
+                        row.dayMap[day.dayNumber] === 'INACTIVE'
+                      "
+                    >
+                      {{ getStatusShortLabel(row.dayMap[day.dayNumber]) }}
+                    </span>
+                  </td>
+                }
+              </tr>
+            } @empty {
+              <tr>
+                <td [attr.colspan]="8 + monthDays().length">
+                  <div class="empty-state">
+                    <strong>No staff day-wise records found</strong>
+                    <p>
+                      Try changing the month, department, designation,
+                      employment type, status, or search keyword.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
