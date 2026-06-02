@@ -23,6 +23,8 @@ import { ParentsService } from './parents.service';
 import { PrismaService } from './prisma.service';
 import { StaffsController } from './staffs.controller';
 import { StaffsService } from './staffs.service';
+import { StudentAttendanceController } from './student-attendance.controller';
+import { StudentAttendanceService } from './student-attendance.service';
 import { StudentsController } from './students.controller';
 import { StudentsService } from './students.service';
 import { TeachersController } from './teachers.controller';
@@ -46,6 +48,7 @@ import { TeachersService } from './teachers.service';
     StaffsController,
     HolidaysController,
     LeavesController,
+    StudentAttendanceController,
     FeesController,
     FeeGroupsController,
     LibraryController,
@@ -61,6 +64,7 @@ import { TeachersService } from './teachers.service';
     StaffsService,
     HolidaysService,
     LeavesService,
+    StudentAttendanceService,
     FeesService,
     FeeGroupsService,
     LibraryService,
