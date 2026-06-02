@@ -190,11 +190,6 @@ export class SidebarComponent {
           route: '/reports/attendance',
           icon: 'report-analytics',
         },
-        {
-          label: 'Student Report',
-          route: '/reports/student',
-          icon: 'report-analytics',
-        },
       ],
     },
   ];

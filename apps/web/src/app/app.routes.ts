@@ -365,17 +365,24 @@ export const appRoutes: Routes = [
       {
         path: 'reports',
         pathMatch: 'full',
-        redirectTo: 'dashboard/admin',
+        redirectTo: 'reports/attendance',
       },
       {
         path: 'reports/attendance',
+        loadComponent: () =>
+          import(
+            './features/reports/attendance-report/attendance-report.component'
+          ).then((m) => m.AttendanceReportComponent),
+      },
+      {
+        path: 'reports/attendance-report',
         pathMatch: 'full',
-        redirectTo: 'dashboard/admin',
+        redirectTo: 'reports/attendance',
       },
       {
         path: 'reports/student',
         pathMatch: 'full',
-        redirectTo: 'dashboard/admin',
+        redirectTo: 'reports/attendance',
       },
 
       {
