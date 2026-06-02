@@ -380,6 +380,18 @@ export const appRoutes: Routes = [
         redirectTo: 'reports/attendance',
       },
       {
+        path: 'reports/student-attendance-type',
+        loadComponent: () =>
+          import(
+            './features/reports/student-attendance-type/student-attendance-type.component'
+          ).then((m) => m.StudentAttendanceTypeComponent),
+      },
+      {
+        path: 'reports/students-attendance-type',
+        pathMatch: 'full',
+        redirectTo: 'reports/student-attendance-type',
+      },
+      {
         path: 'reports/student',
         pathMatch: 'full',
         redirectTo: 'reports/attendance',

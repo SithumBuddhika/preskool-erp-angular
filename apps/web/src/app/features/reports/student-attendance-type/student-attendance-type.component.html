@@ -1,0 +1,377 @@
+<section class="student-attendance-type-page">
+  <div class="student-attendance-type-page__header">
+    <div>
+      <h1>Student Attendance Type</h1>
+      <p>Reports / Student Attendance Type</p>
+    </div>
+
+    <div class="header-actions">
+      <button
+        class="secondary-btn"
+        type="button"
+        (click)="loadAttendanceRecords()"
+      >
+        Refresh
+      </button>
+
+      <button
+        class="primary-btn"
+        type="button"
+        (click)="exportCsv()"
+        [disabled]="classWiseSummary().length === 0"
+      >
+        Export CSV
+      </button>
+    </div>
+  </div>
+
+  <nav class="report-tabs">
+    <a
+      routerLink="/reports/attendance"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      Attendance Report
+    </a>
+
+    <a
+      routerLink="/reports/student-attendance-type"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      Students Attendance Type
+    </a>
+
+    <a>Daily Attendance</a>
+    <a>Student Day Wise</a>
+    <a>Teacher Day Wise</a>
+    <a>Teacher Report</a>
+    <a>Staff Day Wise</a>
+    <a>Staff Report</a>
+  </nav>
+
+  <div class="filters-card">
+    <div class="filter-group filter-group--wide">
+      <label>Search</label>
+      <input
+        type="text"
+        placeholder="Search student, admission no, class..."
+        [value]="searchTerm()"
+        (input)="onSearchInput($event)"
+      />
+    </div>
+
+    <div class="filter-group">
+      <label>Date</label>
+      <input
+        type="date"
+        [value]="selectedDate()"
+        (input)="onDateInput($event)"
+      />
+    </div>
+
+    <div class="filter-group">
+      <label>Class</label>
+      <select [value]="selectedClass()" (change)="onClassChange($event)">
+        <option value="ALL">All Classes</option>
+
+        @for (className of classOptions(); track className) {
+          <option [value]="className">{{ className }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Attendance Type</label>
+      <select [value]="selectedStatus()" (change)="onStatusChange($event)">
+        <option value="ALL">All Types</option>
+        <option value="PRESENT">Present</option>
+        <option value="ABSENT">Absent</option>
+        <option value="LATE">Late</option>
+        <option value="HALF_DAY">Half Day</option>
+      </select>
+    </div>
+
+    <button class="clear-btn" type="button" (click)="clearFilters()">
+      Clear Filters
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">T</span>
+      <div>
+        <strong>{{ totalRecords() }}</strong>
+        <p>Total Records</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">P</span>
+      <div>
+        <strong>{{ presentCount() }}</strong>
+        <p>Present</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--red">A</span>
+      <div>
+        <strong>{{ absentCount() }}</strong>
+        <p>Absent</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">L</span>
+      <div>
+        <strong>{{ lateCount() }}</strong>
+        <p>Late</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">H</span>
+      <div>
+        <strong>{{ halfDayCount() }}</strong>
+        <p>Half Day</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--teal">%</span>
+      <div>
+        <strong>{{ attendanceRate() }}%</strong>
+        <p>Attendance Rate</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="report-grid">
+    <div class="report-card">
+      <div class="report-card__top">
+        <div>
+          <h2>Attendance Type Summary</h2>
+          <p>Status-wise attendance count and percentage.</p>
+        </div>
+
+        <span class="record-count">{{ totalRecords() }} records</span>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      @if (isLoading()) {
+        <div class="report-skeleton">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      } @else {
+        <div class="type-summary-list">
+          @for (row of typeSummary(); track row.status) {
+            <article class="type-summary-item">
+              <div class="type-summary-item__left">
+                <span
+                  class="type-badge"
+                  [class.type-badge--absent]="row.status === 'ABSENT'"
+                  [class.type-badge--late]="row.status === 'LATE'"
+                  [class.type-badge--half]="row.status === 'HALF_DAY'"
+                >
+                  {{ getStatusShortLabel(row.status) }}
+                </span>
+
+                <div>
+                  <strong>{{ row.label }}</strong>
+                  <p>{{ row.count }} student record(s)</p>
+                </div>
+              </div>
+
+              <div class="type-summary-item__right">
+                <strong>{{ row.percentage }}%</strong>
+                <div class="progress-track">
+                  <span
+                    [style.width.%]="row.percentage"
+                    [class.progress-bar--absent]="row.status === 'ABSENT'"
+                    [class.progress-bar--late]="row.status === 'LATE'"
+                    [class.progress-bar--half]="row.status === 'HALF_DAY'"
+                  ></span>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="report-card">
+      <div class="report-card__top">
+        <div>
+          <h2>Class Wise Type Report</h2>
+          <p>Breakdown of attendance types by class.</p>
+        </div>
+
+        <span class="record-count">
+          {{ classWiseSummary().length }} class(es)
+        </span>
+      </div>
+
+      @if (isLoading()) {
+        <div class="report-skeleton">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Class</th>
+                <th>Total</th>
+                <th>Present</th>
+                <th>Absent</th>
+                <th>Late</th>
+                <th>Half Day</th>
+                <th>Attendance Rate</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (row of classWiseSummary(); track row.classLabel) {
+                <tr>
+                  <td>
+                    <span class="class-pill">{{ row.classLabel }}</span>
+                  </td>
+                  <td>{{ row.total }}</td>
+                  <td>
+                    <span class="mini-count mini-count--present">
+                      {{ row.present }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="mini-count mini-count--absent">
+                      {{ row.absent }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="mini-count mini-count--late">
+                      {{ row.late }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="mini-count mini-count--half">
+                      {{ row.halfDay }}
+                    </span>
+                  </td>
+                  <td>
+                    <strong>{{ row.attendanceRate }}%</strong>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="7">
+                    <div class="empty-state">
+                      <strong>No class-wise records found</strong>
+                      <p>
+                        Try changing filters or add attendance records first.
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="report-card">
+    <div class="report-card__top">
+      <div>
+        <h2>Filtered Attendance Type Records</h2>
+        <p>
+          Detailed student records based on selected attendance type filters.
+        </p>
+      </div>
+
+      <span class="record-count">
+        Showing {{ filteredRecords().length }} of
+        {{ attendanceRecords().length }}
+      </span>
+    </div>
+
+    @if (isLoading()) {
+      <div class="report-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Attendance ID</th>
+              <th>Student</th>
+              <th>Admission No</th>
+              <th>Class</th>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Check In</th>
+              <th>Check Out</th>
+              <th>Remarks</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (record of filteredRecords(); track record.id) {
+              <tr>
+                <td>
+                  <span class="attendance-code">
+                    {{ record.attendanceCode }}
+                  </span>
+                </td>
+
+                <td>
+                  <strong>{{ record.studentName }}</strong>
+                </td>
+
+                <td>{{ record.studentAdmissionNo || 'Not added' }}</td>
+                <td>{{ getClassLabel(record) }}</td>
+                <td>{{ formatDisplayDate(record.attendanceDate) }}</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--absent]="record.status === 'ABSENT'"
+                    [class.status-pill--late]="record.status === 'LATE'"
+                    [class.status-pill--half]="record.status === 'HALF_DAY'"
+                  >
+                    {{ getStatusLabel(record.status) }}
+                  </span>
+                </td>
+
+                <td>{{ record.checkInTime || 'Not added' }}</td>
+                <td>{{ record.checkOutTime || 'Not added' }}</td>
+                <td>{{ record.remarks || 'No remarks' }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="9">
+                  <div class="empty-state">
+                    <strong>No detailed records found</strong>
+                    <p>Try changing filters or add attendance records first.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
