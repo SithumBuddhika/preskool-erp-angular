@@ -1,0 +1,264 @@
+import { Component, OnInit, computed, signal } from '@angular/core';
+import {
+  StudentAttendance,
+  StudentAttendanceStatus,
+} from '../../../core/models/student-attendance.model';
+import { StudentAttendanceService } from '../../../core/services/student-attendance.service';
+
+type AttendanceStatusFilter = StudentAttendanceStatus | 'ALL';
+
+@Component({
+  selector: 'app-attendance-report',
+  standalone: true,
+  imports: [],
+  templateUrl: './attendance-report.component.html',
+  styleUrl: './attendance-report.component.scss',
+})
+export class AttendanceReportComponent implements OnInit {
+  attendanceRecords = signal<StudentAttendance[]>([]);
+
+  isLoading = signal(false);
+  serverError = signal('');
+
+  searchTerm = signal('');
+  selectedDate = signal('');
+  selectedClass = signal('ALL');
+  selectedStatus = signal<AttendanceStatusFilter>('ALL');
+
+  filteredRecords = computed(() => {
+    const keyword = this.searchTerm().trim().toLowerCase();
+    const date = this.selectedDate();
+    const classFilter = this.selectedClass();
+    const statusFilter = this.selectedStatus();
+
+    return this.attendanceRecords().filter((record) => {
+      const recordDate = this.formatDateForInput(record.attendanceDate);
+      const classLabel = this.getClassLabel(record);
+
+      const searchableText = [
+        record.attendanceCode,
+        record.studentAdmissionNo,
+        record.studentName,
+        record.className,
+        record.section,
+        record.status,
+        record.checkInTime,
+        record.checkOutTime,
+        record.remarks,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+      const matchesSearch = !keyword || searchableText.includes(keyword);
+      const matchesDate = !date || recordDate === date;
+      const matchesClass = classFilter === 'ALL' || classLabel === classFilter;
+      const matchesStatus =
+        statusFilter === 'ALL' || record.status === statusFilter;
+
+      return matchesSearch && matchesDate && matchesClass && matchesStatus;
+    });
+  });
+
+  classOptions = computed(() => {
+    const classes = this.attendanceRecords()
+      .map((record) => this.getClassLabel(record))
+      .filter(Boolean);
+
+    return Array.from(new Set(classes)).sort((a, b) => a.localeCompare(b));
+  });
+
+  totalRecords = computed(() => this.filteredRecords().length);
+
+  presentCount = computed(
+    () =>
+      this.filteredRecords().filter((record) => record.status === 'PRESENT')
+        .length,
+  );
+
+  absentCount = computed(
+    () =>
+      this.filteredRecords().filter((record) => record.status === 'ABSENT')
+        .length,
+  );
+
+  lateCount = computed(
+    () =>
+      this.filteredRecords().filter((record) => record.status === 'LATE')
+        .length,
+  );
+
+  halfDayCount = computed(
+    () =>
+      this.filteredRecords().filter((record) => record.status === 'HALF_DAY')
+        .length,
+  );
+
+  attendancePercentage = computed(() => {
+    const total = this.totalRecords();
+
+    if (total === 0) {
+      return 0;
+    }
+
+    const attended =
+      this.presentCount() + this.lateCount() + this.halfDayCount();
+
+    return Math.round((attended / total) * 100);
+  });
+
+  constructor(
+    private readonly studentAttendanceService: StudentAttendanceService,
+  ) {}
+
+  ngOnInit(): void {
+    this.loadAttendanceRecords();
+  }
+
+  loadAttendanceRecords(): void {
+    this.isLoading.set(true);
+    this.serverError.set('');
+
+    this.studentAttendanceService.getAttendanceRecords().subscribe({
+      next: (records) => {
+        this.attendanceRecords.set(records);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        this.serverError.set(
+          error?.error?.message || 'Failed to load attendance report.',
+        );
+        this.isLoading.set(false);
+      },
+    });
+  }
+
+  onSearchInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.searchTerm.set(value);
+  }
+
+  onDateInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.selectedDate.set(value);
+  }
+
+  onClassChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.selectedClass.set(value);
+  }
+
+  onStatusChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement)
+      .value as AttendanceStatusFilter;
+
+    this.selectedStatus.set(value);
+  }
+
+  clearFilters(): void {
+    this.searchTerm.set('');
+    this.selectedDate.set('');
+    this.selectedClass.set('ALL');
+    this.selectedStatus.set('ALL');
+  }
+
+  exportCsv(): void {
+    const records = this.filteredRecords();
+
+    if (records.length === 0) {
+      return;
+    }
+
+    const headers = [
+      'Attendance ID',
+      'Admission No',
+      'Student Name',
+      'Class',
+      'Date',
+      'Status',
+      'Check In',
+      'Check Out',
+      'Remarks',
+    ];
+
+    const rows = records.map((record) => [
+      record.attendanceCode,
+      record.studentAdmissionNo || '',
+      record.studentName,
+      this.getClassLabel(record),
+      this.formatDisplayDate(record.attendanceDate),
+      this.getStatusLabel(record.status),
+      record.checkInTime || '',
+      record.checkOutTime || '',
+      record.remarks || '',
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map((row) => row.map((cell) => this.escapeCsvValue(cell)).join(','))
+      .join('\n');
+
+    const blob = new Blob([csvContent], {
+      type: 'text/csv;charset=utf-8;',
+    });
+
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = `attendance-report-${this.getTodayForFileName()}.csv`;
+    link.click();
+
+    window.URL.revokeObjectURL(url);
+  }
+
+  getClassLabel(record: StudentAttendance): string {
+    return `${record.className} ${record.section || ''}`.trim();
+  }
+
+  getStatusLabel(status: StudentAttendanceStatus): string {
+    return status
+      .toLowerCase()
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (letter) => letter.toUpperCase());
+  }
+
+  getAttendanceInitial(record: StudentAttendance): string {
+    return record.studentName
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((word) => word[0])
+      .join('')
+      .toUpperCase();
+  }
+
+  formatDisplayDate(date: string): string {
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+    });
+  }
+
+  formatTime(time?: string | null): string {
+    return time || 'Not added';
+  }
+
+  private formatDateForInput(date: string): string {
+    if (!date) {
+      return '';
+    }
+
+    return new Date(date).toISOString().split('T')[0];
+  }
+
+  private escapeCsvValue(value: string): string {
+    const safeValue = String(value).replace(/"/g, '""');
+
+    return `"${safeValue}"`;
+  }
+
+  private getTodayForFileName(): string {
+    return new Date().toISOString().split('T')[0];
+  }
+}
