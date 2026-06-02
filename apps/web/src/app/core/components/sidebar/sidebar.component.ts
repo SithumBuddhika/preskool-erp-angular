@@ -215,6 +215,11 @@ export class SidebarComponent {
           route: '/reports/teacher-day-wise',
           icon: 'report-analytics',
         },
+        {
+          label: 'Teacher Report',
+          route: '/reports/teacher-report',
+          icon: 'report-analytics',
+        },
       ],
     },
   ];

@@ -1,0 +1,281 @@
+<section class="teacher-report-page">
+  <div class="teacher-report-page__header">
+    <div>
+      <h1>Teacher Report</h1>
+      <p>Reports / Teacher Report</p>
+    </div>
+
+    <div class="header-actions">
+      <button class="secondary-btn" type="button" (click)="loadTeachers()">
+        Refresh
+      </button>
+
+      <button
+        class="primary-btn"
+        type="button"
+        (click)="exportCsv()"
+        [disabled]="filteredTeachers().length === 0"
+      >
+        Export CSV
+      </button>
+    </div>
+  </div>
+
+  <app-report-tabs></app-report-tabs>
+
+  <div class="filters-card">
+    <div class="filter-group filter-group--wide">
+      <label>Search Teacher</label>
+      <input
+        type="text"
+        placeholder="Search teacher, employee no, email, subject..."
+        [value]="searchTerm()"
+        (input)="onSearchInput($event)"
+      />
+    </div>
+
+    <div class="filter-group">
+      <label>Subject</label>
+      <select [value]="selectedSubject()" (change)="onSubjectChange($event)">
+        <option value="ALL">All Subjects</option>
+
+        @for (subject of subjectOptions(); track subject) {
+          <option [value]="subject">{{ subject }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Gender</label>
+      <select [value]="selectedGender()" (change)="onGenderChange($event)">
+        <option value="ALL">All Gender</option>
+        <option value="MALE">Male</option>
+        <option value="FEMALE">Female</option>
+        <option value="OTHER">Other</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Status</label>
+      <select [value]="selectedStatus()" (change)="onStatusChange($event)">
+        <option value="ALL">All Status</option>
+        <option value="ACTIVE">Active</option>
+        <option value="INACTIVE">Inactive</option>
+      </select>
+    </div>
+
+    <button class="clear-btn" type="button" (click)="clearFilters()">
+      Clear Filters
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">T</span>
+      <div>
+        <strong>{{ totalTeachers() }}</strong>
+        <p>Total Teachers</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ activeTeachers() }}</strong>
+        <p>Active Teachers</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--red">I</span>
+      <div>
+        <strong>{{ inactiveTeachers() }}</strong>
+        <p>Inactive Teachers</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">M</span>
+      <div>
+        <strong>{{ maleTeachers() }}</strong>
+        <p>Male Teachers</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">F</span>
+      <div>
+        <strong>{{ femaleTeachers() }}</strong>
+        <p>Female Teachers</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--teal">O</span>
+      <div>
+        <strong>{{ otherGenderTeachers() }}</strong>
+        <p>Other Gender</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="report-card">
+    <div class="report-card__top">
+      <div>
+        <h2>Subject Wise Teacher Summary</h2>
+        <p>Teacher distribution grouped by teaching subject.</p>
+      </div>
+
+      <span class="record-count">
+        {{ subjectSummary().length }} subject(s)
+      </span>
+    </div>
+
+    @if (isLoading()) {
+      <div class="report-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th>Total Teachers</th>
+              <th>Active</th>
+              <th>Inactive</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (row of subjectSummary(); track row.subject) {
+              <tr>
+                <td>
+                  <span class="subject-pill">{{ row.subject }}</span>
+                </td>
+                <td>{{ row.total }}</td>
+                <td>
+                  <span class="mini-count mini-count--active">
+                    {{ row.active }}
+                  </span>
+                </td>
+                <td>
+                  <span class="mini-count mini-count--inactive">
+                    {{ row.inactive }}
+                  </span>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4">
+                  <div class="empty-state">
+                    <strong>No subject summary found</strong>
+                    <p>Try changing filters or add teacher records first.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <div class="report-card">
+    <div class="report-card__top">
+      <div>
+        <h2>Teacher Report List</h2>
+        <p>Detailed teacher information from the teachers database.</p>
+      </div>
+
+      <span class="record-count">
+        Showing {{ filteredTeachers().length }} of {{ teachers().length }}
+      </span>
+    </div>
+
+    @if (serverError()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="report-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Employee No</th>
+              <th>Teacher</th>
+              <th>Subject</th>
+              <th>Gender</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>Qualification</th>
+              <th>Joining Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (teacher of filteredTeachers(); track teacher.id) {
+              <tr>
+                <td>
+                  <span class="employee-code">
+                    {{ teacher.employeeNo }}
+                  </span>
+                </td>
+
+                <td>
+                  <div class="teacher-info">
+                    <span>{{ getTeacherInitial(teacher) }}</span>
+
+                    <div>
+                      <strong>{{ teacher.fullName }}</strong>
+                      <p>{{ teacher.address || 'No address' }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="subject-pill">{{ teacher.subject }}</span>
+                </td>
+
+                <td>{{ getGenderLabel(teacher.gender) }}</td>
+                <td>{{ teacher.phone }}</td>
+                <td>{{ teacher.email }}</td>
+                <td>{{ teacher.qualification || 'Not added' }}</td>
+                <td>{{ formatDisplayDate(teacher.joiningDate) }}</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--inactive]="
+                      teacher.status === 'INACTIVE'
+                    "
+                  >
+                    {{ getStatusLabel(teacher.status) }}
+                  </span>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="9">
+                  <div class="empty-state">
+                    <strong>No teacher records found</strong>
+                    <p>Try changing filters or add teacher records first.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
