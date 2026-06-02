@@ -332,6 +332,18 @@ export const appRoutes: Routes = [
         pathMatch: 'full',
         redirectTo: 'hrm/holidays',
       },
+      {
+        path: 'hrm/leaves',
+        loadComponent: () =>
+          import('./features/hrm/leaves/leaves.component').then(
+            (m) => m.LeavesComponent,
+          ),
+      },
+      {
+        path: 'hrm/leave',
+        pathMatch: 'full',
+        redirectTo: 'hrm/leaves',
+      },
 
       {
         path: 'reports',

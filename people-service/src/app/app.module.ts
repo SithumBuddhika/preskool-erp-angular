@@ -14,6 +14,8 @@ import { GuardiansController } from './guardians.controller';
 import { GuardiansService } from './guardians.service';
 import { HolidaysController } from './holidays.controller';
 import { HolidaysService } from './holidays.service';
+import { LeavesController } from './leaves.controller';
+import { LeavesService } from './leaves.service';
 import { LibraryController } from './library.controller';
 import { LibraryService } from './library.service';
 import { ParentsController } from './parents.controller';
@@ -43,6 +45,7 @@ import { TeachersService } from './teachers.service';
     DesignationsController,
     StaffsController,
     HolidaysController,
+    LeavesController,
     FeesController,
     FeeGroupsController,
     LibraryController,
@@ -57,6 +60,7 @@ import { TeachersService } from './teachers.service';
     DesignationsService,
     StaffsService,
     HolidaysService,
+    LeavesService,
     FeesService,
     FeeGroupsService,
     LibraryService,
