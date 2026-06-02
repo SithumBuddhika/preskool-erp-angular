@@ -292,11 +292,21 @@ export const appRoutes: Routes = [
           ),
       },
       {
+        path: 'hrm/department',
+        pathMatch: 'full',
+        redirectTo: 'hrm/departments',
+      },
+      {
         path: 'hrm/designations',
         loadComponent: () =>
           import('./features/hrm/designations/designations.component').then(
             (m) => m.DesignationsComponent,
           ),
+      },
+      {
+        path: 'hrm/designation',
+        pathMatch: 'full',
+        redirectTo: 'hrm/designations',
       },
       {
         path: 'hrm/staffs',
@@ -306,11 +316,21 @@ export const appRoutes: Routes = [
           ),
       },
       {
+        path: 'hrm/staff',
+        pathMatch: 'full',
+        redirectTo: 'hrm/staffs',
+      },
+      {
         path: 'hrm/holidays',
         loadComponent: () =>
           import('./features/hrm/holidays/holidays.component').then(
             (m) => m.HolidaysComponent,
           ),
+      },
+      {
+        path: 'hrm/holiday',
+        pathMatch: 'full',
+        redirectTo: 'hrm/holidays',
       },
       {
         path: 'hrm/leaves',
@@ -320,11 +340,33 @@ export const appRoutes: Routes = [
           ),
       },
       {
+        path: 'hrm/leave',
+        pathMatch: 'full',
+        redirectTo: 'hrm/leaves',
+      },
+      {
         path: 'hrm/student-attendance',
         loadComponent: () =>
           import(
             './features/hrm/student-attendance/student-attendance.component'
           ).then((m) => m.StudentAttendanceComponent),
+      },
+      {
+        path: 'hrm/student-attendances',
+        pathMatch: 'full',
+        redirectTo: 'hrm/student-attendance',
+      },
+      {
+        path: 'hrm/teacher-attendance',
+        loadComponent: () =>
+          import(
+            './features/hrm/teacher-attendance/teacher-attendance.component'
+          ).then((m) => m.TeacherAttendanceComponent),
+      },
+      {
+        path: 'hrm/teacher-attendances',
+        pathMatch: 'full',
+        redirectTo: 'hrm/teacher-attendance',
       },
 
       {

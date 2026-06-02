@@ -1,0 +1,409 @@
+<section class="teacher-attendance-page">
+  <div class="teacher-attendance-page__header">
+    <div>
+      <h1>Teacher Attendance</h1>
+      <p>HRM / Teacher Attendance</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Attendance
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">A</span>
+      <div>
+        <strong>{{ attendanceRecords().length }}</strong>
+        <p>Total Records</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">P</span>
+      <div>
+        <strong>{{ presentCount() }}</strong>
+        <p>Present</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">L</span>
+      <div>
+        <strong>{{ lateCount() }}</strong>
+        <p>Late</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--red">Ab</span>
+      <div>
+        <strong>{{ absentCount() }}</strong>
+        <p>Absent</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="teacher-attendance-card">
+    <div class="teacher-attendance-card__top">
+      <div>
+        <h2>Teacher Attendance List</h2>
+        <p>
+          Manage daily teacher attendance with teacher autocomplete and subject
+          autofill.
+        </p>
+      </div>
+
+      <div class="attendance-search">
+        <input
+          type="text"
+          placeholder="Search teacher attendance..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showAttendanceModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="attendance-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Attendance ID</th>
+              <th>Teacher</th>
+              <th>Subject</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Check In</th>
+              <th>Check Out</th>
+              <th>Remarks</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (attendance of attendanceRecords(); track attendance.id) {
+              <tr>
+                <td>
+                  <span class="attendance-code">
+                    {{ attendance.attendanceCode }}
+                  </span>
+                </td>
+
+                <td>
+                  <div class="teacher-info">
+                    <span>{{ getAttendanceInitial(attendance) }}</span>
+
+                    <div>
+                      <strong>{{ attendance.teacherName }}</strong>
+                      <p>
+                        {{ attendance.teacherEmployeeNo || 'No employee no' }}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="subject-pill">
+                    {{ attendance.subject || 'Not added' }}
+                  </span>
+                </td>
+
+                <td>{{ formatDisplayDate(attendance.attendanceDate) }}</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--absent]="attendance.status === 'ABSENT'"
+                    [class.status-pill--late]="attendance.status === 'LATE'"
+                    [class.status-pill--half]="attendance.status === 'HALF_DAY'"
+                  >
+                    {{ getStatusLabel(attendance.status) }}
+                  </span>
+                </td>
+
+                <td>{{ attendance.checkInTime || 'Not added' }}</td>
+                <td>{{ attendance.checkOutTime || 'Not added' }}</td>
+                <td>{{ attendance.remarks || 'No remarks' }}</td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(attendance)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(attendance)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="9">
+                  <div class="empty-state">
+                    <strong>No teacher attendance records found</strong>
+                    <p>
+                      Add your first teacher attendance record or change your
+                      search keyword.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showAttendanceModal()) {
+  <div class="modal-backdrop">
+    <form
+      class="attendance-modal"
+      [formGroup]="attendanceForm"
+      (ngSubmit)="saveAttendance()"
+    >
+      <div class="attendance-modal__header">
+        <div>
+          <h2>
+            {{
+              isEditMode()
+                ? 'Edit Teacher Attendance'
+                : 'Add New Teacher Attendance'
+            }}
+          </h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update teacher daily attendance information.'
+                : 'Create a teacher attendance record using teacher suggestions.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeAttendanceModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Attendance ID
+          <input
+            type="text"
+            formControlName="attendanceCode"
+            placeholder="Example: TATT-0001"
+          />
+
+          @if (isInvalid('attendanceCode')) {
+            <small>Attendance ID is required.</small>
+          }
+        </label>
+
+        <label class="autocomplete-field">
+          Teacher
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="teacherName"
+              placeholder="Type teacher name..."
+              autocomplete="off"
+              (input)="onTeacherInput($event)"
+              (focus)="onTeacherFocus()"
+              (blur)="onTeacherBlur()"
+            />
+
+            @if (isInvalid('teacherName')) {
+              <small>Teacher name is required.</small>
+            }
+
+            @if (showTeacherSuggestions() && filteredTeachers().length > 0) {
+              <div class="suggestions-panel">
+                @for (teacher of filteredTeachers(); track teacher.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectTeacher(teacher)"
+                  >
+                    <span>{{ getTeacherInitial(teacher) }}</span>
+
+                    <div>
+                      <strong>{{ teacher.fullName }}</strong>
+                      <p>{{ teacher.employeeNo }} · {{ teacher.subject }}</p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showTeacherSuggestions() &&
+              teacherSearchTerm().trim() &&
+              filteredTeachers().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching teacher found
+              </div>
+            }
+          </div>
+        </label>
+
+        <label>
+          Employee No
+          <input
+            type="text"
+            formControlName="teacherEmployeeNo"
+            placeholder="Auto-filled from teacher"
+            readonly
+          />
+        </label>
+
+        <label>
+          Subject
+          <input
+            type="text"
+            formControlName="subject"
+            placeholder="Auto-filled from teacher"
+            readonly
+          />
+        </label>
+
+        <label>
+          Attendance Date
+          <input type="date" formControlName="attendanceDate" />
+
+          @if (isInvalid('attendanceDate')) {
+            <small>Attendance date is required.</small>
+          }
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="PRESENT">Present</option>
+            <option value="ABSENT">Absent</option>
+            <option value="LATE">Late</option>
+            <option value="HALF_DAY">Half Day</option>
+          </select>
+        </label>
+
+        <label>
+          Check In Time
+          <input type="time" formControlName="checkInTime" />
+        </label>
+
+        <label>
+          Check Out Time
+          <input type="time" formControlName="checkOutTime" />
+        </label>
+
+        <label class="form-grid__full">
+          Remarks
+          <textarea
+            formControlName="remarks"
+            rows="3"
+            placeholder="Optional attendance remarks"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="attendance-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeAttendanceModal()"
+          [disabled]="isSubmitting()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Attendance'
+                : 'Save Attendance'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (attendanceToDelete(); as attendance) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Attendance?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong
+          >{{ attendance.attendanceCode }} -
+          {{ attendance.teacherName }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteAttendance()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Attendance' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}

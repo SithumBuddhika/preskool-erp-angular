@@ -325,6 +325,31 @@ model StudentAttendance {
   @@map("student_attendance")
 }
 
+enum TeacherAttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  HALF_DAY
+}
+
+model TeacherAttendance {
+  id                String                  @id @default(uuid())
+  attendanceCode    String                  @unique
+  teacherEmployeeNo String?
+  teacherName       String
+  subject           String?
+  attendanceDate    DateTime
+  status            TeacherAttendanceStatus @default(PRESENT)
+  checkInTime       String?
+  checkOutTime      String?
+  remarks           String?
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+
+  @@unique([teacherEmployeeNo, attendanceDate])
+  @@map("teacher_attendance")
+}
+
 enum FeeType {
   ADMISSION
   TUITION
