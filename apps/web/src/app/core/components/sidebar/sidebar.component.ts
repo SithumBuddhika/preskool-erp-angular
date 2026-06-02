@@ -190,6 +190,11 @@ export class SidebarComponent {
           route: '/reports/attendance',
           icon: 'report-analytics',
         },
+        {
+          label: 'Student Attendance Type',
+          route: '/reports/student-attendance-type',
+          icon: 'report-analytics',
+        },
       ],
     },
   ];
