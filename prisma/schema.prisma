@@ -448,6 +448,38 @@ model FeeGroup {
   @@map("fee_groups")
 }
 
+enum LibraryMemberType {
+  STUDENT
+  TEACHER
+  STAFF
+}
+
+enum LibraryMemberStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+}
+
+model LibraryMember {
+  id            String              @id @default(uuid())
+  memberCode    String              @unique
+  memberType    LibraryMemberType
+  referenceCode String?
+  memberName    String
+  className     String?
+  department    String?
+  phone         String?
+  email         String?
+  joinDate      DateTime
+  status        LibraryMemberStatus @default(ACTIVE)
+  notes         String?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  @@unique([memberType, referenceCode])
+  @@map("library_members")
+}
+
 enum LibraryBookStatus {
   AVAILABLE
   UNAVAILABLE

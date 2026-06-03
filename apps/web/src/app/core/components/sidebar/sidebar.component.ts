@@ -141,8 +141,13 @@ export class SidebarComponent {
           icon: 'briefcase',
         },
         {
-          label: 'Library',
+          label: 'Library Books',
           route: '/management/library',
+          icon: 'briefcase',
+        },
+        {
+          label: 'Library Members',
+          route: '/management/library-members',
           icon: 'briefcase',
         },
       ],

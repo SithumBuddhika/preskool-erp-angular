@@ -18,6 +18,8 @@ import { LeavesController } from './leaves.controller';
 import { LeavesService } from './leaves.service';
 import { LibraryController } from './library.controller';
 import { LibraryService } from './library.service';
+import { LibraryMembersController } from './library-members.controller';
+import { LibraryMembersService } from './library-members.service';
 import { ParentsController } from './parents.controller';
 import { ParentsService } from './parents.service';
 import { PayrollController } from './payroll.controller';
@@ -58,6 +60,7 @@ import { TeachersService } from './teachers.service';
     FeesController,
     FeeGroupsController,
     LibraryController,
+    LibraryMembersController,
   ],
   providers: [
     AppService,
@@ -76,6 +79,7 @@ import { TeachersService } from './teachers.service';
     FeesService,
     FeeGroupsService,
     LibraryService,
+    LibraryMembersService,
     PrismaService,
   ],
 })

@@ -1,0 +1,435 @@
+<section class="library-members-page">
+  <div class="library-members-page__header">
+    <div>
+      <h1>Library Members</h1>
+      <p>Management / Library Members</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Member
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">M</span>
+      <div>
+        <strong>{{ members().length }}</strong>
+        <p>Total Members</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ activeMembers() }}</strong>
+        <p>Active Members</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">B</span>
+      <div>
+        <strong>{{ blockedMembers() }}</strong>
+        <p>Blocked Members</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">S</span>
+      <div>
+        <strong>{{ studentMembers() }}</strong>
+        <p>Student Members</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="members-card">
+    <div class="members-card__top">
+      <div>
+        <h2>Member List</h2>
+        <p>
+          Manage student, teacher, and staff library memberships with reference
+          details.
+        </p>
+      </div>
+
+      <div class="members-search">
+        <input
+          type="text"
+          placeholder="Search members..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showMemberModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="members-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Member Code</th>
+              <th>Member</th>
+              <th>Type</th>
+              <th>Reference</th>
+              <th>Class / Department</th>
+              <th>Contact</th>
+              <th>Join Date</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (member of members(); track member.id) {
+              <tr>
+                <td>
+                  <span class="member-code">{{ member.memberCode }}</span>
+                </td>
+
+                <td>
+                  <div class="member-info">
+                    <span>{{ getMemberInitial(member) }}</span>
+
+                    <div>
+                      <strong>{{ member.memberName }}</strong>
+                      <p>{{ member.notes || 'No notes added' }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="type-pill">
+                    {{ getMemberTypeLabel(member.memberType) }}
+                  </span>
+                </td>
+
+                <td>{{ member.referenceCode || '-' }}</td>
+
+                <td>
+                  @if (member.className) {
+                    {{ member.className }}
+                  } @else if (member.department) {
+                    {{ member.department }}
+                  } @else {
+                    -
+                  }
+                </td>
+
+                <td>
+                  <div class="contact-cell">
+                    <span>{{ member.phone || '-' }}</span>
+                    <small>{{ member.email || '-' }}</small>
+                  </div>
+                </td>
+
+                <td>{{ formatDisplayDate(member.joinDate) }}</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--inactive]="member.status === 'INACTIVE'"
+                    [class.status-pill--blocked]="member.status === 'BLOCKED'"
+                  >
+                    {{ getStatusLabel(member.status) }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(member)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(member)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="9">
+                  <div class="empty-state">
+                    <strong>No library members found</strong>
+                    <p>Add your first member or change your search keyword.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showMemberModal()) {
+  <div class="modal-backdrop">
+    <form
+      class="member-modal"
+      [formGroup]="memberForm"
+      (ngSubmit)="saveMember()"
+    >
+      <div class="member-modal__header">
+        <div>
+          <h2>{{ isEditMode() ? 'Edit Member' : 'Add New Member' }}</h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update library membership details and current status.'
+                : 'Create a library member from existing student, teacher, or staff records.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeMemberModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Member Code
+          <input
+            type="text"
+            formControlName="memberCode"
+            placeholder="Example: LM-0001"
+          />
+
+          @if (isInvalid('memberCode')) {
+            <small>Member code is required.</small>
+          }
+        </label>
+
+        <label>
+          Member Type
+          <select formControlName="memberType" (change)="onMemberTypeChange()">
+            <option value="STUDENT">Student</option>
+            <option value="TEACHER">Teacher</option>
+            <option value="STAFF">Staff</option>
+          </select>
+        </label>
+
+        <label class="autocomplete-field">
+          {{ getReferenceLabel() }}
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="memberName"
+              [placeholder]="getReferencePlaceholder()"
+              autocomplete="off"
+              (input)="onMemberSearchInput($event)"
+              (focus)="onMemberSearchFocus()"
+              (blur)="onMemberSearchBlur()"
+            />
+
+            @if (isInvalid('memberName')) {
+              <small>Member name is required.</small>
+            }
+
+            @if (showMemberSuggestions() && memberSuggestions().length > 0) {
+              <div class="suggestions-panel">
+                @for (suggestion of memberSuggestions(); track suggestion.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectMemberSuggestion(suggestion)"
+                  >
+                    <span>{{ getSuggestionInitial(suggestion) }}</span>
+
+                    <div>
+                      <strong>{{ suggestion.memberName }}</strong>
+                      <p>{{ suggestion.description }}</p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showMemberSuggestions() &&
+              memberSearchTerm().trim() &&
+              memberSuggestions().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching record found
+              </div>
+            }
+          </div>
+        </label>
+
+        <label>
+          Reference Code
+          <input
+            type="text"
+            formControlName="referenceCode"
+            placeholder="Auto-filled from selected record"
+          />
+        </label>
+
+        <label>
+          Class
+          <input
+            type="text"
+            formControlName="className"
+            placeholder="Student class if applicable"
+          />
+        </label>
+
+        <label>
+          Department / Subject
+          <input
+            type="text"
+            formControlName="department"
+            placeholder="Department or subject"
+          />
+        </label>
+
+        <label>
+          Phone
+          <input
+            type="text"
+            formControlName="phone"
+            placeholder="Enter phone number"
+          />
+        </label>
+
+        <label>
+          Email
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="Enter email address"
+          />
+
+          @if (isInvalid('email')) {
+            <small>Enter a valid email address.</small>
+          }
+        </label>
+
+        <label>
+          Join Date
+          <input type="date" formControlName="joinDate" />
+
+          @if (isInvalid('joinDate')) {
+            <small>Join date is required.</small>
+          }
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+            <option value="BLOCKED">Blocked</option>
+          </select>
+        </label>
+
+        <label class="form-grid__full">
+          Notes
+          <textarea
+            formControlName="notes"
+            rows="3"
+            placeholder="Enter membership notes"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="member-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeMemberModal()"
+          [disabled]="isSubmitting()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Member'
+                : 'Save Member'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (memberToDelete(); as member) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Member?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ member.memberCode }} - {{ member.memberName }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteMember()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Member' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}
