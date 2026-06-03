@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+
 import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
 
@@ -8,7 +9,6 @@ export const appRoutes: Routes = [
     pathMatch: 'full',
     redirectTo: 'dashboard/admin',
   },
-
   {
     path: 'auth',
     canActivate: [guestGuard],
@@ -73,7 +73,6 @@ export const appRoutes: Routes = [
       },
     ],
   },
-
   {
     path: '',
     canActivate: [authGuard],
@@ -245,7 +244,7 @@ export const appRoutes: Routes = [
       {
         path: 'management',
         pathMatch: 'full',
-        redirectTo: 'management/fees',
+        redirectTo: 'management/fee-groups',
       },
       {
         path: 'management/fee-groups',
@@ -278,6 +277,18 @@ export const appRoutes: Routes = [
             (m) => m.LibraryComponent,
           ),
       },
+      {
+        path: 'management/library-books',
+        pathMatch: 'full',
+        redirectTo: 'management/library',
+      },
+      {
+        path: 'management/library-members',
+        loadComponent: () =>
+          import(
+            './features/management/library-members/library-members.component'
+          ).then((m) => m.LibraryMembersComponent),
+      },
 
       {
         path: 'hrm',
@@ -292,6 +303,11 @@ export const appRoutes: Routes = [
           ),
       },
       {
+        path: 'hrm/department',
+        pathMatch: 'full',
+        redirectTo: 'hrm/departments',
+      },
+      {
         path: 'hrm/designations',
         loadComponent: () =>
           import('./features/hrm/designations/designations.component').then(
@@ -299,11 +315,21 @@ export const appRoutes: Routes = [
           ),
       },
       {
+        path: 'hrm/designation',
+        pathMatch: 'full',
+        redirectTo: 'hrm/designations',
+      },
+      {
         path: 'hrm/staffs',
         loadComponent: () =>
           import('./features/hrm/staffs/staffs.component').then(
             (m) => m.StaffsComponent,
           ),
+      },
+      {
+        path: 'hrm/staff',
+        pathMatch: 'full',
+        redirectTo: 'hrm/staffs',
       },
       {
         path: 'hrm/holidays',
@@ -318,6 +344,11 @@ export const appRoutes: Routes = [
           import('./features/hrm/leaves/leaves.component').then(
             (m) => m.LeavesComponent,
           ),
+      },
+      {
+        path: 'hrm/leave',
+        pathMatch: 'full',
+        redirectTo: 'hrm/leaves',
       },
       {
         path: 'hrm/student-attendance',
@@ -409,7 +440,6 @@ export const appRoutes: Routes = [
       },
     ],
   },
-
   {
     path: '**',
     redirectTo: 'dashboard/admin',
