@@ -3,45 +3,387 @@
     <app-page-title title="Admin Dashboard" current="Admin Dashboard" />
 
     <div class="admin-dashboard__actions">
-      <button type="button" class="primary-btn">Add New Student</button>
-      <button type="button" class="secondary-btn">Fees Details</button>
+      <a routerLink="/people/students" class="primary-link-btn">
+        Add New Student
+      </a>
+
+      <a routerLink="/management/fees" class="secondary-link-btn">
+        Fees Details
+      </a>
+
+      <button type="button" class="secondary-btn" (click)="refreshDashboard()">
+        Refresh
+      </button>
     </div>
   </div>
 
-  <app-payment-alert />
+  <section class="real-dashboard-welcome">
+    <div>
+      <span>School ERP Overview</span>
+      <h2>Welcome back, {{ currentAdminName() }}</h2>
+      <p>
+        Monitor students, staff, fees, attendance, leave requests, library,
+        transport, hostels, and sports from one live dashboard.
+      </p>
+    </div>
 
-  <app-welcome-banner />
+    <div class="real-dashboard-welcome__meta">
+      <strong>{{ attendancePercent() }}%</strong>
+      <span>Today Attendance</span>
+      <small>{{ attendanceSummary()?.present || 0 }} present records</small>
+    </div>
+  </section>
 
-  <div class="admin-dashboard__stats">
-    @for (card of statCards; track card.label) {
-      <app-stat-card
-        [short]="card.short"
-        [label]="card.label"
-        [value]="card.value"
-        [badge]="card.badge"
-        [active]="card.active"
-        [inactive]="card.inactive"
-        [color]="card.color"
-      />
-    }
+  @if (dashboardError()) {
+    <p class="dashboard-error">{{ dashboardError() }}</p>
+  }
+
+  @if (isDashboardLoading()) {
+    <div class="stats-skeleton">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  } @else {
+    <div class="admin-dashboard__stats">
+      @for (card of statCards(); track card.label) {
+        <app-stat-card
+          [short]="card.short"
+          [label]="card.label"
+          [value]="card.value"
+          [badge]="card.badge"
+          [active]="card.active"
+          [inactive]="card.inactive"
+          [color]="card.color"
+        />
+      }
+    </div>
+  }
+
+  <div class="dashboard-content-grid">
+    <section class="dashboard-card dashboard-card--fees">
+      <div class="dashboard-card__header">
+        <div>
+          <h3>Fees Collection</h3>
+          <p>Real collection progress from fee records</p>
+        </div>
+
+        <a routerLink="/management/fees">View All</a>
+      </div>
+
+      <div class="fee-summary-row">
+        <article>
+          <span>Total Fees</span>
+          <strong>{{ formatMoney(feeSummary()?.totalAmount) }}</strong>
+        </article>
+
+        <article>
+          <span>Collected</span>
+          <strong>{{ formatMoney(feeSummary()?.collectedAmount) }}</strong>
+        </article>
+
+        <article>
+          <span>Pending</span>
+          <strong>{{ formatMoney(feeSummary()?.pendingAmount) }}</strong>
+        </article>
+      </div>
+
+      @if (isDashboardLoading()) {
+        <div class="chart-skeleton"></div>
+      } @else {
+        <div class="fee-chart">
+          @for (bar of feeBars(); track bar.label) {
+            <div class="fee-chart__item">
+              <div class="fee-chart__bar">
+                <span [style.height.%]="bar.collected"></span>
+              </div>
+              <small>{{ bar.label }}</small>
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="dashboard-card dashboard-card--leave">
+      <div class="dashboard-card__header">
+        <div>
+          <h3>Leave Requests</h3>
+          <p>Recent HRM leave records</p>
+        </div>
+
+        <a routerLink="/hrm/leaves">View</a>
+      </div>
+
+      @for (leave of recentLeaves(); track $index) {
+        <div class="leave-request-card">
+          <div class="leave-request-card__avatar">
+            {{ leave.staffName.charAt(0).toUpperCase() }}
+          </div>
+
+          <div class="leave-request-card__content">
+            <div>
+              <strong>{{ leave.staffName }}</strong>
+              <span>{{ formatLeaveType(leave.leaveType) }}</span>
+            </div>
+
+            <p>{{ leave.designation || 'Staff Member' }}</p>
+
+            <small>
+              Leave :
+              {{ formatDate(leave.startDate) }} -
+              {{ formatDate(leave.endDate) }}
+            </small>
+          </div>
+        </div>
+      } @empty {
+        <div class="empty-widget-state">
+          <strong>No recent leave requests</strong>
+          <p>Leave requests will appear here.</p>
+        </div>
+      }
+    </section>
+
+    <section class="dashboard-card dashboard-card--schedule">
+      <div class="dashboard-card__header">
+        <div>
+          <h3>Schedules</h3>
+          <p>{{ currentMonthLabel() }}</p>
+        </div>
+
+        <a routerLink="/academic/time-table">Time Table</a>
+      </div>
+
+      <div class="mini-calendar">
+        @for (day of calendarDays(); track $index) {
+          <span [class.active]="day.active" [title]="day.title">
+            {{ day.label }}
+          </span>
+        }
+      </div>
+
+      <div class="upcoming-events">
+        <h4>Upcoming Events</h4>
+
+        @for (leave of recentLeaves(); track $index) {
+          <div class="event-card">
+            <span class="event-card__icon">📅</span>
+
+            <div>
+              <strong>{{ leave.staffName }} Leave</strong>
+              <p>
+                {{ formatLeaveType(leave.leaveType) }} /
+                {{ formatDate(leave.startDate) }}
+              </p>
+            </div>
+          </div>
+        } @empty {
+          <div class="event-card">
+            <span class="event-card__icon">📌</span>
+
+            <div>
+              <strong>No upcoming events</strong>
+              <p>Holiday/Event management can be added later</p>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="dashboard-card dashboard-card--attendance">
+      <div class="dashboard-card__header">
+        <div>
+          <h3>Attendance</h3>
+          <p>Today real attendance</p>
+        </div>
+
+        <a routerLink="/reports/daily-attendance">Report</a>
+      </div>
+
+      <div class="attendance-tabs">
+        <span class="active">Students</span>
+        <span>Teachers</span>
+        <span>Staff</span>
+      </div>
+
+      <div class="attendance-counts">
+        <article>
+          <strong>{{ attendanceSummary()?.absent || 0 }}</strong>
+          <span>Absent</span>
+        </article>
+
+        <article>
+          <strong>{{ attendanceSummary()?.late || 0 }}</strong>
+          <span>Late</span>
+        </article>
+
+        <article>
+          <strong>{{ attendanceSummary()?.halfDay || 0 }}</strong>
+          <span>Half Day</span>
+        </article>
+      </div>
+
+      <div
+        class="attendance-ring"
+        [style.background]="attendanceRingBackground()"
+      >
+        <div>
+          <strong>{{ attendanceSummary()?.present || 0 }}</strong>
+          <span>Present</span>
+        </div>
+      </div>
+
+      <a routerLink="/reports/daily-attendance" class="view-attendance-btn">
+        View All
+      </a>
+    </section>
+
+    <section class="dashboard-card dashboard-card--notice">
+      <div class="dashboard-card__header">
+        <div>
+          <h3>Notice Board</h3>
+          <p>Live ERP module summary</p>
+        </div>
+
+        <a routerLink="/dashboard/admin">Live Data</a>
+      </div>
+
+      <div class="notice-list">
+        <article>
+          <span class="notice-icon is-blue">LB</span>
+          <div>
+            <strong
+              >Library has {{ quickSummary()?.libraryBooks || 0 }} books</strong
+            >
+            <p>{{ quickSummary()?.libraryMembers || 0 }} library members</p>
+          </div>
+          <small>Live</small>
+        </article>
+
+        <article>
+          <span class="notice-icon is-green">RT</span>
+          <div>
+            <strong
+              >{{ quickSummary()?.routes || 0 }} transport routes added</strong
+            >
+            <p>{{ quickSummary()?.hostels || 0 }} hostel records available</p>
+          </div>
+          <small>Live</small>
+        </article>
+
+        <article>
+          <span class="notice-icon is-orange">SP</span>
+          <div>
+            <strong>{{ quickSummary()?.sports || 0 }} sports activities</strong>
+            <p>
+              {{ quickSummary()?.sportParticipants || 0 }} current participants
+            </p>
+          </div>
+          <small>Live</small>
+        </article>
+
+        <article>
+          <span class="notice-icon is-pink">FE</span>
+          <div>
+            <strong
+              >{{ feeSummary()?.pendingCount || 0 }} pending fee records</strong
+            >
+            <p>{{ formatMoney(feeSummary()?.pendingAmount) }} still pending</p>
+          </div>
+          <small>Live</small>
+        </article>
+      </div>
+    </section>
+
+    <section class="finance-side-stack">
+      <article>
+        <span>Total Fees Collected</span>
+        <strong>{{ formatMoney(feeSummary()?.collectedAmount) }}</strong>
+        <small class="positive">Live</small>
+      </article>
+
+      <article>
+        <span>Available Hostel Beds</span>
+        <strong>{{ quickSummary()?.availableBeds || 0 }}</strong>
+        <small class="positive">Live</small>
+      </article>
+
+      <article>
+        <span>Student Not Paid</span>
+        <strong>{{ feeSummary()?.pendingCount || 0 }}</strong>
+        <small class="negative">Live</small>
+      </article>
+
+      <article>
+        <span>Total Outstanding</span>
+        <strong>{{ formatMoney(feeSummary()?.pendingAmount) }}</strong>
+        <small class="negative">Live</small>
+      </article>
+    </section>
   </div>
 
-  <div class="admin-users-panel">
-    <div class="admin-users-panel__header">
+  <div class="dashboard-action-tiles">
+    <a routerLink="/reports/daily-attendance" class="action-tile is-yellow">
+      <span>📋</span>
       <div>
-        <h2>Admin User Management</h2>
+        <strong>View Attendance</strong>
+        <p>{{ attendanceSummary()?.total || 0 }} records today</p>
+      </div>
+    </a>
+
+    <a routerLink="/hrm/leaves" class="action-tile is-green">
+      <span>📢</span>
+      <div>
+        <strong>Leave Updates</strong>
+        <p>{{ recentLeaves().length }} recent leave records</p>
+      </div>
+    </a>
+
+    <a routerLink="/management/library-members" class="action-tile is-pink">
+      <span>🎫</span>
+      <div>
+        <strong>Library Members</strong>
+        <p>{{ quickSummary()?.libraryMembers || 0 }} active records</p>
+      </div>
+    </a>
+
+    <a routerLink="/management/fees" class="action-tile is-cyan">
+      <span>💼</span>
+      <div>
+        <strong>Finance & Accounts</strong>
+        <p>{{ formatMoney(feeSummary()?.collectedAmount) }} collected</p>
+      </div>
+    </a>
+  </div>
+
+  <section class="admin-users-dock">
+    <div class="admin-users-dock__header">
+      <div>
+        <span>Security</span>
+        <h3>Admin User Management</h3>
         <p>
-          Manage dashboard login users. Inactive admins cannot login to the ERP.
+          Create test admin accounts, deactivate access, and protect your hosted
+          ERP.
         </p>
       </div>
 
-      <button
-        class="primary-btn"
-        type="button"
-        (click)="openCreateAdminModal()"
-      >
-        Add Admin User
-      </button>
+      <div class="admin-users-dock__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="toggleAdminUsersPanel()"
+        >
+          {{ showAdminUsersPanel() ? 'Collapse' : 'Open Table' }}
+        </button>
+
+        <button
+          class="primary-btn"
+          type="button"
+          (click)="openCreateAdminModal()"
+        >
+          Add Admin
+        </button>
+      </div>
     </div>
 
     <div class="admin-users-summary">
@@ -66,187 +408,122 @@
       </article>
     </div>
 
-    @if (adminUserError() && !showAdminUserModal()) {
-      <p class="admin-error">{{ adminUserError() }}</p>
-    }
+    @if (showAdminUsersPanel()) {
+      @if (adminUserError() && !showAdminUserModal()) {
+        <p class="admin-error">{{ adminUserError() }}</p>
+      }
 
-    @if (isAdminUsersLoading()) {
-      <div class="admin-users-skeleton">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-    } @else {
-      <div class="admin-users-table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Admin</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Created</th>
-              <th class="text-right">Action</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            @for (user of adminUsers(); track user.id) {
+      @if (isAdminUsersLoading()) {
+        <div class="admin-users-skeleton">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      } @else {
+        <div class="admin-users-table-wrap">
+          <table>
+            <thead>
               <tr>
-                <td>
-                  <div class="admin-user-info">
-                    <span>{{ getAdminInitial(user) }}</span>
+                <th>Admin</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th class="text-right">Action</th>
+              </tr>
+            </thead>
 
-                    <div>
-                      <strong>{{ user.fullName }}</strong>
+            <tbody>
+              @for (user of adminUsers(); track user.id) {
+                <tr>
+                  <td>
+                    <div class="admin-user-info">
+                      <span>{{ getAdminInitial(user) }}</span>
 
-                      @if (isCurrentUser(user)) {
-                        <small>Current user</small>
-                      } @else {
-                        <small>Managed account</small>
-                      }
+                      <div>
+                        <strong>{{ user.fullName }}</strong>
+
+                        @if (isCurrentUser(user)) {
+                          <small>Current user</small>
+                        } @else {
+                          <small>Managed account</small>
+                        }
+                      </div>
                     </div>
-                  </div>
-                </td>
+                  </td>
 
-                <td>{{ user.email }}</td>
+                  <td>{{ user.email }}</td>
 
-                <td>
-                  <span class="role-pill">
-                    {{ getRoleLabel(user.role) }}
-                  </span>
-                </td>
+                  <td>
+                    <span class="role-pill">
+                      {{ getRoleLabel(user.role) }}
+                    </span>
+                  </td>
 
-                <td>
-                  <span
-                    class="admin-status-pill"
-                    [class.admin-status-pill--inactive]="!user.isActive"
-                  >
-                    {{ user.isActive ? 'Active' : 'Inactive' }}
-                  </span>
-                </td>
-
-                <td>{{ formatDate(user.createdAt) }}</td>
-
-                <td class="text-right">
-                  <div class="admin-user-actions">
-                    <button
-                      class="edit-btn"
-                      type="button"
-                      (click)="openEditAdminModal(user)"
+                  <td>
+                    <span
+                      class="admin-status-pill"
+                      [class.admin-status-pill--inactive]="!user.isActive"
                     >
-                      Edit
-                    </button>
+                      {{ user.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+                  </td>
 
-                    <button
-                      class="status-btn"
-                      type="button"
-                      [class.status-btn--activate]="!user.isActive"
-                      [disabled]="
-                        isCurrentUser(user) || isStatusUpdating() === user.id
-                      "
-                      (click)="toggleAdminStatus(user)"
-                    >
-                      @if (isStatusUpdating() === user.id) {
-                        Updating...
-                      } @else {
-                        {{ user.isActive ? 'Deactivate' : 'Activate' }}
-                      }
-                    </button>
+                  <td>{{ formatDate(user.createdAt) }}</td>
 
-                    <button
-                      class="danger-btn"
-                      type="button"
-                      [disabled]="isCurrentUser(user)"
-                      (click)="openDeleteAdminModal(user)"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="6">
-                  <div class="admin-empty-state">
-                    <strong>No admin users found</strong>
-                    <p>Create an admin user to manage ERP access.</p>
-                  </div>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+                  <td class="text-right">
+                    <div class="admin-user-actions">
+                      <button
+                        class="edit-btn"
+                        type="button"
+                        (click)="openEditAdminModal(user)"
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        class="status-btn"
+                        type="button"
+                        [class.status-btn--activate]="!user.isActive"
+                        [disabled]="
+                          isCurrentUser(user) || isStatusUpdating() === user.id
+                        "
+                        (click)="toggleAdminStatus(user)"
+                      >
+                        @if (isStatusUpdating() === user.id) {
+                          Updating...
+                        } @else {
+                          {{ user.isActive ? 'Deactivate' : 'Activate' }}
+                        }
+                      </button>
+
+                      <button
+                        class="danger-btn"
+                        type="button"
+                        [disabled]="isCurrentUser(user)"
+                        (click)="openDeleteAdminModal(user)"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6">
+                    <div class="admin-empty-state">
+                      <strong>No admin users found</strong>
+                      <p>Create an admin user to manage ERP access.</p>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
     }
-  </div>
-
-  <div class="admin-dashboard__grid">
-    <app-widget-card
-      title="Fees Collection"
-      meta="Last 8 Quarter"
-      [large]="true"
-    >
-      <div class="bar-chart">
-        @for (bar of feeBars; track $index) {
-          <div class="bar-chart__item">
-            <div class="bar-chart__bar">
-              <span [style.height.%]="bar.collected"></span>
-            </div>
-            <small>Q1 : 2023</small>
-          </div>
-        }
-      </div>
-    </app-widget-card>
-
-    <app-widget-card title="Leave Requests" meta="This Week">
-      <div class="leave-card">
-        <div class="leave-card__avatar">J</div>
-        <div>
-          <strong>James</strong>
-          <p>Physics Teacher</p>
-          <small>Leave : 12 - 13 May</small>
-        </div>
-      </div>
-
-      <div class="leave-card">
-        <div class="leave-card__avatar is-pink">H</div>
-        <div>
-          <strong>Hendrita</strong>
-          <p>Maths Teacher</p>
-          <small>Leave : 17 - 18 May</small>
-        </div>
-      </div>
-    </app-widget-card>
-
-    <app-widget-card title="Schedules" meta="Add New">
-      <div class="mini-calendar">
-        @for (day of calendarDays; track $index) {
-          <span [class.active]="day.active">{{ day.label }}</span>
-        }
-      </div>
-    </app-widget-card>
-
-    <app-widget-card title="Attendance" meta="Today">
-      <div class="attendance-ring">
-        <div>
-          <strong>3610</strong>
-          <span>Present</span>
-        </div>
-      </div>
-
-      <button class="view-btn" type="button">View All</button>
-    </app-widget-card>
-
-    <app-widget-card title="Quick Links">
-      <div class="quick-links">
-        <button type="button">Calendar</button>
-        <button type="button">Events</button>
-        <button type="button">Attendance</button>
-        <button type="button">Exams</button>
-      </div>
-    </app-widget-card>
-  </div>
+  </section>
 </section>
 
 @if (showAdminUserModal()) {

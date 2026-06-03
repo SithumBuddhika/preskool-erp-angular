@@ -1,41 +1,51 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import {
   FormControl,
   FormGroup,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import {
   AdminUser,
   AdminUserRole,
   CreateAdminUserPayload,
   UpdateAdminUserPayload,
 } from '../../../core/models/admin-user.model';
+import {
+  AdminDashboardData,
+  AdminDashboardDataService,
+} from '../../../core/services/admin-dashboard-data.service';
 import { AdminUsersService } from '../../../core/services/admin-users.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { PageTitleComponent } from '../../../shared/components/page-title/page-title.component';
-import { PaymentAlertComponent } from '../../../shared/components/payment-alert/payment-alert.component';
 import { StatCardComponent } from '../../../shared/components/stat-card/stat-card.component';
-import { WelcomeBannerComponent } from '../../../shared/components/welcome-banner/welcome-banner.component';
-import { WidgetCardComponent } from '../../../shared/components/widget-card/widget-card.component';
 
 type ToastType = 'success' | 'error';
+
+type CalendarDay = {
+  label: string;
+  active: boolean;
+  title: string;
+};
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    RouterLink,
     PageTitleComponent,
-    PaymentAlertComponent,
-    WelcomeBannerComponent,
     StatCardComponent,
-    WidgetCardComponent,
   ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
 })
-export class AdminDashboardComponent implements OnInit {
+export class AdminDashboardComponent implements OnInit, OnDestroy {
+  dashboardData = signal<AdminDashboardData | null>(null);
+  isDashboardLoading = signal(false);
+  dashboardError = signal('');
+
   adminUsers = signal<AdminUser[]>([]);
   selectedAdminUser = signal<AdminUser | null>(null);
   adminUserToDelete = signal<AdminUser | null>(null);
@@ -45,6 +55,7 @@ export class AdminDashboardComponent implements OnInit {
   isAdminDeleting = signal(false);
   isStatusUpdating = signal<string | null>(null);
 
+  showAdminUsersPanel = signal(false);
   showAdminUserModal = signal(false);
   adminUserError = signal('');
 
@@ -52,6 +63,75 @@ export class AdminDashboardComponent implements OnInit {
   private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
   isAdminEditMode = computed(() => this.selectedAdminUser() !== null);
+
+  statCards = computed(() => this.dashboardData()?.statCards || []);
+  feeBars = computed(() => this.dashboardData()?.feeBars || []);
+  feeSummary = computed(() => this.dashboardData()?.feeSummary);
+  attendanceSummary = computed(() => this.dashboardData()?.attendanceSummary);
+  quickSummary = computed(() => this.dashboardData()?.quickSummary);
+  recentLeaves = computed(() => this.dashboardData()?.recentLeaves || []);
+
+  currentMonthLabel = computed(() =>
+    new Date().toLocaleDateString('en-US', {
+      month: 'long',
+      year: 'numeric',
+    }),
+  );
+
+  calendarDays = computed<CalendarDay[]>(() => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    return Array.from({ length: daysInMonth }).map((_, index) => {
+      const dayNumber = index + 1;
+      const dayDate = new Date(year, month, dayNumber);
+      const dayKey = dayDate.toISOString().slice(0, 10);
+
+      const leaveEvents = this.recentLeaves().filter((leave) => {
+        if (!leave.startDate) {
+          return false;
+        }
+
+        return leave.startDate.slice(0, 10) === dayKey;
+      });
+
+      return {
+        label: `${dayNumber}`,
+        active: leaveEvents.length > 0,
+        title:
+          leaveEvents.length > 0
+            ? leaveEvents
+                .map(
+                  (leave) =>
+                    `${leave.staffName} - ${this.formatLeaveType(
+                      leave.leaveType,
+                    )}`,
+                )
+                .join(', ')
+            : 'No holiday or event added',
+      };
+    });
+  });
+
+  attendancePercent = computed(() => {
+    const attendance = this.attendanceSummary();
+
+    if (!attendance || attendance.total === 0) {
+      return 0;
+    }
+
+    return Math.round((attendance.present / attendance.total) * 100);
+  });
+
+  attendanceRingBackground = computed(() => {
+    const percent = this.attendancePercent();
+
+    return `conic-gradient(#3d5ee1 0 ${percent}%, #22d3ee ${percent}% ${
+      percent + 8
+    }%, #eef1f6 ${percent + 8}% 100%)`;
+  });
 
   activeAdminUsers = computed(
     () => this.adminUsers().filter((user) => user.isActive).length,
@@ -84,69 +164,48 @@ export class AdminDashboardComponent implements OnInit {
     }),
   });
 
-  statCards = [
-    {
-      short: 'S',
-      label: 'Total Students',
-      value: '3654',
-      badge: '1.2%',
-      active: '3643',
-      inactive: '11',
-      color: 'is-orange',
-    },
-    {
-      short: 'T',
-      label: 'Total Teachers',
-      value: '284',
-      badge: '1.2%',
-      active: '254',
-      inactive: '30',
-      color: 'is-blue',
-    },
-    {
-      short: 'SF',
-      label: 'Total Staff',
-      value: '162',
-      badge: '1.2%',
-      active: '161',
-      inactive: '02',
-      color: 'is-green',
-    },
-    {
-      short: 'SB',
-      label: 'Total Subjects',
-      value: '82',
-      badge: '1.2%',
-      active: '81',
-      inactive: '01',
-      color: 'is-purple',
-    },
-  ];
-
-  feeBars = [
-    { collected: 72 },
-    { collected: 84 },
-    { collected: 78 },
-    { collected: 86 },
-    { collected: 79 },
-    { collected: 68 },
-    { collected: 62 },
-    { collected: 76 },
-    { collected: 83 },
-  ];
-
-  calendarDays = Array.from({ length: 35 }).map((_, index) => ({
-    label: `${index + 1}`,
-    active: [6, 7, 12, 27].includes(index + 1),
-  }));
-
   constructor(
+    private readonly dashboardDataService: AdminDashboardDataService,
     private readonly adminUsersService: AdminUsersService,
     private readonly authService: AuthService,
   ) {}
 
   ngOnInit(): void {
+    this.loadDashboardData();
     this.loadAdminUsers();
+  }
+
+  ngOnDestroy(): void {
+    if (this.toastTimer) {
+      clearTimeout(this.toastTimer);
+    }
+  }
+
+  currentAdminName(): string {
+    return this.authService.currentUser()?.fullName || 'Admin';
+  }
+
+  loadDashboardData(): void {
+    this.isDashboardLoading.set(true);
+    this.dashboardError.set('');
+
+    this.dashboardDataService.getDashboardData().subscribe({
+      next: (data) => {
+        this.dashboardData.set(data);
+        this.isDashboardLoading.set(false);
+      },
+      error: () => {
+        this.dashboardError.set('Failed to load dashboard data.');
+        this.isDashboardLoading.set(false);
+        this.showToast('Failed to load dashboard data.', 'error');
+      },
+    });
+  }
+
+  refreshDashboard(): void {
+    this.loadDashboardData();
+    this.loadAdminUsers();
+    this.showToast('Dashboard refreshed.', 'success');
   }
 
   loadAdminUsers(): void {
@@ -166,6 +225,10 @@ export class AdminDashboardComponent implements OnInit {
         this.showToast('Failed to load admin users.', 'error');
       },
     });
+  }
+
+  toggleAdminUsersPanel(): void {
+    this.showAdminUsersPanel.update((value) => !value);
   }
 
   openCreateAdminModal(): void {
@@ -379,11 +442,28 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   formatDate(date: string): string {
+    if (!date) {
+      return '-';
+    }
+
     return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: '2-digit',
     });
+  }
+
+  formatMoney(value?: number): string {
+    return `Rs. ${new Intl.NumberFormat('en-LK').format(
+      Math.round(value || 0),
+    )}`;
+  }
+
+  formatLeaveType(type: string): string {
+    return type
+      .split('_')
+      .map((part) => part.charAt(0) + part.slice(1).toLowerCase())
+      .join(' ');
   }
 
   isAdminFormInvalid(
