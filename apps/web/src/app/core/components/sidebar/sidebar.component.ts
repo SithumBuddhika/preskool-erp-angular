@@ -165,6 +165,11 @@ export class SidebarComponent {
           route: '/management/sports',
           icon: 'briefcase',
         },
+        {
+          label: 'Events',
+          route: '/management/events',
+          icon: 'briefcase',
+        },
       ],
     },
     {
