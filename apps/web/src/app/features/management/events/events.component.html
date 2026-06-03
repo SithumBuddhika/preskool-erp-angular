@@ -1,0 +1,382 @@
+<section class="events-page">
+  <div class="events-page__header">
+    <div>
+      <h1>Events</h1>
+      <p>Management / Events</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add Event
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">E</span>
+      <div>
+        <strong>{{ events().length }}</strong>
+        <p>Total Events</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ activeCount() }}</strong>
+        <p>Active</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">U</span>
+      <div>
+        <strong>{{ upcomingCount() }}</strong>
+        <p>Upcoming</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">M</span>
+      <div>
+        <strong>{{ meetingCount() }}</strong>
+        <p>Meetings</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="events-card">
+    <div class="events-card__top">
+      <div>
+        <h2>Event Management</h2>
+        <p>
+          Create school events for dashboard calendar, upcoming events, and
+          announcements.
+        </p>
+      </div>
+
+      <div class="filter-row">
+        <input
+          type="text"
+          placeholder="Search event, location, organizer..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+
+        <input
+          type="date"
+          [value]="selectedDate()"
+          (change)="onDateFilterChange($event)"
+        />
+
+        <select
+          [value]="selectedStatus()"
+          (change)="onStatusFilterChange($event)"
+        >
+          <option value="ALL">All Status</option>
+          <option value="ACTIVE">Active</option>
+          <option value="INACTIVE">Inactive</option>
+        </select>
+
+        <button class="secondary-btn" type="button" (click)="clearFilters()">
+          Clear
+        </button>
+      </div>
+    </div>
+
+    @if (serverError() && !showEventModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="table-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Type</th>
+              <th>Audience</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Location</th>
+              <th>Organizer</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (event of events(); track event.id) {
+              <tr>
+                <td>
+                  <div class="event-info">
+                    <span [class]="getEventTypeClass(event.eventType)">
+                      {{ getEventIcon(event.eventType) }}
+                    </span>
+
+                    <div>
+                      <strong>{{ event.title }}</strong>
+                      <p>{{ event.description || 'No description added' }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <span
+                    class="event-type-pill"
+                    [ngClass]="getEventTypeClass(event.eventType)"
+                  >
+                    {{ getEventTypeLabel(event.eventType) }}
+                  </span>
+                </td>
+
+                <td>{{ getAudienceLabel(event.audience) }}</td>
+                <td>{{ formatDateRange(event) }}</td>
+                <td>{{ formatTimeRange(event) }}</td>
+                <td>{{ event.location || '-' }}</td>
+                <td>{{ event.organizer || '-' }}</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [ngClass]="getStatusClass(event.status)"
+                  >
+                    {{ event.status === 'ACTIVE' ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(event)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(event)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="9">
+                  <div class="empty-state">
+                    <strong>No events found</strong>
+                    <p>Add an event or change your filters.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showEventModal()) {
+  <div class="modal-backdrop">
+    <form class="event-modal" [formGroup]="eventForm" (ngSubmit)="saveEvent()">
+      <div class="event-modal__header">
+        <div>
+          <h2>{{ isEditMode() ? 'Edit Event' : 'Add Event' }}</h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update school event details.'
+                : 'Create a new school event for dashboard and schedules.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeEventModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label class="form-grid__full">
+          Event Title
+          <input
+            type="text"
+            formControlName="title"
+            placeholder="Example: Parents Teacher Meeting"
+          />
+
+          @if (isInvalid('title')) {
+            <small>Event title is required.</small>
+          }
+        </label>
+
+        <label>
+          Event Type
+          <select formControlName="eventType">
+            <option value="GENERAL">General</option>
+            <option value="MEETING">Meeting</option>
+            <option value="HOLIDAY_EVENT">Holiday Event</option>
+            <option value="EXAM_EVENT">Exam Event</option>
+            <option value="SPORTS_EVENT">Sports Event</option>
+          </select>
+        </label>
+
+        <label>
+          Audience
+          <select formControlName="audience">
+            <option value="ALL">All</option>
+            <option value="STUDENTS">Students</option>
+            <option value="TEACHERS">Teachers</option>
+            <option value="STAFF">Staff</option>
+            <option value="PARENTS">Parents</option>
+          </select>
+        </label>
+
+        <label>
+          Start Date
+          <input type="date" formControlName="startDate" />
+
+          @if (isInvalid('startDate')) {
+            <small>Start date is required.</small>
+          }
+        </label>
+
+        <label>
+          End Date
+          <input type="date" formControlName="endDate" />
+        </label>
+
+        <label>
+          Start Time
+          <input type="time" formControlName="startTime" />
+        </label>
+
+        <label>
+          End Time
+          <input type="time" formControlName="endTime" />
+        </label>
+
+        <label>
+          Location
+          <input
+            type="text"
+            formControlName="location"
+            placeholder="Example: Main Hall"
+          />
+        </label>
+
+        <label>
+          Organizer
+          <input
+            type="text"
+            formControlName="organizer"
+            placeholder="Example: Admin Office"
+          />
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+          </select>
+        </label>
+
+        <label class="form-grid__full">
+          Description
+          <textarea
+            formControlName="description"
+            rows="3"
+            placeholder="Optional event description"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="event-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          [disabled]="isSubmitting()"
+          (click)="closeEventModal()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Event'
+                : 'Save Event'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (eventToDelete(); as event) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Event?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ event.title }}</strong
+        >?
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          [disabled]="isDeleting()"
+          (click)="closeDeleteModal()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          [disabled]="isDeleting()"
+          (click)="confirmDeleteEvent()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Event' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}
