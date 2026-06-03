@@ -313,6 +313,18 @@ export const appRoutes: Routes = [
         pathMatch: 'full',
         redirectTo: 'management/hostels',
       },
+      {
+        path: 'management/sports',
+        loadComponent: () =>
+          import('./features/management/sports/sports.component').then(
+            (m) => m.SportsComponent,
+          ),
+      },
+      {
+        path: 'management/sport',
+        pathMatch: 'full',
+        redirectTo: 'management/sports',
+      },
 
       {
         path: 'hrm',

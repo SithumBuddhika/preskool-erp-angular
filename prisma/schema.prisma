@@ -561,6 +561,30 @@ model Hostel {
   @@map("hostels")
 }
 
+enum SportStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Sport {
+  id                  String      @id @default(uuid())
+  sportCode           String      @unique
+  sportName           String
+  category            String?
+  coachName           String?
+  venue               String?
+  practiceDays        String?
+  practiceTime        String?
+  maxParticipants     Int         @default(0)
+  currentParticipants Int         @default(0)
+  status              SportStatus @default(ACTIVE)
+  notes               String?
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  @@map("sports")
+}
+
 enum ClassStatus {
   ACTIVE
   INACTIVE
