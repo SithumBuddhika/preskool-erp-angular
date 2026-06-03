@@ -39,6 +39,7 @@ export type DashboardQuickSummary = {
   routes: number;
   hostels: number;
   sports: number;
+  events: number;
   availableBeds: number;
   sportParticipants: number;
 };
@@ -52,6 +53,19 @@ export type DashboardRecentLeave = {
   status: string;
 };
 
+export type DashboardCalendarItem = {
+  id: string;
+  type: 'EVENT' | 'HOLIDAY' | 'LEAVE';
+  title: string;
+  subTitle?: string;
+  startDate: string;
+  endDate?: string | null;
+  dateKey: string;
+  time?: string;
+  status?: string;
+  eventType?: string;
+};
+
 export type AdminDashboardData = {
   statCards: DashboardStatCard[];
   feeBars: DashboardFeeBar[];
@@ -59,6 +73,8 @@ export type AdminDashboardData = {
   attendanceSummary: DashboardAttendanceSummary;
   quickSummary: DashboardQuickSummary;
   recentLeaves: DashboardRecentLeave[];
+  upcomingItems: DashboardCalendarItem[];
+  calendarItems: DashboardCalendarItem[];
 };
 
 type StatusEntity = {
@@ -80,6 +96,7 @@ type AttendanceRecord = {
 };
 
 type LeaveRecord = {
+  id?: string;
   staffName?: string;
   designation?: string | null;
   leaveType?: string;
@@ -95,6 +112,35 @@ type HostelRecord = {
 
 type SportRecord = {
   currentParticipants?: number;
+};
+
+type SchoolEventRecord = {
+  id: string;
+  title: string;
+  eventType?: string;
+  audience?: string;
+  startDate: string;
+  endDate?: string | null;
+  startTime?: string | null;
+  endTime?: string | null;
+  location?: string | null;
+  organizer?: string | null;
+  description?: string | null;
+  status?: string;
+};
+
+type HolidayRecord = {
+  id?: string;
+  holidayCode?: string;
+  holidayName?: string;
+  title?: string;
+  holidayDate?: string;
+  date?: string;
+  startDate?: string;
+  endDate?: string;
+  holidayType?: string;
+  description?: string | null;
+  status?: string;
 };
 
 @Injectable({
@@ -122,6 +168,10 @@ export class AdminDashboardDataService {
       hostels: this.safeGet<HostelRecord>(`${this.peopleApiUrl}/hostels`),
       sports: this.safeGet<SportRecord>(`${this.peopleApiUrl}/sports`),
 
+      events: this.safeGet<SchoolEventRecord>(`${this.peopleApiUrl}/events`),
+      holidays: this.safeGet<HolidayRecord>(`${this.peopleApiUrl}/holidays`),
+      leaves: this.safeGet<LeaveRecord>(`${this.peopleApiUrl}/leaves`),
+
       studentAttendance: this.safeGet<AttendanceRecord>(
         `${this.peopleApiUrl}/student-attendance`,
       ),
@@ -131,44 +181,60 @@ export class AdminDashboardDataService {
       staffAttendance: this.safeGet<AttendanceRecord>(
         `${this.peopleApiUrl}/staff-attendance`,
       ),
-      leaves: this.safeGet<LeaveRecord>(`${this.peopleApiUrl}/leaves`),
     }).pipe(
-      map((data) => ({
-        statCards: [
-          this.buildStatCard('S', 'Total Students', data.students, 'is-orange'),
-          this.buildStatCard('T', 'Total Teachers', data.teachers, 'is-blue'),
-          this.buildStatCard('SF', 'Total Staff', data.staffs, 'is-green'),
-          this.buildStatCard(
-            'SB',
-            'Total Subjects',
-            data.subjects,
-            'is-purple',
-          ),
-        ],
-        feeBars: this.buildFeeBars(data.fees),
-        feeSummary: this.buildFeeSummary(data.fees),
-        attendanceSummary: this.buildAttendanceSummary([
-          ...data.studentAttendance,
-          ...data.teacherAttendance,
-          ...data.staffAttendance,
-        ]),
-        quickSummary: {
-          libraryBooks: data.libraryBooks.length,
-          libraryMembers: data.libraryMembers.length,
-          routes: data.routes.length,
-          hostels: data.hostels.length,
-          sports: data.sports.length,
-          availableBeds: data.hostels.reduce(
-            (total, hostel) => total + Number(hostel.availableBeds || 0),
-            0,
-          ),
-          sportParticipants: data.sports.reduce(
-            (total, sport) => total + Number(sport.currentParticipants || 0),
-            0,
-          ),
-        },
-        recentLeaves: this.buildRecentLeaves(data.leaves),
-      })),
+      map((data) => {
+        const calendarItems = this.buildCalendarItems(
+          data.events,
+          data.holidays,
+          data.leaves,
+        );
+
+        return {
+          statCards: [
+            this.buildStatCard(
+              'S',
+              'Total Students',
+              data.students,
+              'is-orange',
+            ),
+            this.buildStatCard('T', 'Total Teachers', data.teachers, 'is-blue'),
+            this.buildStatCard('SF', 'Total Staff', data.staffs, 'is-green'),
+            this.buildStatCard(
+              'SB',
+              'Total Subjects',
+              data.subjects,
+              'is-purple',
+            ),
+          ],
+          feeBars: this.buildFeeBars(data.fees),
+          feeSummary: this.buildFeeSummary(data.fees),
+          attendanceSummary: this.buildAttendanceSummary([
+            ...data.studentAttendance,
+            ...data.teacherAttendance,
+            ...data.staffAttendance,
+          ]),
+          quickSummary: {
+            libraryBooks: data.libraryBooks.length,
+            libraryMembers: data.libraryMembers.length,
+            routes: data.routes.length,
+            hostels: data.hostels.length,
+            sports: data.sports.length,
+            events: data.events.filter((event) => event.status !== 'INACTIVE')
+              .length,
+            availableBeds: data.hostels.reduce(
+              (total, hostel) => total + Number(hostel.availableBeds || 0),
+              0,
+            ),
+            sportParticipants: data.sports.reduce(
+              (total, sport) => total + Number(sport.currentParticipants || 0),
+              0,
+            ),
+          },
+          recentLeaves: this.buildRecentLeaves(data.leaves),
+          upcomingItems: this.buildUpcomingItems(calendarItems),
+          calendarItems,
+        };
+      }),
     );
   }
 
@@ -297,6 +363,177 @@ export class AdminDashboardDataService {
         endDate: leave.endDate || '',
         status: leave.status || 'PENDING',
       }));
+  }
+
+  private buildCalendarItems(
+    events: SchoolEventRecord[],
+    holidays: HolidayRecord[],
+    leaves: LeaveRecord[],
+  ): DashboardCalendarItem[] {
+    const eventItems = events
+      .filter((event) => event.status !== 'INACTIVE')
+      .flatMap((event) =>
+        this.expandCalendarItem({
+          id: event.id,
+          type: 'EVENT',
+          title: event.title,
+          subTitle: event.location || event.organizer || 'School event',
+          startDate: event.startDate,
+          endDate: event.endDate,
+          dateKey: this.toDateKey(event.startDate),
+          time: this.formatEventTime(event.startTime, event.endTime),
+          status: event.status || 'ACTIVE',
+          eventType: event.eventType || 'GENERAL',
+        }),
+      );
+
+    const holidayItems = holidays
+      .filter((holiday) => holiday.status !== 'INACTIVE')
+      .filter((holiday) => this.getHolidayDate(holiday))
+      .flatMap((holiday) => {
+        const startDate = this.getHolidayDate(holiday);
+
+        return this.expandCalendarItem({
+          id: holiday.id || holiday.holidayCode || `holiday-${startDate}`,
+          type: 'HOLIDAY',
+          title: holiday.holidayName || holiday.title || 'Holiday',
+          subTitle: holiday.holidayType || holiday.description || 'Holiday',
+          startDate,
+          endDate: holiday.endDate || startDate,
+          dateKey: this.toDateKey(startDate),
+          status: holiday.status || 'ACTIVE',
+          eventType: 'HOLIDAY_EVENT',
+        });
+      });
+
+    const leaveItems = leaves
+      .filter((leave) => leave.startDate)
+      .flatMap((leave) =>
+        this.expandCalendarItem({
+          id: leave.id || `${leave.staffName}-${leave.startDate}`,
+          type: 'LEAVE',
+          title: `${leave.staffName || 'Staff'} Leave`,
+          subTitle: `${this.formatLeaveType(leave.leaveType || 'OTHER')} / ${
+            leave.designation || 'Staff Member'
+          }`,
+          startDate: leave.startDate || '',
+          endDate: leave.endDate || leave.startDate || '',
+          dateKey: this.toDateKey(leave.startDate || ''),
+          status: leave.status || 'PENDING',
+          eventType: 'LEAVE',
+        }),
+      );
+
+    return [...eventItems, ...holidayItems, ...leaveItems].sort((a, b) =>
+      a.dateKey.localeCompare(b.dateKey),
+    );
+  }
+
+  private buildUpcomingItems(
+    calendarItems: DashboardCalendarItem[],
+  ): DashboardCalendarItem[] {
+    const today = new Date().toISOString().slice(0, 10);
+    const uniqueItems = new Map<string, DashboardCalendarItem>();
+
+    calendarItems
+      .filter((item) => item.dateKey >= today)
+      .forEach((item) => {
+        const key = `${item.type}-${item.id}`;
+
+        if (!uniqueItems.has(key)) {
+          uniqueItems.set(key, item);
+        }
+      });
+
+    return Array.from(uniqueItems.values())
+      .sort((a, b) => a.dateKey.localeCompare(b.dateKey))
+      .slice(0, 5);
+  }
+
+  private expandCalendarItem(
+    item: DashboardCalendarItem,
+  ): DashboardCalendarItem[] {
+    const startKey = this.toDateKey(item.startDate);
+    const endKey = this.toDateKey(item.endDate || item.startDate);
+
+    if (!startKey) {
+      return [];
+    }
+
+    const start = new Date(`${startKey}T00:00:00`);
+    const end = new Date(`${endKey || startKey}T00:00:00`);
+
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      return [{ ...item, dateKey: startKey }];
+    }
+
+    const days: DashboardCalendarItem[] = [];
+    const cursor = new Date(start);
+    let guard = 0;
+
+    while (cursor <= end && guard < 45) {
+      const dateKey = cursor.toISOString().slice(0, 10);
+
+      days.push({
+        ...item,
+        dateKey,
+      });
+
+      cursor.setDate(cursor.getDate() + 1);
+      guard += 1;
+    }
+
+    return days;
+  }
+
+  private getHolidayDate(holiday: HolidayRecord): string {
+    return (
+      holiday.holidayDate ||
+      holiday.date ||
+      holiday.startDate ||
+      holiday.endDate ||
+      ''
+    );
+  }
+
+  private formatEventTime(
+    startTime?: string | null,
+    endTime?: string | null,
+  ): string {
+    if (startTime && endTime) {
+      return `${startTime} - ${endTime}`;
+    }
+
+    if (startTime) {
+      return startTime;
+    }
+
+    return 'All Day';
+  }
+
+  private formatLeaveType(type: string): string {
+    return type
+      .split('_')
+      .map((part) => part.charAt(0) + part.slice(1).toLowerCase())
+      .join(' ');
+  }
+
+  private toDateKey(value?: string | null): string {
+    if (!value) {
+      return '';
+    }
+
+    if (/^\d{4}-\d{2}-\d{2}/.test(value)) {
+      return value.slice(0, 10);
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+
+    return date.toISOString().slice(0, 10);
   }
 
   private getRate(active: number, total: number): string {
