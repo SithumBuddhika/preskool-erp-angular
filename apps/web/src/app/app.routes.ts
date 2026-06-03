@@ -423,6 +423,13 @@ export const appRoutes: Routes = [
             './features/reports/staff-day-wise/staff-day-wise.component'
           ).then((m) => m.StaffDayWiseComponent),
       },
+      {
+        path: 'reports/staff-report',
+        loadComponent: () =>
+          import('./features/reports/staff-report/staff-report.component').then(
+            (m) => m.StaffReportComponent,
+          ),
+      },
 
       {
         path: '**',
