@@ -350,6 +350,34 @@ model TeacherAttendance {
   @@map("teacher_attendance")
 }
 
+enum PayrollStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+model Payroll {
+  id          String        @id @default(uuid())
+  payrollCode String        @unique
+  staffCode   String?
+  staffName   String
+  department  String?
+  designation String?
+  salaryMonth String
+  basicSalary Float         @default(0)
+  allowance   Float         @default(0)
+  deduction   Float         @default(0)
+  netSalary   Float         @default(0)
+  status      PayrollStatus @default(PENDING)
+  paymentDate DateTime?
+  remarks     String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([staffCode, salaryMonth])
+  @@map("payrolls")
+}
+
 enum FeeType {
   ADMISSION
   TUITION

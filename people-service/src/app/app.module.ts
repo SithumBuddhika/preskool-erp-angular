@@ -20,6 +20,8 @@ import { LibraryController } from './library.controller';
 import { LibraryService } from './library.service';
 import { ParentsController } from './parents.controller';
 import { ParentsService } from './parents.service';
+import { PayrollController } from './payroll.controller';
+import { PayrollService } from './payroll.service';
 import { PrismaService } from './prisma.service';
 import { StaffsController } from './staffs.controller';
 import { StaffsService } from './staffs.service';
@@ -52,6 +54,7 @@ import { TeachersService } from './teachers.service';
     LeavesController,
     StudentAttendanceController,
     TeacherAttendanceController,
+    PayrollController,
     FeesController,
     FeeGroupsController,
     LibraryController,
@@ -69,6 +72,7 @@ import { TeachersService } from './teachers.service';
     LeavesService,
     StudentAttendanceService,
     TeacherAttendanceService,
+    PayrollService,
     FeesService,
     FeeGroupsService,
     LibraryService,

@@ -1,0 +1,455 @@
+<section class="payroll-page">
+  <div class="payroll-page__header">
+    <div>
+      <h1>Payroll</h1>
+      <p>HRM / Payroll</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Payroll
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">P</span>
+      <div>
+        <strong>{{ totalPayrolls() }}</strong>
+        <p>Total Payrolls</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">Pe</span>
+      <div>
+        <strong>{{ pendingCount() }}</strong>
+        <p>Pending</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">Pa</span>
+      <div>
+        <strong>{{ paidCount() }}</strong>
+        <p>Paid</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--red">F</span>
+      <div>
+        <strong>{{ failedCount() }}</strong>
+        <p>Failed</p>
+      </div>
+    </article>
+
+    <article class="summary-card summary-card--wide">
+      <span class="summary-card__icon summary-card__icon--purple">Rs</span>
+      <div>
+        <strong>{{ formatCurrency(totalNetSalary()) }}</strong>
+        <p>Total Net Salary</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="payroll-card">
+    <div class="payroll-card__top">
+      <div>
+        <h2>Payroll List</h2>
+        <p>
+          Manage monthly staff payroll with staff autocomplete and automatic net
+          salary calculation.
+        </p>
+      </div>
+
+      <div class="payroll-search">
+        <input
+          type="text"
+          placeholder="Search payroll..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showPayrollModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="payroll-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Payroll ID</th>
+              <th>Staff</th>
+              <th>Department</th>
+              <th>Month</th>
+              <th>Basic</th>
+              <th>Allowance</th>
+              <th>Deduction</th>
+              <th>Net Salary</th>
+              <th>Status</th>
+              <th>Payment Date</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (payroll of payrollRecords(); track payroll.id) {
+              <tr>
+                <td>
+                  <span class="payroll-code">{{ payroll.payrollCode }}</span>
+                </td>
+
+                <td>
+                  <div class="staff-info">
+                    <span>{{ getPayrollInitial(payroll) }}</span>
+
+                    <div>
+                      <strong>{{ payroll.staffName }}</strong>
+                      <p>{{ payroll.staffCode || 'No staff code' }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <strong>{{ payroll.department || 'Not added' }}</strong>
+                  <p class="muted-text">
+                    {{ payroll.designation || 'Not added' }}
+                  </p>
+                </td>
+
+                <td>{{ payroll.salaryMonth }}</td>
+                <td>{{ formatCurrency(payroll.basicSalary) }}</td>
+                <td>{{ formatCurrency(payroll.allowance) }}</td>
+                <td>{{ formatCurrency(payroll.deduction) }}</td>
+
+                <td>
+                  <strong>{{ formatCurrency(payroll.netSalary) }}</strong>
+                </td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--paid]="payroll.status === 'PAID'"
+                    [class.status-pill--failed]="payroll.status === 'FAILED'"
+                  >
+                    {{ getStatusLabel(payroll.status) }}
+                  </span>
+                </td>
+
+                <td>{{ formatDisplayDate(payroll.paymentDate) }}</td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(payroll)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(payroll)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="11">
+                  <div class="empty-state">
+                    <strong>No payroll records found</strong>
+                    <p>
+                      Add your first payroll record or change your search
+                      keyword.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showPayrollModal()) {
+  <div class="modal-backdrop">
+    <form
+      class="payroll-modal"
+      [formGroup]="payrollForm"
+      (ngSubmit)="savePayroll()"
+    >
+      <div class="payroll-modal__header">
+        <div>
+          <h2>{{ isEditMode() ? 'Edit Payroll' : 'Add New Payroll' }}</h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update staff payroll information.'
+                : 'Create a monthly payroll record using staff suggestions.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closePayrollModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Payroll ID
+          <input
+            type="text"
+            formControlName="payrollCode"
+            placeholder="Example: PAY-0001"
+          />
+
+          @if (isInvalid('payrollCode')) {
+            <small>Payroll ID is required.</small>
+          }
+        </label>
+
+        <label class="autocomplete-field">
+          Staff
+
+          <div class="suggestion-input-wrap">
+            <input
+              type="text"
+              formControlName="staffName"
+              placeholder="Type staff name..."
+              autocomplete="off"
+              (input)="onStaffInput($event)"
+              (focus)="onStaffFocus()"
+              (blur)="onStaffBlur()"
+            />
+
+            @if (isInvalid('staffName')) {
+              <small>Staff name is required.</small>
+            }
+
+            @if (showStaffSuggestions() && filteredStaffs().length > 0) {
+              <div class="suggestions-panel">
+                @for (staff of filteredStaffs(); track staff.id) {
+                  <button
+                    type="button"
+                    class="suggestion-option"
+                    (click)="selectStaff(staff)"
+                  >
+                    <span>{{ getStaffInitial(staff) }}</span>
+
+                    <div>
+                      <strong>{{ staff.fullName || staff.name }}</strong>
+                      <p>
+                        {{
+                          staff.staffCode ||
+                            staff.staffId ||
+                            staff.staffNo ||
+                            staff.employeeNo ||
+                            'No code'
+                        }}
+                        ·
+                        {{
+                          staff.department ||
+                            staff.departmentName ||
+                            'No department'
+                        }}
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showStaffSuggestions() &&
+              staffSearchTerm().trim() &&
+              filteredStaffs().length === 0
+            ) {
+              <div class="suggestions-panel suggestions-panel--empty">
+                No matching staff found
+              </div>
+            }
+          </div>
+        </label>
+
+        <label>
+          Staff Code
+          <input
+            type="text"
+            formControlName="staffCode"
+            placeholder="Auto-filled from staff"
+            readonly
+          />
+        </label>
+
+        <label>
+          Department
+          <input
+            type="text"
+            formControlName="department"
+            placeholder="Auto-filled from staff"
+            readonly
+          />
+        </label>
+
+        <label>
+          Designation
+          <input
+            type="text"
+            formControlName="designation"
+            placeholder="Auto-filled from staff"
+            readonly
+          />
+        </label>
+
+        <label>
+          Salary Month
+          <input type="month" formControlName="salaryMonth" />
+
+          @if (isInvalid('salaryMonth')) {
+            <small>Salary month is required.</small>
+          }
+        </label>
+
+        <label>
+          Basic Salary
+          <input type="number" min="0" formControlName="basicSalary" />
+
+          @if (isInvalid('basicSalary')) {
+            <small>Basic salary is required and cannot be negative.</small>
+          }
+        </label>
+
+        <label>
+          Allowance
+          <input type="number" min="0" formControlName="allowance" />
+        </label>
+
+        <label>
+          Deduction
+          <input type="number" min="0" formControlName="deduction" />
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="PENDING">Pending</option>
+            <option value="PAID">Paid</option>
+            <option value="FAILED">Failed</option>
+          </select>
+        </label>
+
+        <label>
+          Payment Date
+          <input type="date" formControlName="paymentDate" />
+        </label>
+
+        <div class="net-salary-box">
+          <span>Net Salary</span>
+          <strong>{{ formatCurrency(calculateNetSalaryPreview()) }}</strong>
+          <p>Basic Salary + Allowance - Deduction</p>
+        </div>
+
+        <label class="form-grid__full">
+          Remarks
+          <textarea
+            formControlName="remarks"
+            rows="3"
+            placeholder="Optional payroll remarks"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="payroll-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closePayrollModal()"
+          [disabled]="isSubmitting()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Payroll'
+                : 'Save Payroll'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (payrollToDelete(); as payroll) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Payroll?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ payroll.payrollCode }} - {{ payroll.staffName }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeletePayroll()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Payroll' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}
