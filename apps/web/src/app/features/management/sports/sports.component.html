@@ -1,0 +1,375 @@
+<section class="sports-page">
+  <div class="sports-page__header">
+    <div>
+      <h1>Sports</h1>
+      <p>Management / Sports</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Sport
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">S</span>
+      <div>
+        <strong>{{ sports().length }}</strong>
+        <p>Total Sports</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ activeSports() }}</strong>
+        <p>Active Sports</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">I</span>
+      <div>
+        <strong>{{ inactiveSports() }}</strong>
+        <p>Inactive Sports</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">P</span>
+      <div>
+        <strong>{{ totalParticipants() }}/{{ totalCapacity() }}</strong>
+        <p>Participants</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="sports-card">
+    <div class="sports-card__top">
+      <div>
+        <h2>Sports List</h2>
+        <p>
+          Manage school sports, coaches, venues, practice times, and
+          participants.
+        </p>
+      </div>
+
+      <div class="sports-search">
+        <input
+          type="text"
+          placeholder="Search sports..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showSportModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="sports-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Sport Code</th>
+              <th>Sport</th>
+              <th>Category</th>
+              <th>Coach</th>
+              <th>Venue</th>
+              <th>Practice Days</th>
+              <th>Practice Time</th>
+              <th>Participants</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (sport of sports(); track sport.id) {
+              <tr>
+                <td>
+                  <span class="sport-code">{{ sport.sportCode }}</span>
+                </td>
+
+                <td>
+                  <div class="sport-info">
+                    <span>{{ getSportInitial(sport) }}</span>
+
+                    <div>
+                      <strong>{{ sport.sportName }}</strong>
+                      <p>{{ sport.notes || 'No notes added' }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>{{ sport.category || '-' }}</td>
+                <td>{{ sport.coachName || '-' }}</td>
+                <td>{{ sport.venue || '-' }}</td>
+                <td>{{ sport.practiceDays || '-' }}</td>
+                <td>{{ sport.practiceTime || '-' }}</td>
+
+                <td>
+                  <span class="participants-pill">
+                    {{ getParticipantLabel(sport) }}
+                  </span>
+                </td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--inactive]="sport.status === 'INACTIVE'"
+                  >
+                    {{ getStatusLabel(sport.status) }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(sport)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(sport)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="10">
+                  <div class="empty-state">
+                    <strong>No sports found</strong>
+                    <p>Add your first sport or change your search keyword.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showSportModal()) {
+  <div class="modal-backdrop">
+    <form class="sport-modal" [formGroup]="sportForm" (ngSubmit)="saveSport()">
+      <div class="sport-modal__header">
+        <div>
+          <h2>{{ isEditMode() ? 'Edit Sport' : 'Add New Sport' }}</h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update sport details, coach, venue, and participant count.'
+                : 'Create a sport record with coach and practice information.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeSportModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Sport Code
+          <input
+            type="text"
+            formControlName="sportCode"
+            placeholder="Example: SPT-0001"
+          />
+
+          @if (isInvalid('sportCode')) {
+            <small>Sport code is required.</small>
+          }
+        </label>
+
+        <label>
+          Sport Name
+          <input
+            type="text"
+            formControlName="sportName"
+            placeholder="Example: Cricket"
+          />
+
+          @if (isInvalid('sportName')) {
+            <small>Sport name is required.</small>
+          }
+        </label>
+
+        <label>
+          Category
+          <input
+            type="text"
+            formControlName="category"
+            placeholder="Example: Outdoor"
+          />
+        </label>
+
+        <label>
+          Coach Name
+          <input
+            type="text"
+            formControlName="coachName"
+            placeholder="Enter coach name"
+          />
+        </label>
+
+        <label>
+          Venue
+          <input
+            type="text"
+            formControlName="venue"
+            placeholder="Example: Main Ground"
+          />
+        </label>
+
+        <label>
+          Practice Days
+          <input
+            type="text"
+            formControlName="practiceDays"
+            placeholder="Example: Monday, Wednesday"
+          />
+        </label>
+
+        <label>
+          Practice Time
+          <input
+            type="text"
+            formControlName="practiceTime"
+            placeholder="Example: 3:30 PM - 5:30 PM"
+          />
+        </label>
+
+        <label>
+          Max Participants
+          <input type="number" formControlName="maxParticipants" min="0" />
+
+          @if (isInvalid('maxParticipants')) {
+            <small>Max participants must be 0 or more.</small>
+          }
+        </label>
+
+        <label>
+          Current Participants
+          <input type="number" formControlName="currentParticipants" min="0" />
+
+          @if (isInvalid('currentParticipants')) {
+            <small>Current participants must be 0 or more.</small>
+          }
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+          </select>
+        </label>
+
+        <label class="form-grid__full">
+          Notes
+          <textarea
+            formControlName="notes"
+            rows="3"
+            placeholder="Enter sport notes"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="sport-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeSportModal()"
+          [disabled]="isSubmitting()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Sport'
+                : 'Save Sport'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (sportToDelete(); as sport) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Sport?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ sport.sportCode }} - {{ sport.sportName }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteSport()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Sport' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}

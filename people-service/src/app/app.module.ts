@@ -42,6 +42,9 @@ import { PayrollService } from './payroll.service';
 
 import { PrismaService } from './prisma.service';
 
+import { SportsController } from './sports.controller';
+import { SportsService } from './sports.service';
+
 import { StaffsController } from './staffs.controller';
 import { StaffsService } from './staffs.service';
 
@@ -90,6 +93,7 @@ import { TransportRoutesService } from './transport-routes.service';
     LibraryMembersController,
     TransportRoutesController,
     HostelsController,
+    SportsController,
   ],
   providers: [
     AppService,
@@ -114,6 +118,7 @@ import { TransportRoutesService } from './transport-routes.service';
     LibraryMembersService,
     TransportRoutesService,
     HostelsService,
+    SportsService,
 
     PrismaService,
   ],
