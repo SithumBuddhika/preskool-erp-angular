@@ -10,6 +10,9 @@ import { DepartmentsService } from './departments.service';
 import { DesignationsController } from './designations.controller';
 import { DesignationsService } from './designations.service';
 
+import { EventsController } from './events.controller';
+import { EventsService } from './events.service';
+
 import { FeeGroupsController } from './fee-groups.controller';
 import { FeeGroupsService } from './fee-groups.service';
 
@@ -98,6 +101,7 @@ import { TransportRoutesService } from './transport-routes.service';
     TransportRoutesController,
     HostelsController,
     SportsController,
+    EventsController,
   ],
   providers: [
     AppService,
@@ -124,6 +128,7 @@ import { TransportRoutesService } from './transport-routes.service';
     TransportRoutesService,
     HostelsService,
     SportsService,
+    EventsService,
 
     PrismaService,
   ],

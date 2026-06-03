@@ -809,3 +809,44 @@ model TimeTable {
 
   @@map("time_tables")
 }
+
+enum SchoolEventType {
+  MEETING
+  HOLIDAY_EVENT
+  EXAM_EVENT
+  SPORTS_EVENT
+  GENERAL
+}
+
+enum SchoolEventAudience {
+  ALL
+  STUDENTS
+  TEACHERS
+  STAFF
+  PARENTS
+}
+
+enum SchoolEventStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model SchoolEvent {
+  id          String              @id @default(uuid())
+  title       String
+  eventType   SchoolEventType     @default(GENERAL)
+  audience    SchoolEventAudience @default(ALL)
+  startDate   DateTime
+  endDate     DateTime?
+  startTime   String?
+  endTime     String?
+  location    String?
+  organizer   String?
+  description String?
+  status      SchoolEventStatus   @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("school_events")
+}
