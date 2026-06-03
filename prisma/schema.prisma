@@ -299,6 +299,30 @@ model StaffLeave {
   @@map("staff_leaves")
 }
 
+enum StaffAttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  HALF_DAY
+}
+
+model StaffAttendance {
+  id             String                @id @default(uuid())
+  staffId        String?
+  staffCode      String
+  staffName      String
+  department     String?
+  designation    String?
+  attendanceDate DateTime
+  status         StaffAttendanceStatus @default(PRESENT)
+  remarks        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("staff_attendance")
+}
+
 enum StudentAttendanceStatus {
   PRESENT
   ABSENT

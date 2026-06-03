@@ -1,0 +1,393 @@
+<section class="staff-attendance-page">
+  <div class="staff-attendance-page__header">
+    <div>
+      <h1>Staff Attendance</h1>
+      <p>HRM / Staff Attendance</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Mark Staff Attendance
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">T</span>
+      <div>
+        <strong>{{ attendanceRecords().length }}</strong>
+        <p>Total Records</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">P</span>
+      <div>
+        <strong>{{ presentCount() }}</strong>
+        <p>Present</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--red">A</span>
+      <div>
+        <strong>{{ absentCount() }}</strong>
+        <p>Absent</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">L</span>
+      <div>
+        <strong>{{ lateCount() + halfDayCount() }}</strong>
+        <p>Late / Half Day</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="attendance-card">
+    <div class="attendance-card__top">
+      <div>
+        <h2>Staff Attendance List</h2>
+        <p>
+          Mark and manage daily attendance for staff using staff autocomplete.
+        </p>
+      </div>
+
+      <div class="filter-row">
+        <input
+          type="date"
+          [value]="selectedDate()"
+          (change)="onDateFilterChange($event)"
+        />
+
+        <input
+          type="text"
+          placeholder="Search staff attendance..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showAttendanceModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="table-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Staff</th>
+              <th>Staff Code</th>
+              <th>Department</th>
+              <th>Designation</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Remarks</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (record of attendanceRecords(); track record.id) {
+              <tr>
+                <td>
+                  <div class="staff-info">
+                    <span>{{ getStaffInitial(record) }}</span>
+
+                    <div>
+                      <strong>{{ record.staffName }}</strong>
+                      <p>{{ record.staffCode }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="staff-code">{{ record.staffCode }}</span>
+                </td>
+
+                <td>{{ record.department || '-' }}</td>
+                <td>{{ record.designation || '-' }}</td>
+                <td>{{ formatDate(record.attendanceDate) }}</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class]="getStatusClass(record.status)"
+                  >
+                    {{ getStatusLabel(record.status) }}
+                  </span>
+                </td>
+
+                <td>{{ record.remarks || '-' }}</td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(record)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(record)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8">
+                  <div class="empty-state">
+                    <strong>No staff attendance found</strong>
+                    <p>
+                      Mark staff attendance for the selected date or change your
+                      filters.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showAttendanceModal()) {
+  <div class="modal-backdrop">
+    <form
+      class="attendance-modal"
+      [formGroup]="attendanceForm"
+      (ngSubmit)="saveAttendance()"
+    >
+      <div class="attendance-modal__header">
+        <div>
+          <h2>
+            {{
+              isEditMode() ? 'Edit Staff Attendance' : 'Mark Staff Attendance'
+            }}
+          </h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update staff attendance status and remarks.'
+                : 'Search and select a staff member from existing staff records.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeAttendanceModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label class="form-grid__full staff-autocomplete">
+          Staff Name
+          <input
+            type="text"
+            formControlName="staffName"
+            placeholder="Type staff name..."
+            autocomplete="off"
+            (input)="onStaffNameInput($event)"
+            (focus)="
+              attendanceForm.controls.staffName.value
+                ? loadStaffSuggestions(attendanceForm.controls.staffName.value)
+                : null
+            "
+          />
+
+          @if (isInvalid('staffName')) {
+            <small>Staff name is required.</small>
+          }
+
+          @if (showStaffSuggestions() && staffSuggestions().length > 0) {
+            <div class="suggestions-box">
+              @for (staff of staffSuggestions(); track staff.id || $index) {
+                <button
+                  type="button"
+                  class="suggestion-item"
+                  (click)="selectStaff(staff)"
+                >
+                  <strong>
+                    {{
+                      staff.staffName ||
+                        staff.fullName ||
+                        staff.name ||
+                        'Unnamed Staff'
+                    }}
+                  </strong>
+
+                  <span>
+                    {{
+                      staff.staffCode ||
+                        staff.employeeNo ||
+                        staff.staffNo ||
+                        staff.code ||
+                        'No code'
+                    }}
+                    /
+                    {{
+                      staff.designation ||
+                        staff.designationName ||
+                        'No designation'
+                    }}
+                  </span>
+                </button>
+              }
+            </div>
+          }
+        </label>
+
+        <label>
+          Staff Code
+          <input
+            type="text"
+            formControlName="staffCode"
+            placeholder="Auto-filled after selecting staff"
+          />
+
+          @if (isInvalid('staffCode')) {
+            <small>Staff code is required.</small>
+          }
+        </label>
+
+        <label>
+          Attendance Date
+          <input type="date" formControlName="attendanceDate" />
+
+          @if (isInvalid('attendanceDate')) {
+            <small>Attendance date is required.</small>
+          }
+        </label>
+
+        <label>
+          Department
+          <input
+            type="text"
+            formControlName="department"
+            placeholder="Auto-filled department"
+          />
+        </label>
+
+        <label>
+          Designation
+          <input
+            type="text"
+            formControlName="designation"
+            placeholder="Auto-filled designation"
+          />
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="PRESENT">Present</option>
+            <option value="ABSENT">Absent</option>
+            <option value="LATE">Late</option>
+            <option value="HALF_DAY">Half Day</option>
+          </select>
+        </label>
+
+        <label class="form-grid__full">
+          Remarks
+          <textarea
+            formControlName="remarks"
+            rows="3"
+            placeholder="Optional remarks"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="attendance-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          [disabled]="isSubmitting()"
+          (click)="closeAttendanceModal()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Attendance'
+                : 'Save Attendance'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (attendanceToDelete(); as record) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Attendance?</h2>
+
+      <p>
+        Are you sure you want to delete attendance for
+        <strong>{{ record.staffName }} - {{ record.staffCode }}</strong
+        >?
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          [disabled]="isDeleting()"
+          (click)="closeDeleteModal()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          [disabled]="isDeleting()"
+          (click)="confirmDeleteAttendance()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Attendance' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}

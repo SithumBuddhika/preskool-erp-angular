@@ -1,7 +1,20 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { CreateAdminUserDto } from './dto/create-admin-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { UpdateAdminStatusDto } from './dto/update-admin-status.dto';
+import { UpdateAdminUserDto } from './dto/update-admin-user.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { AuthRequest } from './types/auth-request.type';
 import { AuthResponse, AuthUser } from './types/auth-user.type';
@@ -24,5 +37,57 @@ export class AuthController {
   @Get('me')
   me(@Req() request: AuthRequest): Promise<AuthUser> {
     return this.authService.getMe(request.user!.sub);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('admin-users')
+  findAdminUsers(@Req() request: AuthRequest) {
+    return this.authService.findAdminUsers(request.user!.sub);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('admin-users')
+  createAdminUser(
+    @Req() request: AuthRequest,
+    @Body() createAdminUserDto: CreateAdminUserDto,
+  ) {
+    return this.authService.createAdminUser(
+      request.user!.sub,
+      createAdminUserDto,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('admin-users/:id')
+  updateAdminUser(
+    @Req() request: AuthRequest,
+    @Param('id') id: string,
+    @Body() updateAdminUserDto: UpdateAdminUserDto,
+  ) {
+    return this.authService.updateAdminUser(
+      request.user!.sub,
+      id,
+      updateAdminUserDto,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('admin-users/:id/status')
+  updateAdminStatus(
+    @Req() request: AuthRequest,
+    @Param('id') id: string,
+    @Body() updateAdminStatusDto: UpdateAdminStatusDto,
+  ) {
+    return this.authService.updateAdminStatus(
+      request.user!.sub,
+      id,
+      updateAdminStatusDto,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('admin-users/:id')
+  deleteAdminUser(@Req() request: AuthRequest, @Param('id') id: string) {
+    return this.authService.deleteAdminUser(request.user!.sub, id);
   }
 }

@@ -1,8 +1,8 @@
-<section class="student-day-wise-page">
-  <div class="student-day-wise-page__header">
+<section class="day-wise-page">
+  <div class="day-wise-page__header">
     <div>
       <h1>Student Day Wise</h1>
-      <p>Reports / Student Day Wise</p>
+      <p>Reports / Student Day Wise Attendance</p>
     </div>
 
     <div class="header-actions">
@@ -11,76 +11,21 @@
         type="button"
         (click)="loadAttendanceRecords()"
       >
-        Refresh
+        Refresh Report
       </button>
 
-      <button
-        class="primary-btn"
-        type="button"
-        (click)="exportCsv()"
-        [disabled]="studentRows().length === 0"
-      >
+      <button class="primary-btn" type="button" (click)="exportCsv()">
         Export CSV
       </button>
     </div>
   </div>
 
-  <app-report-tabs></app-report-tabs>
-
-  <div class="filters-card">
-    <div class="filter-group filter-group--wide">
-      <label>Search Student</label>
-      <input
-        type="text"
-        placeholder="Search student, admission no, class..."
-        [value]="searchTerm()"
-        (input)="onSearchInput($event)"
-      />
-    </div>
-
-    <div class="filter-group">
-      <label>Month</label>
-      <input
-        type="month"
-        [value]="selectedMonth()"
-        (input)="onMonthInput($event)"
-      />
-    </div>
-
-    <div class="filter-group">
-      <label>Class</label>
-      <select [value]="selectedClass()" (change)="onClassChange($event)">
-        <option value="ALL">All Classes</option>
-
-        @for (className of classOptions(); track className) {
-          <option [value]="className">{{ className }}</option>
-        }
-      </select>
-    </div>
-
-    <button class="clear-btn" type="button" (click)="clearFilters()">
-      Clear Filters
-    </button>
-  </div>
-
-  <div class="month-card">
-    <div>
-      <span>Selected Month</span>
-      <strong>{{ selectedMonthLabel() }}</strong>
-    </div>
-
-    <p>
-      Showing {{ totalStudents() }} student(s), {{ totalMarked() }} marked
-      attendance record(s).
-    </p>
-  </div>
-
   <div class="summary-grid">
     <article class="summary-card">
-      <span class="summary-card__icon summary-card__icon--blue">S</span>
+      <span class="summary-card__icon summary-card__icon--blue">R</span>
       <div>
-        <strong>{{ totalStudents() }}</strong>
-        <p>Students</p>
+        <strong>{{ totalMarked() }}</strong>
+        <p>Total Marked Records</p>
       </div>
     </article>
 
@@ -103,48 +48,56 @@
     <article class="summary-card">
       <span class="summary-card__icon summary-card__icon--orange">L</span>
       <div>
-        <strong>{{ lateCount() }}</strong>
-        <p>Late</p>
+        <strong>{{ lateCount() + halfDayCount() }}</strong>
+        <p>Late / Half Day</p>
       </div>
     </article>
-
-    <article class="summary-card">
-      <span class="summary-card__icon summary-card__icon--purple">H</span>
-      <div>
-        <strong>{{ halfDayCount() }}</strong>
-        <p>Half Day</p>
-      </div>
-    </article>
-
-    <article class="summary-card">
-      <span class="summary-card__icon summary-card__icon--teal">%</span>
-      <div>
-        <strong>{{ attendanceRate() }}%</strong>
-        <p>Attendance Rate</p>
-      </div>
-    </article>
-  </div>
-
-  <div class="legend-card">
-    <span
-      ><strong class="legend-dot legend-dot--present">P</strong> Present</span
-    >
-    <span><strong class="legend-dot legend-dot--absent">A</strong> Absent</span>
-    <span><strong class="legend-dot legend-dot--late">L</strong> Late</span>
-    <span><strong class="legend-dot legend-dot--half">H</strong> Half Day</span>
-    <span
-      ><strong class="legend-dot legend-dot--empty">-</strong> Not Marked</span
-    >
   </div>
 
   <div class="report-card">
     <div class="report-card__top">
       <div>
-        <h2>Student Day Wise Attendance Matrix</h2>
-        <p>Monthly student attendance shown day by day.</p>
+        <h2>{{ monthLabel() }} Student Attendance Matrix</h2>
+        <p>
+          Real day-wise student attendance generated from Student Attendance
+          records.
+        </p>
       </div>
 
-      <span class="record-count"> {{ monthDays().length }} day column(s) </span>
+      <div class="filter-row">
+        <input
+          type="month"
+          [value]="selectedMonth()"
+          (change)="onMonthChange($event)"
+        />
+
+        <select [value]="selectedClass()" (change)="onClassChange($event)">
+          <option value="ALL">All Classes</option>
+
+          @for (className of classOptions(); track className) {
+            <option [value]="className">{{ className }}</option>
+          }
+        </select>
+
+        <input
+          type="text"
+          placeholder="Search student / admission no / class..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+
+        <button class="clear-btn" type="button" (click)="clearFilters()">
+          Clear
+        </button>
+      </div>
+    </div>
+
+    <div class="legend-row">
+      <span class="legend-item legend-item--present">P = Present</span>
+      <span class="legend-item legend-item--absent">A = Absent</span>
+      <span class="legend-item legend-item--late">L = Late</span>
+      <span class="legend-item legend-item--half-day">H = Half Day</span>
+      <span class="legend-item legend-item--empty">- = Not Marked</span>
     </div>
 
     @if (serverError()) {
@@ -152,106 +105,71 @@
     }
 
     @if (isLoading()) {
-      <div class="report-skeleton">
+      <div class="table-skeleton">
+        <span></span>
         <span></span>
         <span></span>
         <span></span>
       </div>
     } @else {
-      <div class="matrix-wrap">
+      <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th class="sticky-col sticky-student">Student</th>
-              <th>Class</th>
-              <th>%</th>
-              <th>P</th>
-              <th>A</th>
-              <th>L</th>
-              <th>H</th>
+              <th class="person-column">Student</th>
 
-              @for (day of monthDays(); track day.dateKey) {
-                <th class="day-heading">{{ day.label }}</th>
+              @for (day of daysInMonth(); track day.dateKey) {
+                <th class="day-column" [class.today-column]="day.isToday">
+                  <span>{{ day.day }}</span>
+                  <small>{{ day.weekday }}</small>
+                </th>
               }
+
+              <th class="total-column">Marked</th>
             </tr>
           </thead>
 
           <tbody>
             @for (row of studentRows(); track row.studentKey) {
               <tr>
-                <td class="sticky-col sticky-student">
-                  <div class="student-info">
+                <td class="person-column">
+                  <div class="person-info">
                     <span>{{ getStudentInitial(row) }}</span>
 
                     <div>
                       <strong>{{ row.studentName }}</strong>
-                      <p>{{ row.admissionNo }}</p>
+                      <p>{{ row.admissionNo }} / {{ row.classLabel }}</p>
                     </div>
                   </div>
                 </td>
 
-                <td>
-                  <span class="class-pill">{{ row.classLabel }}</span>
-                </td>
+                @for (day of daysInMonth(); track day.dateKey) {
+                  @let record = getRecordForDay(row, day);
 
-                <td>
-                  <strong>{{ row.attendanceRate }}%</strong>
-                </td>
-
-                <td>
-                  <span class="mini-count mini-count--present">
-                    {{ row.present }}
-                  </span>
-                </td>
-
-                <td>
-                  <span class="mini-count mini-count--absent">
-                    {{ row.absent }}
-                  </span>
-                </td>
-
-                <td>
-                  <span class="mini-count mini-count--late">
-                    {{ row.late }}
-                  </span>
-                </td>
-
-                <td>
-                  <span class="mini-count mini-count--half">
-                    {{ row.halfDay }}
-                  </span>
-                </td>
-
-                @for (day of monthDays(); track day.dateKey) {
-                  <td class="day-cell">
+                  <td>
                     <span
-                      class="day-status"
-                      [title]="getStatusTitle(row.dayMap[day.dayNumber])"
-                      [class.day-status--present]="
-                        row.dayMap[day.dayNumber] === 'PRESENT'
-                      "
-                      [class.day-status--absent]="
-                        row.dayMap[day.dayNumber] === 'ABSENT'
-                      "
-                      [class.day-status--late]="
-                        row.dayMap[day.dayNumber] === 'LATE'
-                      "
-                      [class.day-status--half]="
-                        row.dayMap[day.dayNumber] === 'HALF_DAY'
-                      "
-                      [class.day-status--empty]="!row.dayMap[day.dayNumber]"
+                      class="status-cell"
+                      [ngClass]="getStatusClass(record?.status)"
+                      [title]="getCellTitle(row, day)"
                     >
-                      {{ getStatusShortLabel(row.dayMap[day.dayNumber]) }}
+                      {{ getStatusShort(record?.status) }}
                     </span>
                   </td>
                 }
+
+                <td class="total-column">
+                  <strong>{{ getMarkedDays(row) }}</strong>
+                </td>
               </tr>
             } @empty {
               <tr>
-                <td [attr.colspan]="7 + monthDays().length">
+                <td [attr.colspan]="daysInMonth().length + 2">
                   <div class="empty-state">
-                    <strong>No student day-wise records found</strong>
-                    <p>Try changing the month, class, or search keyword.</p>
+                    <strong>No student attendance records found</strong>
+                    <p>
+                      Mark student attendance first or change the month/search
+                      filter.
+                    </p>
                   </div>
                 </td>
               </tr>
