@@ -26,6 +26,161 @@
     }
   </div>
 
+  <div class="admin-users-panel">
+    <div class="admin-users-panel__header">
+      <div>
+        <h2>Admin User Management</h2>
+        <p>
+          Manage dashboard login users. Inactive admins cannot login to the ERP.
+        </p>
+      </div>
+
+      <button
+        class="primary-btn"
+        type="button"
+        (click)="openCreateAdminModal()"
+      >
+        Add Admin User
+      </button>
+    </div>
+
+    <div class="admin-users-summary">
+      <article>
+        <strong>{{ adminUsers().length }}</strong>
+        <span>Total Admins</span>
+      </article>
+
+      <article>
+        <strong>{{ activeAdminUsers() }}</strong>
+        <span>Active</span>
+      </article>
+
+      <article>
+        <strong>{{ inactiveAdminUsers() }}</strong>
+        <span>Inactive</span>
+      </article>
+
+      <article>
+        <strong>{{ superAdminUsers() }}</strong>
+        <span>Super Admins</span>
+      </article>
+    </div>
+
+    @if (adminUserError() && !showAdminUserModal()) {
+      <p class="admin-error">{{ adminUserError() }}</p>
+    }
+
+    @if (isAdminUsersLoading()) {
+      <div class="admin-users-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="admin-users-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Admin</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (user of adminUsers(); track user.id) {
+              <tr>
+                <td>
+                  <div class="admin-user-info">
+                    <span>{{ getAdminInitial(user) }}</span>
+
+                    <div>
+                      <strong>{{ user.fullName }}</strong>
+
+                      @if (isCurrentUser(user)) {
+                        <small>Current user</small>
+                      } @else {
+                        <small>Managed account</small>
+                      }
+                    </div>
+                  </div>
+                </td>
+
+                <td>{{ user.email }}</td>
+
+                <td>
+                  <span class="role-pill">
+                    {{ getRoleLabel(user.role) }}
+                  </span>
+                </td>
+
+                <td>
+                  <span
+                    class="admin-status-pill"
+                    [class.admin-status-pill--inactive]="!user.isActive"
+                  >
+                    {{ user.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+
+                <td>{{ formatDate(user.createdAt) }}</td>
+
+                <td class="text-right">
+                  <div class="admin-user-actions">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditAdminModal(user)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="status-btn"
+                      type="button"
+                      [class.status-btn--activate]="!user.isActive"
+                      [disabled]="
+                        isCurrentUser(user) || isStatusUpdating() === user.id
+                      "
+                      (click)="toggleAdminStatus(user)"
+                    >
+                      @if (isStatusUpdating() === user.id) {
+                        Updating...
+                      } @else {
+                        {{ user.isActive ? 'Deactivate' : 'Activate' }}
+                      }
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      [disabled]="isCurrentUser(user)"
+                      (click)="openDeleteAdminModal(user)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6">
+                  <div class="admin-empty-state">
+                    <strong>No admin users found</strong>
+                    <p>Create an admin user to manage ERP access.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
   <div class="admin-dashboard__grid">
     <app-widget-card
       title="Fees Collection"
@@ -93,3 +248,159 @@
     </app-widget-card>
   </div>
 </section>
+
+@if (showAdminUserModal()) {
+  <div class="modal-backdrop">
+    <form
+      class="admin-user-modal"
+      [formGroup]="adminUserForm"
+      (ngSubmit)="saveAdminUser()"
+    >
+      <div class="admin-user-modal__header">
+        <div>
+          <h2>
+            {{ isAdminEditMode() ? 'Edit Admin User' : 'Add Admin User' }}
+          </h2>
+          <p>
+            {{
+              isAdminEditMode()
+                ? 'Update login user details. Leave password empty to keep current password.'
+                : 'Create a test/admin login account for the ERP.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeAdminUserModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (adminUserError()) {
+        <p class="admin-error">{{ adminUserError() }}</p>
+      }
+
+      <div class="admin-user-form-grid">
+        <label>
+          Full Name
+          <input
+            type="text"
+            formControlName="fullName"
+            placeholder="Example: Test Admin"
+          />
+
+          @if (isAdminFormInvalid('fullName')) {
+            <small>Only letters and spaces are allowed.</small>
+          }
+        </label>
+
+        <label>
+          Email
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="Example: testadmin@example.com"
+          />
+
+          @if (isAdminFormInvalid('email')) {
+            <small>Enter a valid email address.</small>
+          }
+        </label>
+
+        <label>
+          Password
+          <input
+            type="password"
+            formControlName="password"
+            [placeholder]="
+              isAdminEditMode()
+                ? 'Leave empty to keep current password'
+                : 'Minimum 7 characters'
+            "
+          />
+        </label>
+
+        <label>
+          Role
+          <select formControlName="role">
+            <option value="ADMIN">Admin</option>
+            <option value="SUPER_ADMIN">Super Admin</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="admin-user-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          [disabled]="isAdminSubmitting()"
+          (click)="closeAdminUserModal()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="primary-btn"
+          type="submit"
+          [disabled]="isAdminSubmitting()"
+        >
+          {{
+            isAdminSubmitting()
+              ? isAdminEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isAdminEditMode()
+                ? 'Update Admin'
+                : 'Save Admin'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (adminUserToDelete(); as user) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Admin User?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ user.fullName }} - {{ user.email }}</strong
+        >? This user will no longer be able to access the ERP.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          [disabled]="isAdminDeleting()"
+          (click)="closeDeleteAdminModal()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          [disabled]="isAdminDeleting()"
+          (click)="confirmDeleteAdminUser()"
+        >
+          {{ isAdminDeleting() ? 'Deleting...' : 'Delete Admin' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}
