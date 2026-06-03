@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { Prisma } from '../../../generated/prisma/client';
 import { CreateTransportRouteDto } from './dto/create-transport-route.dto';
 import { UpdateTransportRouteDto } from './dto/update-transport-route.dto';
 import { PrismaService } from './prisma.service';
@@ -194,11 +195,17 @@ export class TransportRoutesService {
     return cleanedValue ? cleanedValue : null;
   }
 
-  private normalizeJsonArray<T>(value?: T[] | null): T[] | null {
-    if (!value || !Array.isArray(value) || value.length === 0) {
-      return null;
+  private normalizeJsonArray<T>(
+    value?: T[] | null,
+  ): Prisma.InputJsonValue | undefined {
+    if (value === undefined || value === null) {
+      return undefined;
     }
 
-    return value;
+    if (!Array.isArray(value)) {
+      return undefined;
+    }
+
+    return value as Prisma.InputJsonValue;
   }
 }

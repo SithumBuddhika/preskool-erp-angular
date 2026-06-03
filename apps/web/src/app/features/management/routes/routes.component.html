@@ -1,0 +1,424 @@
+<section class="routes-page">
+  <div class="routes-page__header">
+    <div>
+      <h1>Routes</h1>
+      <p>Management / Routes</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Route
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">R</span>
+      <div>
+        <strong>{{ routes().length }}</strong>
+        <p>Total Routes</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ activeRoutes() }}</strong>
+        <p>Active Routes</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">I</span>
+      <div>
+        <strong>{{ inactiveRoutes() }}</strong>
+        <p>Inactive Routes</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">KM</span>
+      <div>
+        <strong>{{ totalDistance() | number: '1.0-1' }}</strong>
+        <p>Total Distance (km)</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="routes-card">
+    <div class="routes-card__top">
+      <div>
+        <h2>Route List</h2>
+        <p>
+          Manage school transport routes with stops, vehicles, drivers, and map
+          preview.
+        </p>
+      </div>
+
+      <div class="routes-search">
+        <input
+          type="text"
+          placeholder="Search routes..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showRouteModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="routes-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Route Code</th>
+              <th>Route</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Stops</th>
+              <th>Distance</th>
+              <th>Vehicle</th>
+              <th>Driver</th>
+              <th>Map Points</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (route of routes(); track route.id) {
+              <tr>
+                <td>
+                  <span class="route-code">{{ route.routeCode }}</span>
+                </td>
+
+                <td>
+                  <div class="route-info">
+                    <span>{{ getRouteInitial(route) }}</span>
+
+                    <div>
+                      <strong>{{ route.routeName }}</strong>
+                      <p>{{ route.notes || 'No notes added' }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>{{ route.startLocation }}</td>
+                <td>{{ route.endLocation }}</td>
+                <td>{{ getStopsLabel(route) }}</td>
+                <td>{{ route.distanceKm ? route.distanceKm + ' km' : '-' }}</td>
+                <td>{{ route.vehicleNo || '-' }}</td>
+                <td>{{ route.driverName || '-' }}</td>
+                <td>{{ getPointsLabel(route) }}</td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--inactive]="route.status === 'INACTIVE'"
+                  >
+                    {{ getStatusLabel(route.status) }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(route)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(route)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="11">
+                  <div class="empty-state">
+                    <strong>No routes found</strong>
+                    <p>
+                      Add your first transport route or change your search
+                      keyword.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showRouteModal()) {
+  <div class="modal-backdrop">
+    <form class="route-modal" [formGroup]="routeForm" (ngSubmit)="saveRoute()">
+      <div class="route-modal__header">
+        <div>
+          <h2>{{ isEditMode() ? 'Edit Route' : 'Add New Route' }}</h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update route details and map points.'
+                : 'Create a route and click on the map to draw the path.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeRouteModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Route Code
+          <input
+            type="text"
+            formControlName="routeCode"
+            placeholder="Example: RTE-0001"
+          />
+
+          @if (isInvalid('routeCode')) {
+            <small>Route code is required.</small>
+          }
+        </label>
+
+        <label>
+          Route Name
+          <input
+            type="text"
+            formControlName="routeName"
+            placeholder="Example: Colombo Central Route"
+          />
+
+          @if (isInvalid('routeName')) {
+            <small>Route name is required.</small>
+          }
+        </label>
+
+        <label>
+          Start Location
+          <input
+            type="text"
+            formControlName="startLocation"
+            placeholder="Example: Colombo Fort"
+          />
+
+          @if (isInvalid('startLocation')) {
+            <small>Start location is required.</small>
+          }
+        </label>
+
+        <label>
+          End Location
+          <input
+            type="text"
+            formControlName="endLocation"
+            placeholder="Example: Nugegoda"
+          />
+
+          @if (isInvalid('endLocation')) {
+            <small>End location is required.</small>
+          }
+        </label>
+
+        <label class="form-grid__full">
+          Stops
+          <input
+            type="text"
+            formControlName="stopsText"
+            placeholder="Example: Pettah, Maradana, Borella"
+          />
+        </label>
+
+        <label>
+          Distance (km)
+          <input
+            type="number"
+            formControlName="distanceKm"
+            placeholder="Auto calculated from map"
+            min="0"
+            step="0.1"
+          />
+        </label>
+
+        <label>
+          Estimated Time
+          <input
+            type="text"
+            formControlName="estimatedTime"
+            placeholder="Example: 45 min"
+          />
+        </label>
+
+        <label>
+          Vehicle No
+          <input
+            type="text"
+            formControlName="vehicleNo"
+            placeholder="Example: BUS-001"
+          />
+        </label>
+
+        <label>
+          Driver Name
+          <input
+            type="text"
+            formControlName="driverName"
+            placeholder="Enter driver name"
+          />
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+          </select>
+        </label>
+
+        <label class="form-grid__full">
+          Notes
+          <textarea
+            formControlName="notes"
+            rows="3"
+            placeholder="Enter route notes"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="map-section">
+        <div class="map-section__header">
+          <div>
+            <h3>Route Map Preview</h3>
+            <p>
+              Click on the map to add route points. First point becomes Start,
+              last point becomes End.
+            </p>
+          </div>
+
+          <div class="map-actions">
+            <button
+              type="button"
+              class="secondary-btn"
+              (click)="removeLastPoint()"
+            >
+              Undo Point
+            </button>
+            <button
+              type="button"
+              class="danger-btn"
+              (click)="clearRoutePoints()"
+            >
+              Clear Map
+            </button>
+          </div>
+        </div>
+
+        <div id="transport-route-map" class="route-map"></div>
+
+        <div class="points-list">
+          @for (point of routePoints(); track $index) {
+            <span> {{ point.label }}: {{ point.lat }}, {{ point.lng }} </span>
+          } @empty {
+            <span>No route points added yet.</span>
+          }
+        </div>
+      </div>
+
+      <div class="route-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeRouteModal()"
+          [disabled]="isSubmitting()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Route'
+                : 'Save Route'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (routeToDelete(); as route) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Route?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ route.routeCode }} - {{ route.routeName }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteRoute()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Route' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}

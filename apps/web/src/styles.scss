@@ -1,6 +1,7 @@
 @use 'tailwindcss';
 @use './styles/variables';
 @use './styles/typography';
+@import 'leaflet/dist/leaflet.css';
 
 :root {
   --erp-font-main: 'Inter', 'Segoe UI', Arial, sans-serif;
