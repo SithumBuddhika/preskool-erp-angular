@@ -22,8 +22,9 @@
       <span>School ERP Overview</span>
       <h2>Welcome back, {{ currentAdminName() }}</h2>
       <p>
-        Monitor students, staff, fees, attendance, leave requests, library,
-        transport, hostels, and sports from one live dashboard.
+        Monitor students, staff, fees, attendance, events, holidays, leave
+        requests, library, transport, hostels, and sports from one live
+        dashboard.
       </p>
     </div>
 
@@ -151,30 +152,50 @@
           <p>{{ currentMonthLabel() }}</p>
         </div>
 
-        <a routerLink="/academic/time-table">Time Table</a>
+        <a routerLink="/management/events">Add Event</a>
       </div>
 
       <div class="mini-calendar">
-        @for (day of calendarDays(); track $index) {
-          <span [class.active]="day.active" [title]="day.title">
+        @for (day of calendarDays(); track day.dateKey) {
+          <span
+            [class.active]="day.active"
+            [class.has-event]="day.activeType === 'EVENT'"
+            [class.has-holiday]="day.activeType === 'HOLIDAY'"
+            [class.has-leave]="day.activeType === 'LEAVE'"
+            [title]="day.title"
+          >
             {{ day.label }}
+
+            @if (day.count > 1) {
+              <small>{{ day.count }}</small>
+            }
           </span>
         }
       </div>
 
       <div class="upcoming-events">
-        <h4>Upcoming Events</h4>
+        <div class="upcoming-events__header">
+          <h4>Upcoming Events</h4>
+          <a routerLink="/management/events">Manage</a>
+        </div>
 
-        @for (leave of recentLeaves(); track $index) {
-          <div class="event-card">
-            <span class="event-card__icon">📅</span>
+        @for (
+          item of upcomingItems();
+          track item.type + '-' + item.id + '-' + item.dateKey
+        ) {
+          <div
+            class="event-card"
+            [class.event-card--holiday]="item.type === 'HOLIDAY'"
+            [class.event-card--leave]="item.type === 'LEAVE'"
+          >
+            <span class="event-card__icon">
+              {{ getCalendarItemIcon(item.type) }}
+            </span>
 
             <div>
-              <strong>{{ leave.staffName }} Leave</strong>
-              <p>
-                {{ formatLeaveType(leave.leaveType) }} /
-                {{ formatDate(leave.startDate) }}
-              </p>
+              <strong>{{ item.title }}</strong>
+              <p>{{ item.subTitle || getCalendarItemLabel(item) }}</p>
+              <small>{{ getCalendarItemDate(item) }}</small>
             </div>
           </div>
         } @empty {
@@ -183,7 +204,8 @@
 
             <div>
               <strong>No upcoming events</strong>
-              <p>Holiday/Event management can be added later</p>
+              <p>Add events from Management / Events</p>
+              <small>Calendar will update automatically</small>
             </div>
           </div>
         }
@@ -250,12 +272,12 @@
 
       <div class="notice-list">
         <article>
-          <span class="notice-icon is-blue">LB</span>
+          <span class="notice-icon is-blue">EV</span>
           <div>
             <strong
-              >Library has {{ quickSummary()?.libraryBooks || 0 }} books</strong
+              >{{ quickSummary()?.events || 0 }} active events added</strong
             >
-            <p>{{ quickSummary()?.libraryMembers || 0 }} library members</p>
+            <p>{{ upcomingItems().length }} upcoming schedule items</p>
           </div>
           <small>Live</small>
         </article>
@@ -331,11 +353,11 @@
       </div>
     </a>
 
-    <a routerLink="/hrm/leaves" class="action-tile is-green">
+    <a routerLink="/management/events" class="action-tile is-green">
       <span>📢</span>
       <div>
-        <strong>Leave Updates</strong>
-        <p>{{ recentLeaves().length }} recent leave records</p>
+        <strong>New Events</strong>
+        <p>{{ upcomingItems().length }} upcoming schedule items</p>
       </div>
     </a>
 

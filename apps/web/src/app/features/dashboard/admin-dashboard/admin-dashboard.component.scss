@@ -414,7 +414,7 @@
   font-weight: 700;
 }
 
-/* SCHEDULE */
+/* REAL SCHEDULE / EVENTS CALENDAR */
 
 .mini-calendar {
   display: grid;
@@ -423,20 +423,56 @@
 }
 
 .mini-calendar span {
-  height: 32px;
+  position: relative;
+  height: 34px;
   display: grid;
   place-items: center;
   border-radius: 8px;
   color: #64748b;
   font-size: 12px;
   font-weight: 700;
-  cursor: default;
+  cursor: help;
+  background: #ffffff;
+  border: 1px solid transparent;
+  transition: 0.18s ease;
+}
+
+.mini-calendar span:hover {
+  transform: translateY(-1px);
+  border-color: #dfe5ef;
 }
 
 .mini-calendar span.active {
-  background: #3d5ee1;
   color: #ffffff;
   box-shadow: 0 10px 20px rgba(61, 94, 225, 0.22);
+}
+
+.mini-calendar span.has-event {
+  background: #3d5ee1;
+}
+
+.mini-calendar span.has-holiday {
+  background: #e11d48;
+}
+
+.mini-calendar span.has-leave {
+  background: #f59e0b;
+}
+
+.mini-calendar span small {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: #101828;
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  font-size: 9px;
+  font-weight: 900;
+  border: 2px solid #ffffff;
 }
 
 .upcoming-events {
@@ -445,15 +481,29 @@
   gap: 10px;
 }
 
-.upcoming-events h4 {
-  margin: 0 0 2px;
+.upcoming-events__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.upcoming-events__header h4 {
+  margin: 0;
   color: #101828;
   font-size: 14px;
   font-weight: 900;
 }
 
+.upcoming-events__header a {
+  color: #3d5ee1;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .event-card {
-  border-left: 3px solid #22c55e;
+  border-left: 3px solid #3d5ee1;
   border-radius: 10px;
   background: #fbfcff;
   padding: 12px;
@@ -463,12 +513,12 @@
   box-shadow: 0 8px 20px rgba(16, 24, 40, 0.04);
 }
 
-.event-card:nth-child(3n) {
-  border-left-color: #ef4444;
+.event-card--holiday {
+  border-left-color: #e11d48;
 }
 
-.event-card:nth-child(3n + 1) {
-  border-left-color: #3d5ee1;
+.event-card--leave {
+  border-left-color: #f59e0b;
 }
 
 .event-card__icon {
@@ -479,6 +529,14 @@
   display: grid;
   place-items: center;
   flex: 0 0 auto;
+}
+
+.event-card--holiday .event-card__icon {
+  background: #fff1f2;
+}
+
+.event-card--leave .event-card__icon {
+  background: #fff7ed;
 }
 
 .event-card strong {
@@ -492,6 +550,14 @@
   color: #667085;
   font-size: 11px;
   font-weight: 600;
+}
+
+.event-card small {
+  display: block;
+  margin-top: 4px;
+  color: #475467;
+  font-size: 10px;
+  font-weight: 800;
 }
 
 /* ATTENDANCE */

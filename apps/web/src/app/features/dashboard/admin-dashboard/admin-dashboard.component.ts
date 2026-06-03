@@ -15,6 +15,7 @@ import {
 import {
   AdminDashboardData,
   AdminDashboardDataService,
+  DashboardCalendarItem,
 } from '../../../core/services/admin-dashboard-data.service';
 import { AdminUsersService } from '../../../core/services/admin-users.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -25,8 +26,11 @@ type ToastType = 'success' | 'error';
 
 type CalendarDay = {
   label: string;
+  dateKey: string;
   active: boolean;
   title: string;
+  activeType?: DashboardCalendarItem['type'];
+  count: number;
 };
 
 @Component({
@@ -70,6 +74,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   attendanceSummary = computed(() => this.dashboardData()?.attendanceSummary);
   quickSummary = computed(() => this.dashboardData()?.quickSummary);
   recentLeaves = computed(() => this.dashboardData()?.recentLeaves || []);
+  upcomingItems = computed(() => this.dashboardData()?.upcomingItems || []);
+  calendarItems = computed(() => this.dashboardData()?.calendarItems || []);
 
   currentMonthLabel = computed(() =>
     new Date().toLocaleDateString('en-US', {
@@ -86,31 +92,29 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
     return Array.from({ length: daysInMonth }).map((_, index) => {
       const dayNumber = index + 1;
-      const dayDate = new Date(year, month, dayNumber);
-      const dayKey = dayDate.toISOString().slice(0, 10);
+      const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(
+        dayNumber,
+      ).padStart(2, '0')}`;
 
-      const leaveEvents = this.recentLeaves().filter((leave) => {
-        if (!leave.startDate) {
-          return false;
-        }
-
-        return leave.startDate.slice(0, 10) === dayKey;
-      });
+      const dayItems = this.calendarItems().filter(
+        (item) => item.dateKey === dateKey,
+      );
 
       return {
         label: `${dayNumber}`,
-        active: leaveEvents.length > 0,
+        dateKey,
+        active: dayItems.length > 0,
+        count: dayItems.length,
+        activeType: dayItems[0]?.type,
         title:
-          leaveEvents.length > 0
-            ? leaveEvents
+          dayItems.length > 0
+            ? dayItems
                 .map(
-                  (leave) =>
-                    `${leave.staffName} - ${this.formatLeaveType(
-                      leave.leaveType,
-                    )}`,
+                  (item) =>
+                    `${item.title} (${this.getCalendarItemLabel(item)})`,
                 )
-                .join(', ')
-            : 'No holiday or event added',
+                .join(' | ')
+            : 'No holiday, event, or leave added',
       };
     });
   });
@@ -439,6 +443,50 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       .map((part) => part.charAt(0))
       .join('')
       .toUpperCase();
+  }
+
+  getCalendarItemIcon(type: DashboardCalendarItem['type']): string {
+    switch (type) {
+      case 'HOLIDAY':
+        return '🏖️';
+      case 'LEAVE':
+        return '🧾';
+      case 'EVENT':
+      default:
+        return '📅';
+    }
+  }
+
+  getCalendarItemLabel(item: DashboardCalendarItem): string {
+    if (item.type === 'HOLIDAY') {
+      return 'Holiday';
+    }
+
+    if (item.type === 'LEAVE') {
+      return item.status || 'Leave';
+    }
+
+    return item.eventType
+      ? item.eventType
+          .split('_')
+          .map((part) => part.charAt(0) + part.slice(1).toLowerCase())
+          .join(' ')
+      : 'Event';
+  }
+
+  getCalendarItemDate(item: DashboardCalendarItem): string {
+    const date = this.formatDate(item.startDate);
+
+    if (
+      !item.endDate ||
+      item.endDate.slice(0, 10) === item.startDate.slice(0, 10)
+    ) {
+      return `${date} / ${item.time || 'All Day'}`;
+    }
+
+    return `${date} - ${this.formatDate(item.endDate)} / ${
+      item.time || 'All Day'
+    }`;
   }
 
   formatDate(date: string): string {
