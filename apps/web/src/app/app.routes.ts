@@ -401,6 +401,13 @@ export const appRoutes: Routes = [
           ).then((m) => m.TeacherAttendanceComponent),
       },
       {
+        path: 'hrm/staff-attendance',
+        loadComponent: () =>
+          import(
+            './features/hrm/staff-attendance/staff-attendance.component'
+          ).then((m) => m.StaffAttendanceComponent),
+      },
+      {
         path: 'hrm/payroll',
         loadComponent: () =>
           import('./features/hrm/payroll/payroll.component').then(

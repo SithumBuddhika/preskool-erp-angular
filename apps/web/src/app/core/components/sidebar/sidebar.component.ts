@@ -206,6 +206,11 @@ export class SidebarComponent {
           icon: 'briefcase',
         },
         {
+          label: 'Staff Attendance',
+          route: '/hrm/staff-attendance',
+          icon: 'briefcase',
+        },
+        {
           label: 'Payroll',
           route: '/hrm/payroll',
           icon: 'briefcase',

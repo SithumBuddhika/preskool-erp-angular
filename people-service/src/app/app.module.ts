@@ -45,6 +45,9 @@ import { PrismaService } from './prisma.service';
 import { SportsController } from './sports.controller';
 import { SportsService } from './sports.service';
 
+import { StaffAttendanceController } from './staff-attendance.controller';
+import { StaffAttendanceService } from './staff-attendance.service';
+
 import { StaffsController } from './staffs.controller';
 import { StaffsService } from './staffs.service';
 
@@ -85,6 +88,7 @@ import { TransportRoutesService } from './transport-routes.service';
     LeavesController,
     StudentAttendanceController,
     TeacherAttendanceController,
+    StaffAttendanceController,
     PayrollController,
 
     FeesController,
@@ -110,6 +114,7 @@ import { TransportRoutesService } from './transport-routes.service';
     LeavesService,
     StudentAttendanceService,
     TeacherAttendanceService,
+    StaffAttendanceService,
     PayrollService,
 
     FeesService,
