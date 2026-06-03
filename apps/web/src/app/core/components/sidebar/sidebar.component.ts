@@ -225,6 +225,11 @@ export class SidebarComponent {
           route: '/reports/staff-day-wise',
           icon: 'report-analytics',
         },
+        {
+          label: 'Staff Report',
+          route: '/reports/staff-report',
+          icon: 'report-analytics',
+        },
       ],
     },
   ];
