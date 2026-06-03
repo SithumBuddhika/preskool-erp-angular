@@ -18,6 +18,12 @@ import { TransportRoutesService } from '../../../core/services/transport-routes.
 
 type ToastType = 'success' | 'error';
 
+type GeocodeResult = {
+  lat: string;
+  lon: string;
+  display_name: string;
+};
+
 @Component({
   selector: 'app-routes',
   standalone: true,
@@ -35,6 +41,7 @@ export class RoutesComponent implements OnInit, OnDestroy {
   isLoading = signal(false);
   isSubmitting = signal(false);
   isDeleting = signal(false);
+  isGeneratingMap = signal(false);
   showRouteModal = signal(false);
 
   serverError = signal('');
@@ -317,6 +324,62 @@ export class RoutesComponent implements OnInit, OnDestroy {
     });
   }
 
+  async generateMapFromLocations(): Promise<void> {
+    this.routeForm.controls.startLocation.markAsTouched();
+    this.routeForm.controls.endLocation.markAsTouched();
+
+    const startLocation = this.routeForm.controls.startLocation.value.trim();
+    const endLocation = this.routeForm.controls.endLocation.value.trim();
+    const stops = this.getStopsFromText();
+
+    if (!startLocation || !endLocation || this.isGeneratingMap()) {
+      this.showToast('Enter start and end locations first.', 'error');
+      return;
+    }
+
+    this.isGeneratingMap.set(true);
+    this.serverError.set('');
+
+    const locationNames = [startLocation, ...stops, endLocation];
+
+    try {
+      const generatedPoints: TransportRoutePoint[] = [];
+
+      for (let index = 0; index < locationNames.length; index += 1) {
+        const locationName = locationNames[index];
+        const point = await this.geocodeLocation(locationName);
+
+        generatedPoints.push({
+          label: this.getGeneratedPointLabel(
+            index,
+            locationNames.length,
+            locationName,
+          ),
+          lat: point.lat,
+          lng: point.lng,
+        });
+
+        if (index < locationNames.length - 1) {
+          await this.delay(1100);
+        }
+      }
+
+      this.routePoints.set(this.relabelPoints(generatedPoints));
+      this.calculateDistanceFromPoints();
+      this.renderRouteOnMap();
+      this.showToast('Map generated from route locations.', 'success');
+    } catch (error) {
+      this.showToast(
+        error instanceof Error
+          ? error.message
+          : 'Failed to generate map from locations.',
+        'error',
+      );
+    } finally {
+      this.isGeneratingMap.set(false);
+    }
+  }
+
   removeLastPoint(): void {
     const points = [...this.routePoints()];
 
@@ -559,13 +622,79 @@ export class RoutesComponent implements OnInit, OnDestroy {
     );
   }
 
-  private buildRoutePayload(): CreateTransportRoutePayload {
-    const formValue = this.routeForm.getRawValue();
-
-    const stops = formValue.stopsText
+  private getStopsFromText(): string[] {
+    return this.routeForm.controls.stopsText.value
       .split(',')
       .map((stop) => stop.trim())
       .filter(Boolean);
+  }
+
+  private async geocodeLocation(
+    locationName: string,
+  ): Promise<{ lat: number; lng: number }> {
+    const query = this.buildGeocodeQuery(locationName);
+    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(
+      query,
+    )}`;
+
+    const response = await fetch(url, {
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Could not search location: ${locationName}`);
+    }
+
+    const results = (await response.json()) as GeocodeResult[];
+
+    if (!results.length) {
+      throw new Error(`Location not found: ${locationName}`);
+    }
+
+    return {
+      lat: Number(Number(results[0].lat).toFixed(6)),
+      lng: Number(Number(results[0].lon).toFixed(6)),
+    };
+  }
+
+  private buildGeocodeQuery(locationName: string): string {
+    const cleanedLocation = locationName.trim();
+
+    if (/sri\s*lanka|lk/i.test(cleanedLocation)) {
+      return cleanedLocation;
+    }
+
+    return `${cleanedLocation}, Sri Lanka`;
+  }
+
+  private getGeneratedPointLabel(
+    index: number,
+    total: number,
+    locationName: string,
+  ): string {
+    if (index === 0) {
+      return `Start - ${locationName}`;
+    }
+
+    if (index === total - 1) {
+      return `End - ${locationName}`;
+    }
+
+    return `Stop ${index} - ${locationName}`;
+  }
+
+  private delay(milliseconds: number): Promise<void> {
+    return new Promise((resolve) => {
+      setTimeout(resolve, milliseconds);
+    });
+  }
+
+  private buildRoutePayload(): CreateTransportRoutePayload {
+    const formValue = this.routeForm.getRawValue();
+
+    const stops = this.getStopsFromText();
 
     const payload: CreateTransportRoutePayload = {
       routeCode: formValue.routeCode.trim(),

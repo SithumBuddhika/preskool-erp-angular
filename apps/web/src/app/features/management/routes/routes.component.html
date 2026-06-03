@@ -179,7 +179,7 @@
             {{
               isEditMode()
                 ? 'Update route details and map points.'
-                : 'Create a route and click on the map to draw the path.'
+                : 'Create a route manually or generate the map from locations.'
             }}
           </p>
         </div>
@@ -321,23 +321,39 @@
           <div>
             <h3>Route Map Preview</h3>
             <p>
-              Click on the map to add route points. First point becomes Start,
-              last point becomes End.
+              Click on the map to add points, or generate the map from Start,
+              Stops, and End locations.
             </p>
           </div>
 
           <div class="map-actions">
             <button
               type="button"
+              class="primary-btn"
+              (click)="generateMapFromLocations()"
+              [disabled]="isGeneratingMap()"
+            >
+              {{
+                isGeneratingMap()
+                  ? 'Generating...'
+                  : 'Generate Map from Locations'
+              }}
+            </button>
+
+            <button
+              type="button"
               class="secondary-btn"
               (click)="removeLastPoint()"
+              [disabled]="isGeneratingMap()"
             >
               Undo Point
             </button>
+
             <button
               type="button"
               class="danger-btn"
               (click)="clearRoutePoints()"
+              [disabled]="isGeneratingMap()"
             >
               Clear Map
             </button>
@@ -360,12 +376,16 @@
           class="secondary-btn"
           type="button"
           (click)="closeRouteModal()"
-          [disabled]="isSubmitting()"
+          [disabled]="isSubmitting() || isGeneratingMap()"
         >
           Cancel
         </button>
 
-        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+        <button
+          class="primary-btn"
+          type="submit"
+          [disabled]="isSubmitting() || isGeneratingMap()"
+        >
           {{
             isSubmitting()
               ? isEditMode()
