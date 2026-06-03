@@ -504,6 +504,31 @@ model LibraryBook {
   @@map("library_books")
 }
 
+enum TransportRouteStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model TransportRoute {
+  id            String               @id @default(uuid())
+  routeCode     String               @unique
+  routeName     String
+  startLocation String
+  endLocation   String
+  stops         Json?
+  routePoints   Json?
+  distanceKm    Float?
+  estimatedTime String?
+  vehicleNo     String?
+  driverName    String?
+  status        TransportRouteStatus @default(ACTIVE)
+  notes         String?
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  @@map("transport_routes")
+}
+
 enum ClassStatus {
   ACTIVE
   INACTIVE
