@@ -1,6 +1,6 @@
 .daily-attendance-page {
   display: grid;
-  gap: 22px;
+  gap: 24px;
   min-width: 0;
   max-width: 100%;
 }
@@ -29,7 +29,7 @@
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .primary-btn,
@@ -42,6 +42,7 @@
   font-weight: 700;
   cursor: pointer;
   transition: 0.18s ease;
+  white-space: nowrap;
 }
 
 .primary-btn {
@@ -49,51 +50,49 @@
   color: #ffffff;
 }
 
-.primary-btn:hover {
-  filter: brightness(0.95);
-}
-
-.primary-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
 .secondary-btn,
 .clear-btn {
-  background: #f1f5f9;
+  background: #eef1f6;
   color: #253858;
+}
+
+.primary-btn:hover {
+  filter: brightness(0.96);
+}
+
+.secondary-btn:hover,
+.clear-btn:hover {
+  background: #e5e9f2;
+}
+
+.report-tabs,
+.filter-card,
+.selected-date-card,
+.report-card {
+  background: #ffffff;
+  border: 1px solid #edf1f7;
+  border-radius: 12px;
+  box-shadow: 0 10px 28px rgba(16, 24, 40, 0.04);
 }
 
 .report-tabs {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  gap: 8px;
   overflow-x: auto;
-  background: #ffffff;
-  border: 1px solid #edf1f7;
-  border-radius: 12px;
-  padding: 8px;
-  box-shadow: 0 10px 28px rgba(16, 24, 40, 0.04);
+  padding: 10px;
 }
 
 .report-tabs a {
-  min-height: 38px;
+  height: 38px;
   border-radius: 8px;
-  padding: 0 12px;
-  color: #667085;
+  padding: 0 14px;
+  color: #344054;
+  text-decoration: none;
   display: inline-flex;
   align-items: center;
-  white-space: nowrap;
-  text-decoration: none;
   font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: 0.18s ease;
-}
-
-.report-tabs a:hover {
-  background: #f8fafc;
-  color: var(--erp-primary);
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .report-tabs a.active {
@@ -101,89 +100,74 @@
   color: var(--erp-primary);
 }
 
-.filters-card {
-  display: grid;
-  grid-template-columns: 2fr repeat(3, minmax(150px, 1fr)) auto;
-  gap: 14px;
-  align-items: end;
-  background: #ffffff;
-  border: 1px solid #edf1f7;
-  border-radius: 12px;
+.filter-card {
   padding: 18px;
-  box-shadow: 0 10px 28px rgba(16, 24, 40, 0.04);
-  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(260px, 1.5fr) repeat(4, minmax(150px, 1fr)) auto;
+  gap: 12px;
+  align-items: end;
 }
 
-.filter-group {
+.filter-card label {
   display: grid;
   gap: 8px;
-  min-width: 0;
-}
-
-.filter-group label {
   color: var(--erp-text-main);
   font-size: 13px;
   font-weight: 700;
 }
 
-.filter-group input,
-.filter-group select {
+.filter-card input,
+.filter-card select {
   width: 100%;
   height: 42px;
   border: 1px solid #dfe5ef;
   border-radius: 8px;
-  padding: 0 12px;
+  padding: 0 14px;
   outline: 0;
   color: #253858;
   font-size: 14px;
   background: #ffffff;
 }
 
-.filter-group input::placeholder {
+.filter-card input::placeholder {
   color: #98a2b3;
 }
 
-.filter-group input:focus,
-.filter-group select:focus {
+.filter-card input:focus,
+.filter-card select:focus {
   border-color: var(--erp-primary);
   box-shadow: 0 0 0 3px rgba(56, 99, 255, 0.08);
 }
 
-.daily-date-card {
-  min-width: 0;
-  background: #ffffff;
-  border: 1px solid #edf1f7;
-  border-radius: 12px;
+.selected-date-card {
   padding: 18px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
-  box-shadow: 0 10px 28px rgba(16, 24, 40, 0.04);
+  gap: 16px;
 }
 
-.daily-date-card span {
+.selected-date-card span {
   display: block;
   color: #667085;
   font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.daily-date-card strong {
-  display: block;
-  margin-top: 6px;
-  color: var(--erp-text-main);
-  font-size: 20px;
   font-weight: 800;
+  text-transform: uppercase;
 }
 
-.daily-date-card p {
+.selected-date-card strong {
+  display: block;
+  margin-top: 8px;
+  color: var(--erp-text-main);
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.selected-date-card p {
   margin: 0;
-  color: #667085;
+  color: #475467;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .summary-grid {
@@ -194,7 +178,7 @@
 }
 
 .summary-card {
-  min-height: 108px;
+  min-height: 112px;
   background: #ffffff;
   border: 1px solid #edf1f7;
   border-radius: 12px;
@@ -207,12 +191,12 @@
 }
 
 .summary-card__icon {
-  width: 50px;
-  height: 50px;
+  width: 52px;
+  height: 52px;
   border-radius: 10px;
   display: grid;
   place-items: center;
-  font-weight: 700;
+  font-weight: 900;
   flex: 0 0 auto;
 }
 
@@ -241,7 +225,7 @@
   color: #7f56d9;
 }
 
-.summary-card__icon--teal {
+.summary-card__icon--cyan {
   background: #ecfeff;
   color: #0891b2;
 }
@@ -249,10 +233,9 @@
 .summary-card strong {
   display: block;
   color: var(--erp-text-main);
-  font-size: 25px;
+  font-size: 26px;
   line-height: 1;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 900;
 }
 
 .summary-card p {
@@ -265,16 +248,12 @@
   min-width: 0;
   max-width: 100%;
   overflow: hidden;
-  background: #ffffff;
-  border: 1px solid #edf1f7;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 10px 28px rgba(16, 24, 40, 0.04);
+  padding: 22px;
 }
 
 .report-card__top {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 18px;
   margin-bottom: 18px;
@@ -284,7 +263,7 @@
   margin: 0;
   color: var(--erp-text-main);
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: -0.02em;
 }
 
@@ -294,16 +273,16 @@
   font-size: 13px;
 }
 
-.record-count {
-  height: 32px;
+.report-card__top > span {
+  min-height: 30px;
   border-radius: 999px;
   padding: 0 12px;
   background: #f8fafc;
-  color: #667085;
+  color: #475467;
   display: inline-flex;
   align-items: center;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   white-space: nowrap;
 }
 
@@ -324,8 +303,8 @@
 
 table {
   width: 100%;
+  min-width: 1120px;
   border-collapse: collapse;
-  min-width: 1000px;
 }
 
 th {
@@ -334,7 +313,7 @@ th {
   font-size: 12px;
   text-align: left;
   padding: 13px 12px;
-  font-weight: 700;
+  font-weight: 800;
   border-bottom: 1px solid #edf1f7;
   white-space: nowrap;
 }
@@ -347,97 +326,69 @@ td {
   white-space: nowrap;
 }
 
-.class-pill,
-.attendance-code {
-  min-width: 82px;
-  height: 30px;
-  padding: 0 10px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #eef2ff;
-  color: var(--erp-primary);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.student-info {
+.person-info {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.student-info > span {
-  width: 40px;
-  height: 40px;
+.person-info > span {
+  width: 42px;
+  height: 42px;
   border-radius: 10px;
-  background: #eef2ff;
+  background: #eef4ff;
   color: var(--erp-primary);
   display: grid;
   place-items: center;
   font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
+  font-weight: 900;
   flex: 0 0 auto;
 }
 
-.student-info strong {
+.person-info strong {
   display: block;
   color: var(--erp-text-main);
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
-.student-info p {
+.person-info p {
   margin: 4px 0 0;
   color: #667085;
   font-size: 12px;
 }
 
-.mini-count {
-  width: fit-content;
-  min-width: 30px;
-  height: 26px;
+.type-pill,
+.status-pill,
+.rate-pill {
+  min-height: 28px;
   border-radius: 999px;
-  padding: 0 9px;
+  padding: 0 10px;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 900;
 }
 
-.mini-count--present {
-  background: #ecfdf3;
-  color: #039855;
+.type-pill--student {
+  background: #eef4ff;
+  color: #3863ff;
 }
 
-.mini-count--absent {
-  background: #fff1f2;
-  color: #e11d48;
-}
-
-.mini-count--late {
-  background: #fff7ed;
-  color: #f59e0b;
-}
-
-.mini-count--half {
+.type-pill--teacher {
   background: #f4ebff;
   color: #7f56d9;
 }
 
-.status-pill {
-  display: inline-flex;
-  align-items: center;
-  height: 26px;
-  padding: 0 10px;
-  border-radius: 999px;
+.type-pill--staff {
   background: #ecfdf3;
   color: #039855;
-  font-size: 11px;
-  font-weight: 700;
+}
+
+.status-pill--present,
+.rate-pill {
+  background: #ecfdf3;
+  color: #039855;
 }
 
 .status-pill--absent {
@@ -450,9 +401,9 @@ td {
   color: #f59e0b;
 }
 
-.status-pill--half {
-  background: #f4ebff;
-  color: #7f56d9;
+.status-pill--half-day {
+  background: #eef4ff;
+  color: #3863ff;
 }
 
 .empty-state {
@@ -464,7 +415,7 @@ td {
   display: block;
   color: var(--erp-text-main);
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .empty-state p {
@@ -472,12 +423,12 @@ td {
   color: #667085;
 }
 
-.report-skeleton {
+.table-skeleton {
   display: grid;
   gap: 12px;
 }
 
-.report-skeleton span {
+.table-skeleton span {
   height: 52px;
   border-radius: 8px;
   background: linear-gradient(90deg, #edf1f7 25%, #f8fafc 50%, #edf1f7 75%);
@@ -492,63 +443,50 @@ td {
 }
 
 @media (max-width: 1400px) {
-  .summary-grid {
+  .filter-card {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .filters-card {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .filter-group--wide {
-    grid-column: 1 / -1;
-  }
-
-  .clear-btn {
-    width: fit-content;
+  .summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 991px) {
   .daily-attendance-page__header,
-  .report-card__top,
-  .daily-date-card {
+  .selected-date-card,
+  .report-card__top {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .filter-card {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 575px) {
+  .daily-attendance-page__header {
     align-items: flex-start;
     flex-direction: column;
   }
 
   .header-actions {
     width: 100%;
-  }
-
-  .header-actions button {
-    flex: 1;
-  }
-
-  table {
-    min-width: 920px;
-  }
-}
-
-@media (max-width: 575px) {
-  .summary-grid,
-  .filters-card {
-    grid-template-columns: 1fr;
-  }
-
-  .filter-group--wide {
-    grid-column: auto;
-  }
-
-  .clear-btn {
-    width: 100%;
-  }
-
-  .header-actions {
     flex-direction: column;
   }
 
-  .header-actions button {
+  .header-actions button,
+  .filter-card .clear-btn {
     width: 100%;
+  }
+
+  .filter-card,
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .report-card {
+    padding: 16px;
   }
 }

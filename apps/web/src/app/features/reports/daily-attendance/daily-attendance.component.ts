@@ -1,95 +1,162 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, signal } from '@angular/core';
-import {
-  StudentAttendance,
-  StudentAttendanceStatus,
-} from '../../../core/models/student-attendance.model';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { catchError, forkJoin, of } from 'rxjs';
+
+import { StaffAttendance } from '../../../core/models/staff-attendance.model';
+import { StudentAttendance } from '../../../core/models/student-attendance.model';
+import { TeacherAttendance } from '../../../core/models/teacher-attendance.model';
+import { StaffAttendanceService } from '../../../core/services/staff-attendance.service';
 import { StudentAttendanceService } from '../../../core/services/student-attendance.service';
-import { ReportTabsComponent } from '../components/report-tabs/report-tabs.component';
+import { TeacherAttendanceService } from '../../../core/services/teacher-attendance.service';
 
-type AttendanceStatusFilter = StudentAttendanceStatus | 'ALL';
+type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'HALF_DAY';
+type AttendanceType = 'ALL' | 'STUDENT' | 'TEACHER' | 'STAFF';
 
-type DailyClassSummary = {
-  classLabel: string;
+type DailyAttendanceRecord = {
+  id: string;
+  type: Exclude<AttendanceType, 'ALL'>;
+  code: string;
+  personName: string;
+  groupLabel: string;
+  subLabel: string;
+  attendanceDate: string;
+  status: AttendanceStatus;
+  checkIn?: string | null;
+  checkOut?: string | null;
+  remarks?: string | null;
+};
+
+type DailySummaryRow = {
+  groupLabel: string;
   total: number;
   present: number;
   absent: number;
   late: number;
   halfDay: number;
-  attendanceRate: number;
+  rate: number;
 };
 
 @Component({
   selector: 'app-daily-attendance',
   standalone: true,
-  imports: [ReportTabsComponent],
+  imports: [CommonModule, RouterLink, RouterLinkActive],
   templateUrl: './daily-attendance.component.html',
   styleUrl: './daily-attendance.component.scss',
 })
 export class DailyAttendanceComponent implements OnInit {
-  attendanceRecords = signal<StudentAttendance[]>([]);
-
+  allRecords = signal<DailyAttendanceRecord[]>([]);
   isLoading = signal(false);
   serverError = signal('');
 
+  selectedDate = signal(this.getTodayDate());
   searchTerm = signal('');
-  selectedDate = signal('');
-  selectedClass = signal('ALL');
-  selectedStatus = signal<AttendanceStatusFilter>('ALL');
+  selectedType = signal<AttendanceType>('ALL');
+  selectedGroup = signal('ALL');
+  selectedStatus = signal<AttendanceStatus | 'ALL'>('ALL');
 
-  dailyRecords = computed(() => {
-    const selectedDate = this.selectedDate();
+  selectedDateLabel = computed(() =>
+    new Date(this.selectedDate()).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: '2-digit',
+    }),
+  );
 
-    if (!selectedDate) {
-      return this.attendanceRecords();
-    }
+  selectedDateRecords = computed(() =>
+    this.allRecords().filter(
+      (record) => this.toDateKey(record.attendanceDate) === this.selectedDate(),
+    ),
+  );
 
-    return this.attendanceRecords().filter(
-      (record) =>
-        this.formatDateForInput(record.attendanceDate) === selectedDate,
-    );
+  groupOptions = computed(() => {
+    const groups = this.selectedDateRecords()
+      .filter(
+        (record) =>
+          this.selectedType() === 'ALL' || record.type === this.selectedType(),
+      )
+      .map((record) => record.groupLabel)
+      .filter(Boolean);
+
+    return Array.from(new Set(groups)).sort((a, b) => a.localeCompare(b));
   });
 
   filteredRecords = computed(() => {
     const keyword = this.searchTerm().trim().toLowerCase();
-    const classFilter = this.selectedClass();
-    const statusFilter = this.selectedStatus();
+    const type = this.selectedType();
+    const group = this.selectedGroup();
+    const status = this.selectedStatus();
 
-    return this.dailyRecords().filter((record) => {
-      const classLabel = this.getClassLabel(record);
-
+    return this.selectedDateRecords().filter((record) => {
       const searchableText = [
-        record.attendanceCode,
-        record.studentAdmissionNo,
-        record.studentName,
-        record.className,
-        record.section,
+        record.type,
+        record.code,
+        record.personName,
+        record.groupLabel,
+        record.subLabel,
         record.status,
-        record.checkInTime,
-        record.checkOutTime,
-        record.remarks,
+        record.remarks || '',
       ]
-        .filter(Boolean)
         .join(' ')
         .toLowerCase();
 
       const matchesSearch = !keyword || searchableText.includes(keyword);
-      const matchesClass = classFilter === 'ALL' || classLabel === classFilter;
-      const matchesStatus =
-        statusFilter === 'ALL' || record.status === statusFilter;
+      const matchesType = type === 'ALL' || record.type === type;
+      const matchesGroup = group === 'ALL' || record.groupLabel === group;
+      const matchesStatus = status === 'ALL' || record.status === status;
 
-      return matchesSearch && matchesClass && matchesStatus;
+      return matchesSearch && matchesType && matchesGroup && matchesStatus;
     });
   });
 
-  classOptions = computed(() => {
-    const classes = this.dailyRecords()
-      .map((record) => this.getClassLabel(record))
-      .filter(Boolean);
+  summaryRows = computed<DailySummaryRow[]>(() => {
+    const rowMap = new Map<string, DailySummaryRow>();
 
-    return Array.from(new Set(classes)).sort((a, b) => a.localeCompare(b));
+    this.filteredRecords().forEach((record) => {
+      const groupLabel = record.groupLabel || 'Not Grouped';
+
+      if (!rowMap.has(groupLabel)) {
+        rowMap.set(groupLabel, {
+          groupLabel,
+          total: 0,
+          present: 0,
+          absent: 0,
+          late: 0,
+          halfDay: 0,
+          rate: 0,
+        });
+      }
+
+      const row = rowMap.get(groupLabel)!;
+
+      row.total += 1;
+
+      if (record.status === 'PRESENT') {
+        row.present += 1;
+      }
+
+      if (record.status === 'ABSENT') {
+        row.absent += 1;
+      }
+
+      if (record.status === 'LATE') {
+        row.late += 1;
+      }
+
+      if (record.status === 'HALF_DAY') {
+        row.halfDay += 1;
+      }
+
+      row.rate =
+        row.total > 0 ? Math.round((row.present / row.total) * 100) : 0;
+    });
+
+    return Array.from(rowMap.values()).sort((a, b) =>
+      a.groupLabel.localeCompare(b.groupLabel),
+    );
   });
 
-  totalRecords = computed(() => this.filteredRecords().length);
+  totalCount = computed(() => this.filteredRecords().length);
 
   presentCount = computed(
     () =>
@@ -116,132 +183,97 @@ export class DailyAttendanceComponent implements OnInit {
   );
 
   attendanceRate = computed(() => {
-    const total = this.totalRecords();
+    const total = this.totalCount();
 
     if (total === 0) {
       return 0;
     }
 
-    const attended =
-      this.presentCount() + this.lateCount() + this.halfDayCount();
-
-    return Math.round((attended / total) * 100);
-  });
-
-  classWiseDailySummary = computed<DailyClassSummary[]>(() => {
-    const groupedRecords = new Map<string, StudentAttendance[]>();
-
-    this.filteredRecords().forEach((record) => {
-      const classLabel = this.getClassLabel(record);
-
-      if (!groupedRecords.has(classLabel)) {
-        groupedRecords.set(classLabel, []);
-      }
-
-      groupedRecords.get(classLabel)?.push(record);
-    });
-
-    return Array.from(groupedRecords.entries())
-      .map(([classLabel, records]) => {
-        const present = records.filter(
-          (record) => record.status === 'PRESENT',
-        ).length;
-        const absent = records.filter(
-          (record) => record.status === 'ABSENT',
-        ).length;
-        const late = records.filter(
-          (record) => record.status === 'LATE',
-        ).length;
-        const halfDay = records.filter(
-          (record) => record.status === 'HALF_DAY',
-        ).length;
-
-        const total = records.length;
-        const attended = present + late + halfDay;
-        const attendanceRate =
-          total === 0 ? 0 : Math.round((attended / total) * 100);
-
-        return {
-          classLabel,
-          total,
-          present,
-          absent,
-          late,
-          halfDay,
-          attendanceRate,
-        };
-      })
-      .sort((a, b) => a.classLabel.localeCompare(b.classLabel));
-  });
-
-  selectedDateLabel = computed(() => {
-    const date = this.selectedDate();
-
-    if (!date) {
-      return 'All Dates';
-    }
-
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: '2-digit',
-    });
+    return Math.round((this.presentCount() / total) * 100);
   });
 
   constructor(
     private readonly studentAttendanceService: StudentAttendanceService,
+    private readonly teacherAttendanceService: TeacherAttendanceService,
+    private readonly staffAttendanceService: StaffAttendanceService,
   ) {}
 
   ngOnInit(): void {
-    this.selectedDate.set(this.getTodayForInput());
-    this.loadAttendanceRecords();
+    this.loadDailyAttendance();
   }
 
-  loadAttendanceRecords(): void {
+  loadDailyAttendance(): void {
     this.isLoading.set(true);
     this.serverError.set('');
 
-    this.studentAttendanceService.getAttendanceRecords().subscribe({
-      next: (records) => {
-        this.attendanceRecords.set(records);
+    forkJoin({
+      students: this.studentAttendanceService
+        .getAttendanceRecords()
+        .pipe(catchError(() => of([] as StudentAttendance[]))),
+      teachers: this.teacherAttendanceService
+        .getAttendanceRecords()
+        .pipe(catchError(() => of([] as TeacherAttendance[]))),
+      staffs: this.staffAttendanceService
+        .getStaffAttendance('', '')
+        .pipe(catchError(() => of([] as StaffAttendance[]))),
+    }).subscribe({
+      next: ({ students, teachers, staffs }) => {
+        this.allRecords.set([
+          ...students.map((record) => this.mapStudentRecord(record)),
+          ...teachers.map((record) => this.mapTeacherRecord(record)),
+          ...staffs.map((record) => this.mapStaffRecord(record)),
+        ]);
+
         this.isLoading.set(false);
       },
       error: (error) => {
         this.serverError.set(
-          error?.error?.message || 'Failed to load daily attendance report.',
+          error?.error?.message || 'Failed to load daily attendance.',
         );
         this.isLoading.set(false);
       },
     });
   }
 
+  onDateChange(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+
+    this.selectedDate.set(value || this.getTodayDate());
+    this.selectedGroup.set('ALL');
+  }
+
   onSearchInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
+
     this.searchTerm.set(value);
   }
 
-  onDateInput(event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
-    this.selectedDate.set(value);
-    this.selectedClass.set('ALL');
+  onTypeChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value as AttendanceType;
+
+    this.selectedType.set(value);
+    this.selectedGroup.set('ALL');
   }
 
-  onClassChange(event: Event): void {
+  onGroupChange(event: Event): void {
     const value = (event.target as HTMLSelectElement).value;
-    this.selectedClass.set(value);
+
+    this.selectedGroup.set(value);
   }
 
   onStatusChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement)
-      .value as AttendanceStatusFilter;
+    const value = (event.target as HTMLSelectElement).value as
+      | AttendanceStatus
+      | 'ALL';
 
     this.selectedStatus.set(value);
   }
 
   clearFilters(): void {
     this.searchTerm.set('');
-    this.selectedDate.set(this.getTodayForInput());
-    this.selectedClass.set('ALL');
+    this.selectedDate.set(this.getTodayDate());
+    this.selectedType.set('ALL');
+    this.selectedGroup.set('ALL');
     this.selectedStatus.set('ALL');
   }
 
@@ -253,10 +285,11 @@ export class DailyAttendanceComponent implements OnInit {
     }
 
     const headers = [
-      'Attendance ID',
-      'Admission No',
-      'Student Name',
-      'Class',
+      'Type',
+      'Code',
+      'Name',
+      'Group',
+      'Details',
       'Date',
       'Status',
       'Check In',
@@ -264,19 +297,20 @@ export class DailyAttendanceComponent implements OnInit {
       'Remarks',
     ];
 
-    const rows = records.map((record) => [
-      record.attendanceCode,
-      record.studentAdmissionNo || '',
-      record.studentName,
-      this.getClassLabel(record),
-      this.formatDisplayDate(record.attendanceDate),
+    const csvRows = records.map((record) => [
+      this.getTypeLabel(record.type),
+      record.code,
+      record.personName,
+      record.groupLabel,
+      record.subLabel,
+      this.toDateKey(record.attendanceDate),
       this.getStatusLabel(record.status),
-      record.checkInTime || '',
-      record.checkOutTime || '',
-      record.remarks || '',
+      record.checkIn || '-',
+      record.checkOut || '-',
+      record.remarks || '-',
     ]);
 
-    const csvContent = [headers, ...rows]
+    const csvContent = [headers, ...csvRows]
       .map((row) => row.map((cell) => this.escapeCsvValue(cell)).join(','))
       .join('\n');
 
@@ -288,34 +322,52 @@ export class DailyAttendanceComponent implements OnInit {
     const link = document.createElement('a');
 
     link.href = url;
-    link.download = `daily-attendance-${this.selectedDate() || this.getTodayForInput()}.csv`;
+    link.download = `daily-attendance-${this.selectedDate()}.csv`;
     link.click();
 
     window.URL.revokeObjectURL(url);
   }
 
-  getClassLabel(record: StudentAttendance): string {
-    return `${record.className} ${record.section || ''}`.trim();
+  getTypeLabel(type: DailyAttendanceRecord['type']): string {
+    switch (type) {
+      case 'STUDENT':
+        return 'Student';
+      case 'TEACHER':
+        return 'Teacher';
+      case 'STAFF':
+        return 'Staff';
+      default:
+        return type;
+    }
   }
 
-  getStatusLabel(status: StudentAttendanceStatus): string {
-    return status
-      .toLowerCase()
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, (letter) => letter.toUpperCase());
+  getTypeClass(type: DailyAttendanceRecord['type']): string {
+    return `type-pill--${type.toLowerCase()}`;
   }
 
-  getAttendanceInitial(record: StudentAttendance): string {
-    return record.studentName
+  getStatusLabel(status: AttendanceStatus): string {
+    if (status === 'HALF_DAY') {
+      return 'Half Day';
+    }
+
+    return status.charAt(0) + status.slice(1).toLowerCase();
+  }
+
+  getStatusClass(status: AttendanceStatus): string {
+    return `status-pill--${status.toLowerCase().replace('_', '-')}`;
+  }
+
+  getInitial(record: DailyAttendanceRecord): string {
+    return record.personName
       .split(' ')
       .filter(Boolean)
       .slice(0, 2)
-      .map((word) => word[0])
+      .map((part) => part.charAt(0))
       .join('')
       .toUpperCase();
   }
 
-  formatDisplayDate(date: string): string {
+  formatDate(date: string): string {
     return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -323,25 +375,82 @@ export class DailyAttendanceComponent implements OnInit {
     });
   }
 
-  formatTime(time?: string | null): string {
-    return time || 'Not added';
+  private mapStudentRecord(record: StudentAttendance): DailyAttendanceRecord {
+    const extra = record as unknown as Record<
+      string,
+      string | null | undefined
+    >;
+
+    return {
+      id: record.id,
+      type: 'STUDENT',
+      code: record.studentAdmissionNo || record.attendanceCode || '-',
+      personName: record.studentName,
+      groupLabel: `${record.className} ${record.section || ''}`.trim(),
+      subLabel: record.attendanceCode || 'Student attendance',
+      attendanceDate: record.attendanceDate,
+      status: record.status as AttendanceStatus,
+      checkIn: extra['checkIn'] || extra['checkInTime'] || null,
+      checkOut: extra['checkOut'] || extra['checkOutTime'] || null,
+      remarks: record.remarks || null,
+    };
   }
 
-  private formatDateForInput(date: string): string {
-    if (!date) {
-      return '';
+  private mapTeacherRecord(record: TeacherAttendance): DailyAttendanceRecord {
+    const extra = record as unknown as Record<
+      string,
+      string | null | undefined
+    >;
+
+    return {
+      id: record.id,
+      type: 'TEACHER',
+      code: record.teacherEmployeeNo || record.attendanceCode || '-',
+      personName: record.teacherName,
+      groupLabel: record.subject || 'No Subject',
+      subLabel: record.attendanceCode || 'Teacher attendance',
+      attendanceDate: record.attendanceDate,
+      status: record.status as AttendanceStatus,
+      checkIn: extra['checkIn'] || extra['checkInTime'] || null,
+      checkOut: extra['checkOut'] || extra['checkOutTime'] || null,
+      remarks: record.remarks || null,
+    };
+  }
+
+  private mapStaffRecord(record: StaffAttendance): DailyAttendanceRecord {
+    return {
+      id: record.id,
+      type: 'STAFF',
+      code: record.staffCode,
+      personName: record.staffName,
+      groupLabel: record.department || 'No Department',
+      subLabel: record.designation || 'Staff attendance',
+      attendanceDate: record.attendanceDate,
+      status: record.status as AttendanceStatus,
+      checkIn: null,
+      checkOut: null,
+      remarks: record.remarks || null,
+    };
+  }
+
+  private toDateKey(date: string): string {
+    if (/^\d{4}-\d{2}-\d{2}/.test(date)) {
+      return date.slice(0, 10);
     }
 
-    return new Date(date).toISOString().split('T')[0];
+    return new Date(date).toISOString().slice(0, 10);
   }
 
-  private getTodayForInput(): string {
-    return new Date().toISOString().split('T')[0];
+  private getTodayDate(): string {
+    const today = new Date();
+
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(
+      2,
+      '0',
+    )}-${String(today.getDate()).padStart(2, '0')}`;
   }
 
   private escapeCsvValue(value: string): string {
-    const safeValue = String(value).replace(/"/g, '""');
-
-    return `"${safeValue}"`;
+    return `"${String(value).replace(/"/g, '""')}"`;
   }
 }

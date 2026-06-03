@@ -1,18 +1,18 @@
-.teacher-day-wise-page {
+.day-wise-page {
   display: grid;
-  gap: 22px;
+  gap: 24px;
   min-width: 0;
   max-width: 100%;
 }
 
-.teacher-day-wise-page__header {
+.day-wise-page__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 18px;
 }
 
-.teacher-day-wise-page__header h1 {
+.day-wise-page__header h1 {
   margin: 0;
   color: var(--erp-text-main);
   font-size: 28px;
@@ -20,7 +20,7 @@
   letter-spacing: -0.02em;
 }
 
-.teacher-day-wise-page__header p {
+.day-wise-page__header p {
   margin: 8px 0 0;
   color: #667085;
   font-size: 14px;
@@ -29,7 +29,7 @@
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .primary-btn,
@@ -42,6 +42,7 @@
   font-weight: 700;
   cursor: pointer;
   transition: 0.18s ease;
+  white-space: nowrap;
 }
 
 .primary-btn {
@@ -50,190 +51,47 @@
 }
 
 .primary-btn:hover {
-  filter: brightness(0.95);
-}
-
-.primary-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+  filter: brightness(0.96);
 }
 
 .secondary-btn,
 .clear-btn {
-  background: #f1f5f9;
+  background: #eef1f6;
   color: #253858;
 }
 
-.filters-card {
-  display: grid;
-  grid-template-columns:
-    2fr minmax(180px, 0.6fr) minmax(180px, 0.8fr) minmax(160px, 0.7fr)
-    auto;
-  gap: 14px;
-  align-items: end;
-  background: #ffffff;
-  border: 1px solid #edf1f7;
-  border-radius: 12px;
-  padding: 18px;
-  box-shadow: 0 10px 28px rgba(16, 24, 40, 0.04);
-  min-width: 0;
-}
-
-.filter-group {
-  display: grid;
-  gap: 8px;
-  min-width: 0;
-}
-
-.filter-group label {
-  color: var(--erp-text-main);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.filter-group input,
-.filter-group select {
-  width: 100%;
-  height: 42px;
-  border: 1px solid #dfe5ef;
-  border-radius: 8px;
-  padding: 0 12px;
-  outline: 0;
-  color: #253858;
-  font-size: 14px;
-  background: #ffffff;
-}
-
-.filter-group input::placeholder {
-  color: #98a2b3;
-}
-
-.filter-group input:focus,
-.filter-group select:focus {
-  border-color: var(--erp-primary);
-  box-shadow: 0 0 0 3px rgba(56, 99, 255, 0.08);
-}
-
-.month-card,
-.legend-card {
-  min-width: 0;
-  background: #ffffff;
-  border: 1px solid #edf1f7;
-  border-radius: 12px;
-  padding: 18px 20px;
-  box-shadow: 0 10px 28px rgba(16, 24, 40, 0.04);
-}
-
-.month-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-}
-
-.month-card span {
-  display: block;
-  color: #667085;
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.month-card strong {
-  display: block;
-  margin-top: 6px;
-  color: var(--erp-text-main);
-  font-size: 20px;
-  font-weight: 800;
-}
-
-.month-card p {
-  margin: 0;
-  color: #667085;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.legend-card {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px 18px;
-}
-
-.legend-card span {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  color: #667085;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.legend-dot {
-  min-width: 26px;
-  height: 24px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.legend-dot--present {
-  background: #ecfdf3;
-  color: #039855;
-}
-
-.legend-dot--absent {
-  background: #fff1f2;
-  color: #e11d48;
-}
-
-.legend-dot--late {
-  background: #fff7ed;
-  color: #f59e0b;
-}
-
-.legend-dot--half {
-  background: #f4ebff;
-  color: #7f56d9;
-}
-
-.legend-dot--empty {
-  background: #f1f5f9;
-  color: #667085;
+.secondary-btn:hover,
+.clear-btn:hover {
+  background: #e5e9f2;
 }
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
   min-width: 0;
 }
 
 .summary-card {
-  min-height: 108px;
+  min-height: 116px;
   background: #ffffff;
   border: 1px solid #edf1f7;
   border-radius: 12px;
-  padding: 18px;
+  padding: 22px;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   box-shadow: 0 10px 28px rgba(16, 24, 40, 0.04);
   min-width: 0;
 }
 
 .summary-card__icon {
-  width: 50px;
-  height: 50px;
+  width: 56px;
+  height: 56px;
   border-radius: 10px;
   display: grid;
   place-items: center;
-  font-weight: 700;
+  font-weight: 800;
   flex: 0 0 auto;
 }
 
@@ -257,29 +115,18 @@
   color: #f59e0b;
 }
 
-.summary-card__icon--purple {
-  background: #f4ebff;
-  color: #7f56d9;
-}
-
-.summary-card__icon--teal {
-  background: #ecfeff;
-  color: #0891b2;
-}
-
 .summary-card strong {
   display: block;
   color: var(--erp-text-main);
-  font-size: 25px;
+  font-size: 28px;
   line-height: 1;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 800;
 }
 
 .summary-card p {
   margin: 8px 0 0;
   color: #667085;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .report-card {
@@ -289,13 +136,13 @@
   background: #ffffff;
   border: 1px solid #edf1f7;
   border-radius: 12px;
-  padding: 20px;
+  padding: 22px;
   box-shadow: 0 10px 28px rgba(16, 24, 40, 0.04);
 }
 
 .report-card__top {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 18px;
   margin-bottom: 18px;
@@ -315,17 +162,85 @@
   font-size: 13px;
 }
 
-.record-count {
-  height: 32px;
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(100%, 900px);
+  flex: 0 0 auto;
+}
+
+.filter-row input,
+.filter-row select {
+  width: 100%;
+  height: 42px;
+  border: 1px solid #dfe5ef;
+  border-radius: 8px;
+  padding: 0 14px;
+  outline: 0;
+  color: #253858;
+  font-size: 14px;
+  background: #ffffff;
+}
+
+.filter-row input[type='month'] {
+  max-width: 170px;
+}
+
+.filter-row select {
+  max-width: 170px;
+}
+
+.filter-row input::placeholder {
+  color: #98a2b3;
+}
+
+.filter-row input:focus,
+.filter-row select:focus {
+  border-color: var(--erp-primary);
+  box-shadow: 0 0 0 3px rgba(56, 99, 255, 0.08);
+}
+
+.legend-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.legend-item {
+  min-height: 28px;
   border-radius: 999px;
-  padding: 0 12px;
-  background: #f8fafc;
-  color: #667085;
+  padding: 0 10px;
   display: inline-flex;
   align-items: center;
-  font-size: 12px;
-  font-weight: 700;
-  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.legend-item--present {
+  background: #ecfdf3;
+  color: #039855;
+}
+
+.legend-item--absent {
+  background: #fff1f2;
+  color: #e11d48;
+}
+
+.legend-item--late {
+  background: #fff7ed;
+  color: #f59e0b;
+}
+
+.legend-item--half-day {
+  background: #eef4ff;
+  color: #3863ff;
+}
+
+.legend-item--empty {
+  background: #f1f5f9;
+  color: #64748b;
 }
 
 .server-error {
@@ -335,16 +250,17 @@
   font-weight: 600;
 }
 
-.matrix-wrap {
+.table-wrap {
   width: 100%;
   max-width: 100%;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
 }
 
 table {
-  width: max-content;
-  min-width: 100%;
+  width: 100%;
+  min-width: 1280px;
   border-collapse: collapse;
 }
 
@@ -352,158 +268,130 @@ th {
   background: #f8fafc;
   color: #667085;
   font-size: 12px;
-  text-align: left;
-  padding: 13px 12px;
+  text-align: center;
+  padding: 12px 10px;
   font-weight: 700;
   border-bottom: 1px solid #edf1f7;
   white-space: nowrap;
 }
 
 td {
-  padding: 12px;
+  padding: 12px 10px;
   color: #253858;
   font-size: 13px;
   border-bottom: 1px solid #edf1f7;
+  text-align: center;
   white-space: nowrap;
 }
 
-.sticky-col {
+.person-column {
   position: sticky;
   left: 0;
   z-index: 3;
+  width: 300px;
+  min-width: 300px;
+  text-align: left;
   background: #ffffff;
-  box-shadow: 8px 0 14px rgba(16, 24, 40, 0.04);
 }
 
-thead .sticky-col {
+thead .person-column {
   background: #f8fafc;
   z-index: 4;
 }
 
-.sticky-teacher {
-  min-width: 250px;
+.day-column {
+  min-width: 48px;
 }
 
-.teacher-info {
+.day-column span {
+  display: block;
+  color: #101828;
+  font-weight: 800;
+}
+
+.day-column small {
+  display: block;
+  margin-top: 3px;
+  color: #98a2b3;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.today-column {
+  background: #eef4ff;
+}
+
+.total-column {
+  min-width: 90px;
+  background: #fbfcff;
+}
+
+.person-info {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.teacher-info > span {
-  width: 40px;
-  height: 40px;
+.person-info > span {
+  width: 42px;
+  height: 42px;
   border-radius: 10px;
-  background: #eef2ff;
+  background: #eef4ff;
   color: var(--erp-primary);
   display: grid;
   place-items: center;
   font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
+  font-weight: 800;
   flex: 0 0 auto;
 }
 
-.teacher-info strong {
+.person-info strong {
   display: block;
   color: var(--erp-text-main);
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
-.teacher-info p {
+.person-info p {
   margin: 4px 0 0;
   color: #667085;
   font-size: 12px;
 }
 
-.subject-pill {
-  min-width: 82px;
-  height: 30px;
-  padding: 0 10px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #eef2ff;
-  color: var(--erp-primary);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.mini-count {
-  width: fit-content;
-  min-width: 30px;
-  height: 26px;
-  border-radius: 999px;
-  padding: 0 9px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.mini-count--present {
-  background: #ecfdf3;
-  color: #039855;
-}
-
-.mini-count--absent {
-  background: #fff1f2;
-  color: #e11d48;
-}
-
-.mini-count--late {
-  background: #fff7ed;
-  color: #f59e0b;
-}
-
-.mini-count--half {
-  background: #f4ebff;
-  color: #7f56d9;
-}
-
-.day-heading,
-.day-cell {
-  text-align: center;
-  min-width: 46px;
-}
-
-.day-status {
+.status-cell {
   width: 30px;
-  height: 28px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  height: 30px;
+  border-radius: 8px;
+  display: inline-grid;
+  place-items: center;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 900;
+  cursor: default;
 }
 
-.day-status--present {
+.status-cell--present {
   background: #ecfdf3;
   color: #039855;
 }
 
-.day-status--absent {
+.status-cell--absent {
   background: #fff1f2;
   color: #e11d48;
 }
 
-.day-status--late {
+.status-cell--late {
   background: #fff7ed;
   color: #f59e0b;
 }
 
-.day-status--half {
-  background: #f4ebff;
-  color: #7f56d9;
+.status-cell--half-day {
+  background: #eef4ff;
+  color: #3863ff;
 }
 
-.day-status--empty {
+.status-cell--empty {
   background: #f1f5f9;
-  color: #667085;
+  color: #98a2b3;
 }
 
 .empty-state {
@@ -515,7 +403,7 @@ thead .sticky-col {
   display: block;
   color: var(--erp-text-main);
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .empty-state p {
@@ -523,12 +411,12 @@ thead .sticky-col {
   color: #667085;
 }
 
-.report-skeleton {
+.table-skeleton {
   display: grid;
   gap: 12px;
 }
 
-.report-skeleton span {
+.table-skeleton span {
   height: 52px;
   border-radius: 8px;
   background: linear-gradient(90deg, #edf1f7 25%, #f8fafc 50%, #edf1f7 75%);
@@ -542,60 +430,60 @@ thead .sticky-col {
   }
 }
 
-@media (max-width: 1400px) {
+@media (max-width: 1200px) {
   .summary-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .filters-card {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .filter-group--wide {
-    grid-column: 1 / -1;
+  .report-card__top {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
-  .clear-btn {
-    width: fit-content;
+  .filter-row {
+    width: 100%;
+    flex: none;
+    flex-wrap: wrap;
+  }
+
+  .filter-row input,
+  .filter-row select {
+    flex: 1 1 170px;
   }
 }
 
-@media (max-width: 991px) {
-  .teacher-day-wise-page__header,
-  .report-card__top,
-  .month-card {
+@media (max-width: 575px) {
+  .day-wise-page__header {
     align-items: flex-start;
     flex-direction: column;
   }
 
   .header-actions {
     width: 100%;
-  }
-
-  .header-actions button {
-    flex: 1;
-  }
-}
-
-@media (max-width: 575px) {
-  .summary-grid,
-  .filters-card {
-    grid-template-columns: 1fr;
-  }
-
-  .filter-group--wide {
-    grid-column: auto;
-  }
-
-  .clear-btn {
-    width: 100%;
-  }
-
-  .header-actions {
     flex-direction: column;
   }
 
   .header-actions button {
     width: 100%;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-row {
+    flex-direction: column;
+  }
+
+  .filter-row input,
+  .filter-row select,
+  .filter-row input[type='month'],
+  .clear-btn {
+    width: 100%;
+    max-width: none;
+  }
+
+  .report-card {
+    padding: 16px;
   }
 }

@@ -9,57 +9,87 @@
       <button
         class="secondary-btn"
         type="button"
-        (click)="loadAttendanceRecords()"
+        (click)="loadDailyAttendance()"
       >
         Refresh
       </button>
 
-      <button
-        class="primary-btn"
-        type="button"
-        (click)="exportCsv()"
-        [disabled]="filteredRecords().length === 0"
-      >
+      <button class="primary-btn" type="button" (click)="exportCsv()">
         Export CSV
       </button>
     </div>
   </div>
 
-  <app-report-tabs></app-report-tabs>
+  <nav class="report-tabs">
+    <a routerLink="/reports/attendance" routerLinkActive="active">
+      Attendance Report
+    </a>
+    <a routerLink="/reports/student-attendance-type" routerLinkActive="active">
+      Students Attendance Type
+    </a>
+    <a routerLink="/reports/daily-attendance" routerLinkActive="active">
+      Daily Attendance
+    </a>
+    <a routerLink="/reports/student-day-wise" routerLinkActive="active">
+      Student Day Wise
+    </a>
+    <a routerLink="/reports/teacher-day-wise" routerLinkActive="active">
+      Teacher Day Wise
+    </a>
+    <a routerLink="/reports/teacher-report" routerLinkActive="active">
+      Teacher Report
+    </a>
+    <a routerLink="/reports/staff-day-wise" routerLinkActive="active">
+      Staff Day Wise
+    </a>
+    <a routerLink="/reports/staff-report" routerLinkActive="active">
+      Staff Report
+    </a>
+  </nav>
 
-  <div class="filters-card">
-    <div class="filter-group filter-group--wide">
-      <label>Search</label>
+  <div class="filter-card">
+    <label>
+      Search
       <input
         type="text"
-        placeholder="Search student, admission no, class..."
+        placeholder="Search name, code, class, subject, department..."
         [value]="searchTerm()"
         (input)="onSearchInput($event)"
       />
-    </div>
+    </label>
 
-    <div class="filter-group">
-      <label>Attendance Date</label>
+    <label>
+      Attendance Date
       <input
         type="date"
         [value]="selectedDate()"
-        (input)="onDateInput($event)"
+        (change)="onDateChange($event)"
       />
-    </div>
+    </label>
 
-    <div class="filter-group">
-      <label>Class</label>
-      <select [value]="selectedClass()" (change)="onClassChange($event)">
-        <option value="ALL">All Classes</option>
+    <label>
+      Type
+      <select [value]="selectedType()" (change)="onTypeChange($event)">
+        <option value="ALL">All Types</option>
+        <option value="STUDENT">Students</option>
+        <option value="TEACHER">Teachers</option>
+        <option value="STAFF">Staff</option>
+      </select>
+    </label>
 
-        @for (className of classOptions(); track className) {
-          <option [value]="className">{{ className }}</option>
+    <label>
+      Group
+      <select [value]="selectedGroup()" (change)="onGroupChange($event)">
+        <option value="ALL">All Groups</option>
+
+        @for (group of groupOptions(); track group) {
+          <option [value]="group">{{ group }}</option>
         }
       </select>
-    </div>
+    </label>
 
-    <div class="filter-group">
-      <label>Status</label>
+    <label>
+      Status
       <select [value]="selectedStatus()" (change)="onStatusChange($event)">
         <option value="ALL">All Status</option>
         <option value="PRESENT">Present</option>
@@ -67,14 +97,14 @@
         <option value="LATE">Late</option>
         <option value="HALF_DAY">Half Day</option>
       </select>
-    </div>
+    </label>
 
     <button class="clear-btn" type="button" (click)="clearFilters()">
       Clear Filters
     </button>
   </div>
 
-  <div class="daily-date-card">
+  <div class="selected-date-card">
     <div>
       <span>Selected Date</span>
       <strong>{{ selectedDateLabel() }}</strong>
@@ -82,7 +112,7 @@
 
     <p>
       Showing {{ filteredRecords().length }} record(s) from
-      {{ dailyRecords().length }} daily attendance record(s).
+      {{ selectedDateRecords().length }} daily attendance record(s).
     </p>
   </div>
 
@@ -90,7 +120,7 @@
     <article class="summary-card">
       <span class="summary-card__icon summary-card__icon--blue">T</span>
       <div>
-        <strong>{{ totalRecords() }}</strong>
+        <strong>{{ totalCount() }}</strong>
         <p>Total Records</p>
       </div>
     </article>
@@ -128,7 +158,7 @@
     </article>
 
     <article class="summary-card">
-      <span class="summary-card__icon summary-card__icon--teal">%</span>
+      <span class="summary-card__icon summary-card__icon--cyan">%</span>
       <div>
         <strong>{{ attendanceRate() }}%</strong>
         <p>Attendance Rate</p>
@@ -139,17 +169,22 @@
   <div class="report-card">
     <div class="report-card__top">
       <div>
-        <h2>Class Wise Daily Summary</h2>
-        <p>Daily attendance count grouped by class.</p>
+        <h2>Daily Group Summary</h2>
+        <p>
+          Student classes, teacher subjects, and staff departments grouped for
+          the selected day.
+        </p>
       </div>
 
-      <span class="record-count">
-        {{ classWiseDailySummary().length }} class(es)
-      </span>
+      <span>{{ summaryRows().length }} group(s)</span>
     </div>
 
+    @if (serverError()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
     @if (isLoading()) {
-      <div class="report-skeleton">
+      <div class="table-skeleton">
         <span></span>
         <span></span>
         <span></span>
@@ -159,7 +194,7 @@
         <table>
           <thead>
             <tr>
-              <th>Class</th>
+              <th>Group</th>
               <th>Total</th>
               <th>Present</th>
               <th>Absent</th>
@@ -170,44 +205,26 @@
           </thead>
 
           <tbody>
-            @for (row of classWiseDailySummary(); track row.classLabel) {
+            @for (row of summaryRows(); track row.groupLabel) {
               <tr>
                 <td>
-                  <span class="class-pill">{{ row.classLabel }}</span>
+                  <strong>{{ row.groupLabel }}</strong>
                 </td>
                 <td>{{ row.total }}</td>
+                <td>{{ row.present }}</td>
+                <td>{{ row.absent }}</td>
+                <td>{{ row.late }}</td>
+                <td>{{ row.halfDay }}</td>
                 <td>
-                  <span class="mini-count mini-count--present">
-                    {{ row.present }}
-                  </span>
-                </td>
-                <td>
-                  <span class="mini-count mini-count--absent">
-                    {{ row.absent }}
-                  </span>
-                </td>
-                <td>
-                  <span class="mini-count mini-count--late">
-                    {{ row.late }}
-                  </span>
-                </td>
-                <td>
-                  <span class="mini-count mini-count--half">
-                    {{ row.halfDay }}
-                  </span>
-                </td>
-                <td>
-                  <strong>{{ row.attendanceRate }}%</strong>
+                  <span class="rate-pill">{{ row.rate }}%</span>
                 </td>
               </tr>
             } @empty {
               <tr>
                 <td colspan="7">
                   <div class="empty-state">
-                    <strong>No class-wise daily records found</strong>
-                    <p>
-                      Try changing the date or add attendance records first.
-                    </p>
+                    <strong>No daily summary records found</strong>
+                    <p>Try changing filters or add attendance records first.</p>
                   </div>
                 </td>
               </tr>
@@ -222,20 +239,14 @@
     <div class="report-card__top">
       <div>
         <h2>Daily Attendance List</h2>
-        <p>Detailed student attendance records for selected day.</p>
+        <p>Detailed student, teacher, and staff attendance records.</p>
       </div>
 
-      <span class="record-count">
-        Showing {{ filteredRecords().length }} record(s)
-      </span>
+      <span>Showing {{ filteredRecords().length }} record(s)</span>
     </div>
 
-    @if (serverError()) {
-      <p class="server-error">{{ serverError() }}</p>
-    }
-
     @if (isLoading()) {
-      <div class="report-skeleton">
+      <div class="table-skeleton">
         <span></span>
         <span></span>
         <span></span>
@@ -245,10 +256,11 @@
         <table>
           <thead>
             <tr>
-              <th>Attendance ID</th>
-              <th>Student</th>
-              <th>Admission No</th>
-              <th>Class</th>
+              <th>Person</th>
+              <th>Type</th>
+              <th>Code</th>
+              <th>Group</th>
+              <th>Details</th>
               <th>Date</th>
               <th>Status</th>
               <th>Check In</th>
@@ -258,47 +270,49 @@
           </thead>
 
           <tbody>
-            @for (record of filteredRecords(); track record.id) {
+            @for (
+              record of filteredRecords();
+              track record.type + '-' + record.id
+            ) {
               <tr>
                 <td>
-                  <span class="attendance-code">
-                    {{ record.attendanceCode }}
-                  </span>
-                </td>
-
-                <td>
-                  <div class="student-info">
-                    <span>{{ getAttendanceInitial(record) }}</span>
+                  <div class="person-info">
+                    <span>{{ getInitial(record) }}</span>
 
                     <div>
-                      <strong>{{ record.studentName }}</strong>
-                      <p>{{ getClassLabel(record) }}</p>
+                      <strong>{{ record.personName }}</strong>
+                      <p>{{ record.code }}</p>
                     </div>
                   </div>
                 </td>
 
-                <td>{{ record.studentAdmissionNo || 'Not added' }}</td>
-                <td>{{ getClassLabel(record) }}</td>
-                <td>{{ formatDisplayDate(record.attendanceDate) }}</td>
+                <td>
+                  <span class="type-pill" [ngClass]="getTypeClass(record.type)">
+                    {{ getTypeLabel(record.type) }}
+                  </span>
+                </td>
+
+                <td>{{ record.code }}</td>
+                <td>{{ record.groupLabel }}</td>
+                <td>{{ record.subLabel }}</td>
+                <td>{{ formatDate(record.attendanceDate) }}</td>
 
                 <td>
                   <span
                     class="status-pill"
-                    [class.status-pill--absent]="record.status === 'ABSENT'"
-                    [class.status-pill--late]="record.status === 'LATE'"
-                    [class.status-pill--half]="record.status === 'HALF_DAY'"
+                    [ngClass]="getStatusClass(record.status)"
                   >
                     {{ getStatusLabel(record.status) }}
                   </span>
                 </td>
 
-                <td>{{ formatTime(record.checkInTime) }}</td>
-                <td>{{ formatTime(record.checkOutTime) }}</td>
-                <td>{{ record.remarks || 'No remarks' }}</td>
+                <td>{{ record.checkIn || '-' }}</td>
+                <td>{{ record.checkOut || '-' }}</td>
+                <td>{{ record.remarks || '-' }}</td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="9">
+                <td colspan="10">
                   <div class="empty-state">
                     <strong>No daily attendance records found</strong>
                     <p>Try changing filters or add attendance records first.</p>

@@ -128,6 +128,9 @@ export class AdminDashboardDataService {
       teacherAttendance: this.safeGet<AttendanceRecord>(
         `${this.peopleApiUrl}/teacher-attendance`,
       ),
+      staffAttendance: this.safeGet<AttendanceRecord>(
+        `${this.peopleApiUrl}/staff-attendance`,
+      ),
       leaves: this.safeGet<LeaveRecord>(`${this.peopleApiUrl}/leaves`),
     }).pipe(
       map((data) => ({
@@ -147,6 +150,7 @@ export class AdminDashboardDataService {
         attendanceSummary: this.buildAttendanceSummary([
           ...data.studentAttendance,
           ...data.teacherAttendance,
+          ...data.staffAttendance,
         ]),
         quickSummary: {
           libraryBooks: data.libraryBooks.length,

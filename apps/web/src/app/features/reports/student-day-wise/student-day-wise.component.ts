@@ -1,15 +1,17 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, signal } from '@angular/core';
+
 import {
   StudentAttendance,
   StudentAttendanceStatus,
 } from '../../../core/models/student-attendance.model';
 import { StudentAttendanceService } from '../../../core/services/student-attendance.service';
-import { ReportTabsComponent } from '../components/report-tabs/report-tabs.component';
 
 type DayColumn = {
-  dayNumber: number;
+  day: number;
   dateKey: string;
-  label: string;
+  weekday: string;
+  isToday: boolean;
 };
 
 type DayStatus = StudentAttendanceStatus | '';
@@ -19,67 +21,61 @@ type StudentDayWiseRow = {
   studentName: string;
   admissionNo: string;
   classLabel: string;
-  total: number;
-  present: number;
-  absent: number;
-  late: number;
-  halfDay: number;
-  attendanceRate: number;
-  dayMap: Record<number, DayStatus>;
+  records: Record<string, StudentAttendance>;
 };
 
 @Component({
   selector: 'app-student-day-wise',
   standalone: true,
-  imports: [ReportTabsComponent],
+  imports: [CommonModule],
   templateUrl: './student-day-wise.component.html',
   styleUrl: './student-day-wise.component.scss',
 })
 export class StudentDayWiseComponent implements OnInit {
   attendanceRecords = signal<StudentAttendance[]>([]);
-
   isLoading = signal(false);
   serverError = signal('');
 
+  selectedMonth = signal(this.getCurrentMonth());
   searchTerm = signal('');
-  selectedMonth = signal('');
   selectedClass = signal('ALL');
 
-  monthDays = computed<DayColumn[]>(() => {
-    const monthValue = this.selectedMonth();
+  monthLabel = computed(() => {
+    const [year, month] = this.selectedMonth().split('-').map(Number);
 
-    if (!monthValue) {
-      return [];
-    }
+    return new Date(year, month - 1, 1).toLocaleDateString('en-US', {
+      month: 'long',
+      year: 'numeric',
+    });
+  });
 
-    const [year, month] = monthValue.split('-').map(Number);
-    const daysInMonth = new Date(year, month, 0).getDate();
+  daysInMonth = computed<DayColumn[]>(() => {
+    const [year, month] = this.selectedMonth().split('-').map(Number);
+    const totalDays = new Date(year, month, 0).getDate();
+    const todayKey = this.getTodayDateKey();
 
-    return Array.from({ length: daysInMonth }, (_, index) => {
-      const dayNumber = index + 1;
+    return Array.from({ length: totalDays }).map((_, index) => {
+      const day = index + 1;
       const dateKey = `${year}-${String(month).padStart(2, '0')}-${String(
-        dayNumber,
+        day,
       ).padStart(2, '0')}`;
 
+      const date = new Date(year, month - 1, day);
+
       return {
-        dayNumber,
+        day,
         dateKey,
-        label: String(dayNumber).padStart(2, '0'),
+        weekday: date.toLocaleDateString('en-US', { weekday: 'short' }),
+        isToday: dateKey === todayKey,
       };
     });
   });
 
-  monthRecords = computed(() => {
-    const monthValue = this.selectedMonth();
-
-    if (!monthValue) {
-      return this.attendanceRecords();
-    }
-
-    return this.attendanceRecords().filter((record) =>
-      this.formatDateForInput(record.attendanceDate).startsWith(monthValue),
-    );
-  });
+  monthRecords = computed(() =>
+    this.attendanceRecords().filter((record) =>
+      this.toDateKey(record.attendanceDate).startsWith(this.selectedMonth()),
+    ),
+  );
 
   classOptions = computed(() => {
     const classes = this.monthRecords()
@@ -98,14 +94,13 @@ export class StudentDayWiseComponent implements OnInit {
 
       const searchableText = [
         record.attendanceCode,
-        record.studentAdmissionNo,
+        record.studentAdmissionNo || '',
         record.studentName,
         record.className,
-        record.section,
+        record.section || '',
         record.status,
-        record.remarks,
+        record.remarks || '',
       ]
-        .filter(Boolean)
         .join(' ')
         .toLowerCase();
 
@@ -117,126 +112,65 @@ export class StudentDayWiseComponent implements OnInit {
   });
 
   studentRows = computed<StudentDayWiseRow[]>(() => {
-    const groupedRecords = new Map<string, StudentAttendance[]>();
+    const rowMap = new Map<string, StudentDayWiseRow>();
 
     this.filteredMonthRecords().forEach((record) => {
       const studentKey =
         record.studentAdmissionNo ||
         `${record.studentName}-${this.getClassLabel(record)}`;
+      const dateKey = this.toDateKey(record.attendanceDate);
 
-      if (!groupedRecords.has(studentKey)) {
-        groupedRecords.set(studentKey, []);
+      if (!rowMap.has(studentKey)) {
+        rowMap.set(studentKey, {
+          studentKey,
+          studentName: record.studentName,
+          admissionNo: record.studentAdmissionNo || 'Not added',
+          classLabel: this.getClassLabel(record),
+          records: {},
+        });
       }
 
-      groupedRecords.get(studentKey)?.push(record);
+      rowMap.get(studentKey)!.records[dateKey] = record;
     });
 
-    return Array.from(groupedRecords.entries())
-      .map(([studentKey, records]) => {
-        const firstRecord = records[0];
-
-        const present = records.filter(
-          (record) => record.status === 'PRESENT',
-        ).length;
-        const absent = records.filter(
-          (record) => record.status === 'ABSENT',
-        ).length;
-        const late = records.filter(
-          (record) => record.status === 'LATE',
-        ).length;
-        const halfDay = records.filter(
-          (record) => record.status === 'HALF_DAY',
-        ).length;
-
-        const total = records.length;
-        const attended = present + late + halfDay;
-        const attendanceRate =
-          total === 0 ? 0 : Math.round((attended / total) * 100);
-
-        const dayMap: Record<number, DayStatus> = {};
-
-        this.monthDays().forEach((day) => {
-          const recordForDay = records.find(
-            (record) =>
-              this.formatDateForInput(record.attendanceDate) === day.dateKey,
-          );
-
-          dayMap[day.dayNumber] = recordForDay?.status || '';
-        });
-
-        return {
-          studentKey,
-          studentName: firstRecord.studentName,
-          admissionNo: firstRecord.studentAdmissionNo || 'Not added',
-          classLabel: this.getClassLabel(firstRecord),
-          total,
-          present,
-          absent,
-          late,
-          halfDay,
-          attendanceRate,
-          dayMap,
-        };
-      })
-      .sort((a, b) => a.studentName.localeCompare(b.studentName));
+    return Array.from(rowMap.values()).sort((a, b) =>
+      a.studentName.localeCompare(b.studentName),
+    );
   });
 
-  totalStudents = computed(() => this.studentRows().length);
+  totalMarked = computed(() => this.filteredMonthRecords().length);
 
-  totalMarked = computed(() =>
-    this.studentRows().reduce((total, row) => total + row.total, 0),
+  presentCount = computed(
+    () =>
+      this.filteredMonthRecords().filter(
+        (record) => record.status === 'PRESENT',
+      ).length,
   );
 
-  presentCount = computed(() =>
-    this.studentRows().reduce((total, row) => total + row.present, 0),
+  absentCount = computed(
+    () =>
+      this.filteredMonthRecords().filter((record) => record.status === 'ABSENT')
+        .length,
   );
 
-  absentCount = computed(() =>
-    this.studentRows().reduce((total, row) => total + row.absent, 0),
+  lateCount = computed(
+    () =>
+      this.filteredMonthRecords().filter((record) => record.status === 'LATE')
+        .length,
   );
 
-  lateCount = computed(() =>
-    this.studentRows().reduce((total, row) => total + row.late, 0),
+  halfDayCount = computed(
+    () =>
+      this.filteredMonthRecords().filter(
+        (record) => record.status === 'HALF_DAY',
+      ).length,
   );
-
-  halfDayCount = computed(() =>
-    this.studentRows().reduce((total, row) => total + row.halfDay, 0),
-  );
-
-  attendanceRate = computed(() => {
-    const total = this.totalMarked();
-
-    if (total === 0) {
-      return 0;
-    }
-
-    const attended =
-      this.presentCount() + this.lateCount() + this.halfDayCount();
-
-    return Math.round((attended / total) * 100);
-  });
-
-  selectedMonthLabel = computed(() => {
-    const monthValue = this.selectedMonth();
-
-    if (!monthValue) {
-      return 'All Months';
-    }
-
-    const [year, month] = monthValue.split('-').map(Number);
-
-    return new Date(year, month - 1, 1).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-    });
-  });
 
   constructor(
     private readonly studentAttendanceService: StudentAttendanceService,
   ) {}
 
   ngOnInit(): void {
-    this.selectedMonth.set(this.getCurrentMonthForInput());
     this.loadAttendanceRecords();
   }
 
@@ -258,31 +192,34 @@ export class StudentDayWiseComponent implements OnInit {
     });
   }
 
-  onSearchInput(event: Event): void {
+  onMonthChange(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
-    this.searchTerm.set(value);
+
+    this.selectedMonth.set(value || this.getCurrentMonth());
+    this.selectedClass.set('ALL');
   }
 
-  onMonthInput(event: Event): void {
+  onSearchInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
-    this.selectedMonth.set(value);
-    this.selectedClass.set('ALL');
+
+    this.searchTerm.set(value);
   }
 
   onClassChange(event: Event): void {
     const value = (event.target as HTMLSelectElement).value;
+
     this.selectedClass.set(value);
   }
 
   clearFilters(): void {
     this.searchTerm.set('');
-    this.selectedMonth.set(this.getCurrentMonthForInput());
+    this.selectedMonth.set(this.getCurrentMonth());
     this.selectedClass.set('ALL');
   }
 
   exportCsv(): void {
     const rows = this.studentRows();
-    const days = this.monthDays();
+    const days = this.daysInMonth();
 
     if (rows.length === 0) {
       return;
@@ -292,26 +229,18 @@ export class StudentDayWiseComponent implements OnInit {
       'Admission No',
       'Student Name',
       'Class',
-      'Total',
-      'Present',
-      'Absent',
-      'Late',
-      'Half Day',
-      'Attendance Rate',
-      ...days.map((day) => day.label),
+      'Marked Days',
+      ...days.map((day) => String(day.day).padStart(2, '0')),
     ];
 
     const csvRows = rows.map((row) => [
       row.admissionNo,
       row.studentName,
       row.classLabel,
-      String(row.total),
-      String(row.present),
-      String(row.absent),
-      String(row.late),
-      String(row.halfDay),
-      `${row.attendanceRate}%`,
-      ...days.map((day) => this.getStatusShortLabel(row.dayMap[day.dayNumber])),
+      String(this.getMarkedDays(row)),
+      ...days.map((day) =>
+        this.getStatusShort(this.getRecordForDay(row, day)?.status),
+      ),
     ]);
 
     const csvContent = [headers, ...csvRows]
@@ -326,38 +255,71 @@ export class StudentDayWiseComponent implements OnInit {
     const link = document.createElement('a');
 
     link.href = url;
-    link.download = `student-day-wise-${
-      this.selectedMonth() || this.getCurrentMonthForInput()
-    }.csv`;
+    link.download = `student-day-wise-${this.selectedMonth()}.csv`;
     link.click();
 
     window.URL.revokeObjectURL(url);
   }
 
-  getClassLabel(record: StudentAttendance): string {
-    return `${record.className} ${record.section || ''}`.trim();
+  getRecordForDay(
+    row: StudentDayWiseRow,
+    day: DayColumn,
+  ): StudentAttendance | null {
+    return row.records[day.dateKey] || null;
   }
 
-  getStatusShortLabel(status: DayStatus): string {
-    const labels: Record<StudentAttendanceStatus, string> = {
-      PRESENT: 'P',
-      ABSENT: 'A',
-      LATE: 'L',
-      HALF_DAY: 'H',
-    };
-
-    return status ? labels[status] : '-';
+  getStatusShort(status?: DayStatus): string {
+    switch (status) {
+      case 'PRESENT':
+        return 'P';
+      case 'ABSENT':
+        return 'A';
+      case 'LATE':
+        return 'L';
+      case 'HALF_DAY':
+        return 'H';
+      default:
+        return '-';
+    }
   }
 
-  getStatusTitle(status: DayStatus): string {
+  getStatusLabel(status?: DayStatus): string {
+    switch (status) {
+      case 'PRESENT':
+        return 'Present';
+      case 'ABSENT':
+        return 'Absent';
+      case 'LATE':
+        return 'Late';
+      case 'HALF_DAY':
+        return 'Half Day';
+      default:
+        return 'Not Marked';
+    }
+  }
+
+  getStatusClass(status?: DayStatus): string {
     if (!status) {
-      return 'Not marked';
+      return 'status-cell--empty';
     }
 
-    return status
-      .toLowerCase()
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, (letter) => letter.toUpperCase());
+    return `status-cell--${status.toLowerCase().replace('_', '-')}`;
+  }
+
+  getCellTitle(row: StudentDayWiseRow, day: DayColumn): string {
+    const record = this.getRecordForDay(row, day);
+
+    if (!record) {
+      return `${row.studentName} / ${day.dateKey} / Not marked`;
+    }
+
+    return `${row.studentName} / ${day.dateKey} / ${this.getStatusLabel(
+      record.status,
+    )}${record.remarks ? ` / ${record.remarks}` : ''}`;
+  }
+
+  getMarkedDays(row: StudentDayWiseRow): number {
+    return Object.keys(row.records).length;
   }
 
   getStudentInitial(row: StudentDayWiseRow): string {
@@ -365,20 +327,20 @@ export class StudentDayWiseComponent implements OnInit {
       .split(' ')
       .filter(Boolean)
       .slice(0, 2)
-      .map((word) => word[0])
+      .map((part) => part.charAt(0))
       .join('')
       .toUpperCase();
   }
 
-  private formatDateForInput(date: string): string {
-    if (!date) {
-      return '';
-    }
-
-    return new Date(date).toISOString().split('T')[0];
+  getClassLabel(record: StudentAttendance): string {
+    return `${record.className} ${record.section || ''}`.trim();
   }
 
-  private getCurrentMonthForInput(): string {
+  private toDateKey(date: string): string {
+    return new Date(date).toISOString().slice(0, 10);
+  }
+
+  private getCurrentMonth(): string {
     const today = new Date();
 
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(
@@ -387,9 +349,11 @@ export class StudentDayWiseComponent implements OnInit {
     )}`;
   }
 
-  private escapeCsvValue(value: string): string {
-    const safeValue = String(value).replace(/"/g, '""');
+  private getTodayDateKey(): string {
+    return new Date().toISOString().slice(0, 10);
+  }
 
-    return `"${safeValue}"`;
+  private escapeCsvValue(value: string): string {
+    return `"${String(value).replace(/"/g, '""')}"`;
   }
 }

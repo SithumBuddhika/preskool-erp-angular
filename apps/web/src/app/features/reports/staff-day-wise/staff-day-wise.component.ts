@@ -1,353 +1,243 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, signal } from '@angular/core';
-import { Staff } from '../../../core/models/staff.model';
-import { StaffsService } from '../../../core/services/staffs.service';
-import { ReportTabsComponent } from '../components/report-tabs/report-tabs.component';
+
+import {
+  StaffAttendance,
+  StaffAttendanceStatus,
+} from '../../../core/models/staff-attendance.model';
+import { StaffAttendanceService } from '../../../core/services/staff-attendance.service';
 
 type DayColumn = {
-  dayNumber: number;
-  label: string;
-};
-
-type StaffStatusMarker = 'ACTIVE' | 'INACTIVE';
-
-type StaffReportRecord = Staff & {
-  staffCode?: string | null;
-  staffId?: string | null;
-  staffNo?: string | null;
-  employeeNo?: string | null;
-  fullName?: string | null;
-  name?: string | null;
-  department?: string | null;
-  departmentName?: string | null;
-  departmentCode?: string | null;
-  designation?: string | null;
-  designationName?: string | null;
-  designationCode?: string | null;
-  employmentType?: string | null;
-  employment?: string | null;
-  status?: string | null;
-  phone?: string | null;
-  email?: string | null;
-  joiningDate?: string | null;
-  salary?: number | string | null;
+  day: number;
+  dateKey: string;
+  weekday: string;
+  isToday: boolean;
 };
 
 type StaffDayWiseRow = {
-  staffKey: string;
   staffCode: string;
   staffName: string;
-  department: string;
-  designation: string;
-  employmentType: string;
-  status: StaffStatusMarker;
-  activeDays: number;
-  inactiveDays: number;
-  totalDays: number;
-  activeRate: number;
-  dayMap: Record<number, StaffStatusMarker>;
+  department?: string | null;
+  designation?: string | null;
+  records: Record<string, StaffAttendance>;
 };
 
 @Component({
   selector: 'app-staff-day-wise',
   standalone: true,
-  imports: [ReportTabsComponent],
+  imports: [CommonModule],
   templateUrl: './staff-day-wise.component.html',
   styleUrl: './staff-day-wise.component.scss',
 })
 export class StaffDayWiseComponent implements OnInit {
-  staffs = signal<Staff[]>([]);
-
+  attendanceRecords = signal<StaffAttendance[]>([]);
   isLoading = signal(false);
   serverError = signal('');
 
+  selectedMonth = signal(this.getCurrentMonth());
   searchTerm = signal('');
-  selectedMonth = signal('');
-  selectedDepartment = signal('ALL');
-  selectedDesignation = signal('ALL');
-  selectedEmploymentType = signal('ALL');
-  selectedStatus = signal<'ALL' | StaffStatusMarker>('ALL');
 
-  monthDays = computed<DayColumn[]>(() => {
-    const monthValue = this.selectedMonth();
+  monthLabel = computed(() => {
+    const [year, month] = this.selectedMonth().split('-').map(Number);
 
-    if (!monthValue) {
-      return [];
-    }
-
-    const [year, month] = monthValue.split('-').map(Number);
-    const daysInMonth = new Date(year, month, 0).getDate();
-
-    return Array.from({ length: daysInMonth }, (_, index) => ({
-      dayNumber: index + 1,
-      label: String(index + 1).padStart(2, '0'),
-    }));
+    return new Date(year, month - 1, 1).toLocaleDateString('en-US', {
+      month: 'long',
+      year: 'numeric',
+    });
   });
 
-  staffRecords = computed(() =>
-    this.staffs().map((staff) => staff as StaffReportRecord),
-  );
+  daysInMonth = computed<DayColumn[]>(() => {
+    const [year, month] = this.selectedMonth().split('-').map(Number);
+    const totalDays = new Date(year, month, 0).getDate();
+    const todayKey = this.getTodayDateKey();
 
-  departmentOptions = computed(() => {
-    const departments = this.staffRecords()
-      .map((staff) => this.getStaffDepartment(staff))
-      .filter((department) => department !== 'Not added');
+    return Array.from({ length: totalDays }).map((_, index) => {
+      const day = index + 1;
+      const dateKey = `${year}-${String(month).padStart(2, '0')}-${String(
+        day,
+      ).padStart(2, '0')}`;
 
-    return Array.from(new Set(departments)).sort((a, b) => a.localeCompare(b));
+      const date = new Date(year, month - 1, day);
+
+      return {
+        day,
+        dateKey,
+        weekday: date.toLocaleDateString('en-US', { weekday: 'short' }),
+        isToday: dateKey === todayKey,
+      };
+    });
   });
 
-  designationOptions = computed(() => {
-    const designations = this.staffRecords()
-      .map((staff) => this.getStaffDesignation(staff))
-      .filter((designation) => designation !== 'Not added');
+  monthRecords = computed(() => {
+    const month = this.selectedMonth();
 
-    return Array.from(new Set(designations)).sort((a, b) => a.localeCompare(b));
-  });
-
-  employmentTypeOptions = computed(() => {
-    const employmentTypes = this.staffRecords()
-      .map((staff) => this.getStaffEmploymentType(staff))
-      .filter((employmentType) => employmentType !== 'Not added');
-
-    return Array.from(new Set(employmentTypes)).sort((a, b) =>
-      a.localeCompare(b),
+    return this.attendanceRecords().filter((record) =>
+      record.attendanceDate.slice(0, 7).startsWith(month),
     );
   });
 
-  filteredStaffs = computed(() => {
+  staffRows = computed<StaffDayWiseRow[]>(() => {
     const keyword = this.searchTerm().trim().toLowerCase();
-    const departmentFilter = this.selectedDepartment();
-    const designationFilter = this.selectedDesignation();
-    const employmentTypeFilter = this.selectedEmploymentType();
-    const statusFilter = this.selectedStatus();
+    const rowMap = new Map<string, StaffDayWiseRow>();
 
-    return this.staffRecords().filter((staff) => {
-      const department = this.getStaffDepartment(staff);
-      const designation = this.getStaffDesignation(staff);
-      const employmentType = this.getStaffEmploymentType(staff);
-      const status = this.getStaffStatus(staff);
+    this.monthRecords()
+      .filter((record) => {
+        if (!keyword) {
+          return true;
+        }
 
-      const searchableText = [
-        this.getStaffCode(staff),
-        this.getStaffName(staff),
-        department,
-        designation,
-        employmentType,
-        status,
-        staff.phone,
-        staff.email,
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-
-      const matchesSearch = !keyword || searchableText.includes(keyword);
-      const matchesDepartment =
-        departmentFilter === 'ALL' || department === departmentFilter;
-      const matchesDesignation =
-        designationFilter === 'ALL' || designation === designationFilter;
-      const matchesEmploymentType =
-        employmentTypeFilter === 'ALL' ||
-        employmentType === employmentTypeFilter;
-      const matchesStatus = statusFilter === 'ALL' || status === statusFilter;
-
-      return (
-        matchesSearch &&
-        matchesDepartment &&
-        matchesDesignation &&
-        matchesEmploymentType &&
-        matchesStatus
-      );
-    });
-  });
-
-  staffRows = computed<StaffDayWiseRow[]>(() =>
-    this.filteredStaffs()
-      .map((staff) => {
-        const status = this.getStaffStatus(staff);
-        const totalDays = this.monthDays().length;
-        const activeDays = status === 'ACTIVE' ? totalDays : 0;
-        const inactiveDays = status === 'INACTIVE' ? totalDays : 0;
-        const activeRate =
-          totalDays === 0 ? 0 : Math.round((activeDays / totalDays) * 100);
-
-        const dayMap: Record<number, StaffStatusMarker> = {};
-
-        this.monthDays().forEach((day) => {
-          dayMap[day.dayNumber] = status;
-        });
-
-        return {
-          staffKey: staff.id,
-          staffCode: this.getStaffCode(staff),
-          staffName: this.getStaffName(staff),
-          department: this.getStaffDepartment(staff),
-          designation: this.getStaffDesignation(staff),
-          employmentType: this.getStaffEmploymentType(staff),
-          status,
-          activeDays,
-          inactiveDays,
-          totalDays,
-          activeRate,
-          dayMap,
-        };
+        return [
+          record.staffCode,
+          record.staffName,
+          record.department || '',
+          record.designation || '',
+          record.status,
+        ]
+          .join(' ')
+          .toLowerCase()
+          .includes(keyword);
       })
-      .sort((a, b) => a.staffName.localeCompare(b.staffName)),
-  );
+      .forEach((record) => {
+        const rowKey = record.staffCode || record.staffName;
+        const dateKey = record.attendanceDate.slice(0, 10);
 
-  totalStaffs = computed(() => this.staffRows().length);
+        if (!rowMap.has(rowKey)) {
+          rowMap.set(rowKey, {
+            staffCode: record.staffCode,
+            staffName: record.staffName,
+            department: record.department,
+            designation: record.designation,
+            records: {},
+          });
+        }
 
-  activeStaffs = computed(
-    () => this.staffRows().filter((row) => row.status === 'ACTIVE').length,
-  );
+        rowMap.get(rowKey)!.records[dateKey] = record;
+      });
 
-  inactiveStaffs = computed(
-    () => this.staffRows().filter((row) => row.status === 'INACTIVE').length,
-  );
-
-  totalActiveDays = computed(() =>
-    this.staffRows().reduce((total, row) => total + row.activeDays, 0),
-  );
-
-  totalInactiveDays = computed(() =>
-    this.staffRows().reduce((total, row) => total + row.inactiveDays, 0),
-  );
-
-  selectedMonthLabel = computed(() => {
-    const monthValue = this.selectedMonth();
-
-    if (!monthValue) {
-      return 'All Months';
-    }
-
-    const [year, month] = monthValue.split('-').map(Number);
-
-    return new Date(year, month - 1, 1).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-    });
+    return Array.from(rowMap.values()).sort((a, b) =>
+      a.staffName.localeCompare(b.staffName),
+    );
   });
 
-  constructor(private readonly staffsService: StaffsService) {}
+  presentCount = computed(
+    () =>
+      this.monthRecords().filter((record) => record.status === 'PRESENT')
+        .length,
+  );
+
+  absentCount = computed(
+    () =>
+      this.monthRecords().filter((record) => record.status === 'ABSENT').length,
+  );
+
+  lateCount = computed(
+    () =>
+      this.monthRecords().filter((record) => record.status === 'LATE').length,
+  );
+
+  halfDayCount = computed(
+    () =>
+      this.monthRecords().filter((record) => record.status === 'HALF_DAY')
+        .length,
+  );
+
+  constructor(
+    private readonly staffAttendanceService: StaffAttendanceService,
+  ) {}
 
   ngOnInit(): void {
-    this.selectedMonth.set(this.getCurrentMonthForInput());
-    this.loadStaffs();
+    this.loadStaffAttendance();
   }
 
-  loadStaffs(): void {
+  loadStaffAttendance(): void {
     this.isLoading.set(true);
     this.serverError.set('');
 
-    this.staffsService.getStaffs().subscribe({
-      next: (staffs) => {
-        this.staffs.set(staffs);
+    this.staffAttendanceService.getStaffAttendance('', '').subscribe({
+      next: (records) => {
+        this.attendanceRecords.set(records);
         this.isLoading.set(false);
       },
       error: (error) => {
         this.serverError.set(
-          error?.error?.message || 'Failed to load staff day wise report.',
+          error?.error?.message || 'Failed to load staff attendance report.',
         );
         this.isLoading.set(false);
       },
     });
   }
 
+  onMonthChange(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+
+    this.selectedMonth.set(value || this.getCurrentMonth());
+  }
+
   onSearchInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
+
     this.searchTerm.set(value);
   }
 
-  onMonthInput(event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
-    this.selectedMonth.set(value);
+  getRecordForDay(
+    row: StaffDayWiseRow,
+    day: DayColumn,
+  ): StaffAttendance | null {
+    return row.records[day.dateKey] || null;
   }
 
-  onDepartmentChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    this.selectedDepartment.set(value);
+  getStatusShort(status?: StaffAttendanceStatus): string {
+    switch (status) {
+      case 'PRESENT':
+        return 'P';
+      case 'ABSENT':
+        return 'A';
+      case 'LATE':
+        return 'L';
+      case 'HALF_DAY':
+        return 'H';
+      default:
+        return '-';
+    }
   }
 
-  onDesignationChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    this.selectedDesignation.set(value);
+  getStatusLabel(status?: StaffAttendanceStatus): string {
+    switch (status) {
+      case 'PRESENT':
+        return 'Present';
+      case 'ABSENT':
+        return 'Absent';
+      case 'LATE':
+        return 'Late';
+      case 'HALF_DAY':
+        return 'Half Day';
+      default:
+        return 'Not Marked';
+    }
   }
 
-  onEmploymentTypeChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    this.selectedEmploymentType.set(value);
-  }
-
-  onStatusChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value as
-      | 'ALL'
-      | StaffStatusMarker;
-
-    this.selectedStatus.set(value);
-  }
-
-  clearFilters(): void {
-    this.searchTerm.set('');
-    this.selectedMonth.set(this.getCurrentMonthForInput());
-    this.selectedDepartment.set('ALL');
-    this.selectedDesignation.set('ALL');
-    this.selectedEmploymentType.set('ALL');
-    this.selectedStatus.set('ALL');
-  }
-
-  exportCsv(): void {
-    const rows = this.staffRows();
-    const days = this.monthDays();
-
-    if (rows.length === 0) {
-      return;
+  getStatusClass(status?: StaffAttendanceStatus): string {
+    if (!status) {
+      return 'status-cell--empty';
     }
 
-    const headers = [
-      'Staff ID',
-      'Staff Name',
-      'Department',
-      'Designation',
-      'Employment Type',
-      'Status',
-      'Total Days',
-      'Active Days',
-      'Inactive Days',
-      'Active Rate',
-      ...days.map((day) => day.label),
-    ];
+    return `status-cell--${status.toLowerCase().replace('_', '-')}`;
+  }
 
-    const csvRows = rows.map((row) => [
-      row.staffCode,
-      row.staffName,
-      row.department,
-      row.designation,
-      row.employmentType,
-      this.getStatusLabel(row.status),
-      String(row.totalDays),
-      String(row.activeDays),
-      String(row.inactiveDays),
-      `${row.activeRate}%`,
-      ...days.map((day) => this.getStatusShortLabel(row.dayMap[day.dayNumber])),
-    ]);
+  getCellTitle(row: StaffDayWiseRow, day: DayColumn): string {
+    const record = this.getRecordForDay(row, day);
 
-    const csvContent = [headers, ...csvRows]
-      .map((row) => row.map((cell) => this.escapeCsvValue(cell)).join(','))
-      .join('\n');
+    if (!record) {
+      return `${row.staffName} / ${day.dateKey} / Not marked`;
+    }
 
-    const blob = new Blob([csvContent], {
-      type: 'text/csv;charset=utf-8;',
-    });
+    return `${row.staffName} / ${day.dateKey} / ${this.getStatusLabel(
+      record.status,
+    )}${record.remarks ? ` / ${record.remarks}` : ''}`;
+  }
 
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-
-    link.href = url;
-    link.download = `staff-day-wise-${
-      this.selectedMonth() || this.getCurrentMonthForInput()
-    }.csv`;
-    link.click();
-
-    window.URL.revokeObjectURL(url);
+  getMarkedDays(row: StaffDayWiseRow): number {
+    return Object.keys(row.records).length;
   }
 
   getStaffInitial(row: StaffDayWiseRow): string {
@@ -355,65 +245,12 @@ export class StaffDayWiseComponent implements OnInit {
       .split(' ')
       .filter(Boolean)
       .slice(0, 2)
-      .map((word) => word[0])
+      .map((part) => part.charAt(0))
       .join('')
       .toUpperCase();
   }
 
-  getStatusShortLabel(status: StaffStatusMarker): string {
-    return status === 'ACTIVE' ? 'A' : 'I';
-  }
-
-  getStatusLabel(status: StaffStatusMarker): string {
-    return status.charAt(0) + status.slice(1).toLowerCase();
-  }
-
-  private getStaffCode(staff: StaffReportRecord): string {
-    return (
-      staff.staffCode ||
-      staff.staffId ||
-      staff.staffNo ||
-      staff.employeeNo ||
-      'Not added'
-    );
-  }
-
-  private getStaffName(staff: StaffReportRecord): string {
-    return staff.fullName || staff.name || 'Unknown Staff';
-  }
-
-  private getStaffDepartment(staff: StaffReportRecord): string {
-    return staff.department || staff.departmentName || 'Not added';
-  }
-
-  private getStaffDesignation(staff: StaffReportRecord): string {
-    return staff.designation || staff.designationName || 'Not added';
-  }
-
-  private getStaffEmploymentType(staff: StaffReportRecord): string {
-    return this.formatEnumLabel(
-      staff.employmentType || staff.employment || 'Not added',
-    );
-  }
-
-  private getStaffStatus(staff: StaffReportRecord): StaffStatusMarker {
-    return String(staff.status || 'ACTIVE').toUpperCase() === 'INACTIVE'
-      ? 'INACTIVE'
-      : 'ACTIVE';
-  }
-
-  private formatEnumLabel(value: string): string {
-    if (!value || value === 'Not added') {
-      return 'Not added';
-    }
-
-    return value
-      .toLowerCase()
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, (letter) => letter.toUpperCase());
-  }
-
-  private getCurrentMonthForInput(): string {
+  private getCurrentMonth(): string {
     const today = new Date();
 
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(
@@ -422,9 +259,7 @@ export class StaffDayWiseComponent implements OnInit {
     )}`;
   }
 
-  private escapeCsvValue(value: string): string {
-    const safeValue = String(value).replace(/"/g, '""');
-
-    return `"${safeValue}"`;
+  private getTodayDateKey(): string {
+    return new Date().toISOString().slice(0, 10);
   }
 }
