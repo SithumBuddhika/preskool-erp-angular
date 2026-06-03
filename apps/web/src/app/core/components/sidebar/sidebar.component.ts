@@ -155,6 +155,11 @@ export class SidebarComponent {
           route: '/management/routes',
           icon: 'briefcase',
         },
+        {
+          label: 'Hostels',
+          route: '/management/hostels',
+          icon: 'briefcase',
+        },
       ],
     },
     {

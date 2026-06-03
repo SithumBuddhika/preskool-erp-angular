@@ -296,6 +296,23 @@ export const appRoutes: Routes = [
             (m) => m.RoutesComponent,
           ),
       },
+      {
+        path: 'management/route',
+        pathMatch: 'full',
+        redirectTo: 'management/routes',
+      },
+      {
+        path: 'management/hostels',
+        loadComponent: () =>
+          import('./features/management/hostels/hostels.component').then(
+            (m) => m.HostelsComponent,
+          ),
+      },
+      {
+        path: 'management/hostel',
+        pathMatch: 'full',
+        redirectTo: 'management/hostels',
+      },
 
       {
         path: 'hrm',
