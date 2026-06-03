@@ -1,0 +1,402 @@
+<section class="hostels-page">
+  <div class="hostels-page__header">
+    <div>
+      <h1>Hostels</h1>
+      <p>Management / Hostels</p>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openCreateModal()">
+      Add New Hostel
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">H</span>
+      <div>
+        <strong>{{ hostels().length }}</strong>
+        <p>Total Hostels</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">A</span>
+      <div>
+        <strong>{{ activeHostels() }}</strong>
+        <p>Active Hostels</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">M</span>
+      <div>
+        <strong>{{ maintenanceHostels() }}</strong>
+        <p>Maintenance</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--purple">B</span>
+      <div>
+        <strong>{{ availableBeds() }}/{{ totalBeds() }}</strong>
+        <p>Available Beds</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="hostels-card">
+    <div class="hostels-card__top">
+      <div>
+        <h2>Hostel List</h2>
+        <p>Manage hostel buildings, wardens, rooms, beds, and fees.</p>
+      </div>
+
+      <div class="hostels-search">
+        <input
+          type="text"
+          placeholder="Search hostels..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    @if (serverError() && !showHostelModal()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="hostels-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Hostel Code</th>
+              <th>Hostel</th>
+              <th>Type</th>
+              <th>Warden</th>
+              <th>Phone</th>
+              <th>Rooms</th>
+              <th>Beds</th>
+              <th>Monthly Fee</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (hostel of hostels(); track hostel.id) {
+              <tr>
+                <td>
+                  <span class="hostel-code">{{ hostel.hostelCode }}</span>
+                </td>
+
+                <td>
+                  <div class="hostel-info">
+                    <span>{{ getHostelInitial(hostel) }}</span>
+
+                    <div>
+                      <strong>{{ hostel.hostelName }}</strong>
+                      <p>{{ hostel.address || 'No address added' }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="type-pill">{{
+                    getTypeLabel(hostel.hostelType)
+                  }}</span>
+                </td>
+
+                <td>{{ hostel.wardenName || '-' }}</td>
+                <td>{{ hostel.phone || '-' }}</td>
+                <td>{{ hostel.totalRooms }}</td>
+
+                <td>
+                  <span class="beds-pill">
+                    {{ getBedAvailabilityLabel(hostel) }}
+                  </span>
+                </td>
+
+                <td>
+                  @if (hostel.monthlyFee) {
+                    Rs. {{ hostel.monthlyFee | number: '1.0-0' }}
+                  } @else {
+                    -
+                  }
+                </td>
+
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-pill--inactive]="hostel.status === 'INACTIVE'"
+                    [class.status-pill--maintenance]="
+                      hostel.status === 'MAINTENANCE'
+                    "
+                  >
+                    {{ getStatusLabel(hostel.status) }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="action-buttons">
+                    <button
+                      class="edit-btn"
+                      type="button"
+                      (click)="openEditModal(hostel)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      (click)="openDeleteModal(hostel)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="10">
+                  <div class="empty-state">
+                    <strong>No hostels found</strong>
+                    <p>Add your first hostel or change your search keyword.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (showHostelModal()) {
+  <div class="modal-backdrop">
+    <form
+      class="hostel-modal"
+      [formGroup]="hostelForm"
+      (ngSubmit)="saveHostel()"
+    >
+      <div class="hostel-modal__header">
+        <div>
+          <h2>{{ isEditMode() ? 'Edit Hostel' : 'Add New Hostel' }}</h2>
+          <p>
+            {{
+              isEditMode()
+                ? 'Update hostel details, rooms, beds, and fees.'
+                : 'Create a hostel record with room and bed availability.'
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="Close modal"
+          (click)="closeHostelModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      @if (serverError()) {
+        <p class="server-error">{{ serverError() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Hostel Code
+          <input
+            type="text"
+            formControlName="hostelCode"
+            placeholder="Example: HST-0001"
+          />
+
+          @if (isInvalid('hostelCode')) {
+            <small>Hostel code is required.</small>
+          }
+        </label>
+
+        <label>
+          Hostel Name
+          <input
+            type="text"
+            formControlName="hostelName"
+            placeholder="Example: Boys Hostel A"
+          />
+
+          @if (isInvalid('hostelName')) {
+            <small>Hostel name is required.</small>
+          }
+        </label>
+
+        <label>
+          Hostel Type
+          <select formControlName="hostelType">
+            <option value="BOYS">Boys</option>
+            <option value="GIRLS">Girls</option>
+            <option value="MIXED">Mixed</option>
+          </select>
+        </label>
+
+        <label>
+          Warden Name
+          <input
+            type="text"
+            formControlName="wardenName"
+            placeholder="Enter warden name"
+          />
+        </label>
+
+        <label>
+          Phone
+          <input
+            type="text"
+            formControlName="phone"
+            placeholder="Enter phone number"
+          />
+        </label>
+
+        <label>
+          Total Rooms
+          <input type="number" formControlName="totalRooms" min="1" />
+
+          @if (isInvalid('totalRooms')) {
+            <small>Total rooms must be at least 1.</small>
+          }
+        </label>
+
+        <label>
+          Total Beds
+          <input type="number" formControlName="totalBeds" min="1" />
+
+          @if (isInvalid('totalBeds')) {
+            <small>Total beds must be at least 1.</small>
+          }
+        </label>
+
+        <label>
+          Available Beds
+          <input type="number" formControlName="availableBeds" min="0" />
+
+          @if (isInvalid('availableBeds')) {
+            <small>Available beds must be 0 or more.</small>
+          }
+        </label>
+
+        <label>
+          Monthly Fee
+          <input
+            type="number"
+            formControlName="monthlyFee"
+            min="0"
+            placeholder="Example: 15000"
+          />
+        </label>
+
+        <label>
+          Status
+          <select formControlName="status">
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+            <option value="MAINTENANCE">Maintenance</option>
+          </select>
+        </label>
+
+        <label class="form-grid__full">
+          Address
+          <textarea
+            formControlName="address"
+            rows="3"
+            placeholder="Enter hostel address"
+          ></textarea>
+        </label>
+
+        <label class="form-grid__full">
+          Notes
+          <textarea
+            formControlName="notes"
+            rows="3"
+            placeholder="Enter hostel notes"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="hostel-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeHostelModal()"
+          [disabled]="isSubmitting()"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-btn" type="submit" [disabled]="isSubmitting()">
+          {{
+            isSubmitting()
+              ? isEditMode()
+                ? 'Updating...'
+                : 'Saving...'
+              : isEditMode()
+                ? 'Update Hostel'
+                : 'Save Hostel'
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (hostelToDelete(); as hostel) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-modal__icon">!</div>
+
+      <h2>Delete Hostel?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ hostel.hostelCode }} - {{ hostel.hostelName }}</strong
+        >? This action cannot be undone.
+      </p>
+
+      <div class="confirm-modal__actions">
+        <button
+          class="secondary-btn"
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="danger-confirm-btn"
+          type="button"
+          (click)="confirmDeleteHostel()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete Hostel' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as currentToast) {
+  <div class="toast" [class.toast--error]="currentToast.type === 'error'">
+    {{ currentToast.message }}
+  </div>
+}

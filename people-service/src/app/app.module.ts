@@ -22,6 +22,9 @@ import { GuardiansService } from './guardians.service';
 import { HolidaysController } from './holidays.controller';
 import { HolidaysService } from './holidays.service';
 
+import { HostelsController } from './hostels.controller';
+import { HostelsService } from './hostels.service';
+
 import { LeavesController } from './leaves.controller';
 import { LeavesService } from './leaves.service';
 
@@ -86,6 +89,7 @@ import { TransportRoutesService } from './transport-routes.service';
     LibraryController,
     LibraryMembersController,
     TransportRoutesController,
+    HostelsController,
   ],
   providers: [
     AppService,
@@ -109,6 +113,7 @@ import { TransportRoutesService } from './transport-routes.service';
     LibraryService,
     LibraryMembersService,
     TransportRoutesService,
+    HostelsService,
 
     PrismaService,
   ],

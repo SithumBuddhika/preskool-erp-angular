@@ -529,6 +529,38 @@ model TransportRoute {
   @@map("transport_routes")
 }
 
+enum HostelType {
+  BOYS
+  GIRLS
+  MIXED
+}
+
+enum HostelStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+}
+
+model Hostel {
+  id            String       @id @default(uuid())
+  hostelCode    String       @unique
+  hostelName    String
+  hostelType    HostelType
+  wardenName    String?
+  phone         String?
+  address       String?
+  totalRooms    Int          @default(1)
+  totalBeds     Int          @default(1)
+  availableBeds Int          @default(1)
+  monthlyFee    Float?
+  status        HostelStatus @default(ACTIVE)
+  notes         String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@map("hostels")
+}
+
 enum ClassStatus {
   ACTIVE
   INACTIVE
