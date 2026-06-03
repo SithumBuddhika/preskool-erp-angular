@@ -289,6 +289,13 @@ export const appRoutes: Routes = [
             './features/management/library-members/library-members.component'
           ).then((m) => m.LibraryMembersComponent),
       },
+      {
+        path: 'management/routes',
+        loadComponent: () =>
+          import('./features/management/routes/routes.component').then(
+            (m) => m.RoutesComponent,
+          ),
+      },
 
       {
         path: 'hrm',

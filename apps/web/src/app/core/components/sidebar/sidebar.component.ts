@@ -150,6 +150,11 @@ export class SidebarComponent {
           route: '/management/library-members',
           icon: 'briefcase',
         },
+        {
+          label: 'Routes',
+          route: '/management/routes',
+          icon: 'briefcase',
+        },
       ],
     },
     {
