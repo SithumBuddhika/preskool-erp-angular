@@ -20,6 +20,7 @@ import { UpdateAdminUserDto } from './dto/update-admin-user.dto';
 import { VerifyLoginOtpDto } from './dto/verify-login-otp.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { AuthRequest } from './types/auth-request.type';
+import { UpdateAdminTwoStepDto } from './dto/update-admin-two-step.dto';
 import { AuthResponse, AuthUser, LoginResponse } from './types/auth-user.type';
 
 @Controller('auth')
@@ -102,6 +103,20 @@ export class AuthController {
       request.user!.sub,
       id,
       updateAdminStatusDto,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('admin-users/:id/two-step')
+  updateAdminTwoStep(
+    @Req() request: AuthRequest,
+    @Param('id') id: string,
+    @Body() updateAdminTwoStepDto: UpdateAdminTwoStepDto,
+  ) {
+    return this.authService.updateAdminTwoStep(
+      request.user!.sub,
+      id,
+      updateAdminTwoStepDto,
     );
   }
 

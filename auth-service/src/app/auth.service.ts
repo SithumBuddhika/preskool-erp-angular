@@ -20,6 +20,7 @@ import { UpdateAdminUserDto } from './dto/update-admin-user.dto';
 import { VerifyLoginOtpDto } from './dto/verify-login-otp.dto';
 import { MailService } from './mail.service';
 import { PrismaService } from './prisma.service';
+import { UpdateAdminTwoStepDto } from './dto/update-admin-two-step.dto';
 import { AuthResponse, AuthUser, LoginResponse } from './types/auth-user.type';
 
 type DbUser = AuthUser & {
@@ -418,6 +419,39 @@ export class AuthService {
     return this.toAuthUser(updatedUser as DbUser);
   }
 
+  async updateAdminTwoStep(
+    currentUserId: string,
+    adminUserId: string,
+    updateAdminTwoStepDto: UpdateAdminTwoStepDto,
+  ) {
+    await this.assertCanManageAdmins(currentUserId);
+
+    const targetUser = await this.findUserById(adminUserId);
+
+    this.validateAdminRole(targetUser.role);
+
+    if (
+      updateAdminTwoStepDto.twoStepEnabled &&
+      this.isUnsafeDemoEmail(targetUser.email)
+    ) {
+      throw new BadRequestException(
+        '2-step verification requires a real email address. Use a real email or keep 2FA disabled for demo accounts.',
+      );
+    }
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: adminUserId },
+      data: {
+        twoStepEnabled: updateAdminTwoStepDto.twoStepEnabled,
+        emailVerified: updateAdminTwoStepDto.twoStepEnabled
+          ? true
+          : targetUser.emailVerified,
+      },
+    });
+
+    return this.toAuthUser(updatedUser as DbUser);
+  }
+
   async deleteAdminUser(currentUserId: string, adminUserId: string) {
     await this.assertCanManageAdmins(currentUserId);
 
@@ -535,5 +569,16 @@ export class AuthService {
     date.setMinutes(date.getMinutes() + minutes);
 
     return date;
+  }
+
+  private isUnsafeDemoEmail(email: string): boolean {
+    const normalizedEmail = email.toLowerCase().trim();
+
+    return (
+      normalizedEmail.endsWith('@example.com') ||
+      normalizedEmail.endsWith('@test.com') ||
+      normalizedEmail.endsWith('@localhost') ||
+      normalizedEmail.includes('example.')
+    );
   }
 }

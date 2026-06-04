@@ -71,6 +71,7 @@
 .secondary-btn:disabled,
 .edit-btn:disabled,
 .status-btn:disabled,
+.two-step-btn:disabled,
 .danger-btn:disabled,
 .danger-confirm-btn:disabled {
   opacity: 0.65;
@@ -962,7 +963,7 @@
 
 .admin-users-summary {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -998,7 +999,7 @@
 
 .admin-users-table-wrap table {
   width: 100%;
-  min-width: 900px;
+  min-width: 1040px;
   border-collapse: collapse;
 }
 
@@ -1058,7 +1059,8 @@
 }
 
 .role-pill,
-.admin-status-pill {
+.admin-status-pill,
+.two-step-pill {
   min-height: 28px;
   padding: 0 10px;
   border-radius: 999px;
@@ -1083,6 +1085,16 @@
   color: #e11d48;
 }
 
+.two-step-pill {
+  background: #eef4ff;
+  color: #3d5ee1;
+}
+
+.two-step-pill--disabled {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
 .admin-user-actions {
   display: inline-flex;
   align-items: center;
@@ -1092,6 +1104,7 @@
 
 .edit-btn,
 .status-btn,
+.two-step-btn,
 .danger-btn {
   height: 34px;
   border: 0;
@@ -1115,6 +1128,16 @@
 .status-btn--activate {
   background: #ecfdf3;
   color: #039855;
+}
+
+.two-step-btn {
+  background: #eef4ff;
+  color: #3d5ee1;
+}
+
+.two-step-btn--disable {
+  background: #fff1f2;
+  color: #e11d48;
 }
 
 .danger-btn {

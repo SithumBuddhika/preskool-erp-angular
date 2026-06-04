@@ -6,6 +6,8 @@ export type AdminUser = {
   email: string;
   role: AdminUserRole;
   isActive: boolean;
+  twoStepEnabled: boolean;
+  emailVerified: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -26,4 +28,8 @@ export type UpdateAdminUserPayload = {
 
 export type UpdateAdminStatusPayload = {
   isActive: boolean;
+};
+
+export type UpdateAdminTwoStepPayload = {
+  twoStepEnabled: boolean;
 };
