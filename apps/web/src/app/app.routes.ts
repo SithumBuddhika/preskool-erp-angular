@@ -114,6 +114,14 @@ export const appRoutes: Routes = [
       },
 
       {
+        path: 'dashboard/parent',
+        loadComponent: () =>
+          import(
+            './features/dashboard/parent-dashboard/parent-dashboard.component'
+          ).then((m) => m.ParentDashboardComponent),
+      },
+
+      {
         path: 'people',
         pathMatch: 'full',
         redirectTo: 'people/students',
