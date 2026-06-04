@@ -1,0 +1,701 @@
+.student-dashboard {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.student-dashboard__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.student-dashboard__header h1 {
+  margin: 0;
+  color: var(--erp-text-main);
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.student-dashboard__header p {
+  margin: 8px 0 0;
+  color: #667085;
+  font-size: 14px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.primary-link-btn,
+.secondary-btn {
+  height: 42px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 18px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.18s ease;
+}
+
+.primary-link-btn {
+  background: var(--erp-primary);
+  color: #ffffff;
+  box-shadow: 0 10px 20px rgba(61, 94, 225, 0.22);
+}
+
+.secondary-btn {
+  background: #eef1f6;
+  color: #253858;
+}
+
+.primary-link-btn:hover {
+  filter: brightness(0.96);
+  transform: translateY(-1px);
+}
+
+.secondary-btn:hover {
+  background: #e5e9f2;
+}
+
+.student-hero {
+  min-height: 165px;
+  border-radius: 18px;
+  padding: 28px;
+  background:
+    radial-gradient(
+      circle at 88% 16%,
+      rgba(255, 255, 255, 0.2),
+      transparent 26%
+    ),
+    linear-gradient(135deg, #0f172a 0%, #064e3b 44%, #14b8a6 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.18);
+}
+
+.student-hero > div:first-child > span {
+  min-height: 26px;
+  border-radius: 999px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.15);
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.student-hero h2 {
+  margin: 14px 0 0;
+  font-size: 32px;
+  line-height: 1.1;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.student-hero p {
+  max-width: 760px;
+  margin: 10px 0 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.student-hero__attendance {
+  width: 230px;
+  min-height: 116px;
+  border-radius: 16px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(12px);
+  flex: 0 0 auto;
+}
+
+.student-hero__attendance strong {
+  display: block;
+  font-size: 44px;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.student-hero__attendance span {
+  display: block;
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.student-hero__attendance small {
+  display: block;
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.server-error {
+  margin: 0;
+  color: #e11d48;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.summary-grid,
+.summary-skeleton {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.summary-card {
+  min-height: 120px;
+  background: #ffffff;
+  border: 1px solid #edf1f7;
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 10px 28px rgba(16, 24, 40, 0.04);
+}
+
+.summary-card > span {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 900;
+  flex: 0 0 auto;
+}
+
+.summary-card.is-blue > span {
+  background: #eef4ff;
+  color: #3863ff;
+}
+
+.summary-card.is-orange > span {
+  background: #fff7ed;
+  color: #f59e0b;
+}
+
+.summary-card.is-purple > span {
+  background: #f4ebff;
+  color: #7f56d9;
+}
+
+.summary-card.is-green > span {
+  background: #ecfdf3;
+  color: #039855;
+}
+
+.summary-card strong {
+  display: block;
+  color: var(--erp-text-main);
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.summary-card p {
+  margin: 8px 0 0;
+  color: var(--erp-text-main);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.summary-card small {
+  display: block;
+  margin-top: 6px;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.summary-skeleton span {
+  height: 120px;
+  border-radius: 14px;
+  background: linear-gradient(90deg, #edf1f7 25%, #f8fafc 50%, #edf1f7 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.4s infinite;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(330px, 0.75fr);
+  grid-template-areas:
+    'attendance calendar'
+    'fees events'
+    'academic library'
+    'recent recent';
+  gap: 18px;
+  align-items: start;
+}
+
+.dashboard-card {
+  background: #ffffff;
+  border: 1px solid #edf1f7;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 10px 28px rgba(16, 24, 40, 0.04);
+  min-width: 0;
+}
+
+.dashboard-card--attendance {
+  grid-area: attendance;
+}
+
+.dashboard-card--calendar {
+  grid-area: calendar;
+}
+
+.dashboard-card--events {
+  grid-area: events;
+}
+
+.dashboard-card--fees {
+  grid-area: fees;
+}
+
+.dashboard-card--academic {
+  grid-area: academic;
+}
+
+.dashboard-card--library {
+  grid-area: library;
+}
+
+.dashboard-card--recent {
+  grid-area: recent;
+}
+
+.dashboard-card__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #edf1f7;
+}
+
+.dashboard-card__header h3 {
+  margin: 0;
+  color: var(--erp-text-main);
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.dashboard-card__header p {
+  margin: 5px 0 0;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.dashboard-card__header a {
+  color: var(--erp-primary);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.attendance-ring {
+  width: 190px;
+  height: 190px;
+  margin: 8px auto 18px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+}
+
+.attendance-ring > div {
+  width: 104px;
+  height: 104px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px #edf1f7;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.attendance-ring strong {
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--erp-text-main);
+}
+
+.attendance-ring span {
+  color: #667085;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.attendance-counts,
+.fee-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.attendance-counts article,
+.fee-grid article {
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #edf1f7;
+  padding: 12px;
+  text-align: center;
+}
+
+.attendance-counts strong,
+.fee-grid strong {
+  display: block;
+  color: var(--erp-text-main);
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.attendance-counts span,
+.fee-grid span {
+  display: block;
+  margin-bottom: 7px;
+  color: #667085;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.fee-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.student-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.student-calendar span {
+  position: relative;
+  height: 36px;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #64748b;
+  border: 1px solid #edf1f7;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: help;
+  transition: 0.18s ease;
+}
+
+.student-calendar span:hover {
+  transform: translateY(-1px);
+  border-color: #dfe5ef;
+}
+
+.student-calendar span.active {
+  color: #ffffff;
+  box-shadow: 0 10px 20px rgba(61, 94, 225, 0.22);
+}
+
+.student-calendar span.has-general {
+  background: #3d5ee1;
+}
+
+.student-calendar span.has-meeting {
+  background: #14b8a6;
+}
+
+.student-calendar span.has-exam-event {
+  background: #7f56d9;
+}
+
+.student-calendar span.has-sports-event {
+  background: #039855;
+}
+
+.student-calendar span.has-holiday-event {
+  background: #e11d48;
+}
+
+.student-calendar span small {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 17px;
+  height: 17px;
+  border-radius: 999px;
+  background: #101828;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  display: grid;
+  place-items: center;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.calendar-legend {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.calendar-legend span {
+  min-height: 26px;
+  border-radius: 999px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.legend-event {
+  background: #3d5ee1;
+}
+
+.legend-meeting {
+  background: #14b8a6;
+}
+
+.legend-exam {
+  background: #7f56d9;
+}
+
+.legend-sport {
+  background: #039855;
+}
+
+.legend-holiday {
+  background: #e11d48;
+}
+
+.event-list,
+.academic-list,
+.recent-list {
+  display: grid;
+  gap: 12px;
+}
+
+.event-card,
+.academic-list article,
+.recent-list article,
+.library-box article {
+  border-radius: 12px;
+  background: #fbfcff;
+  border: 1px solid #edf1f7;
+  padding: 12px;
+}
+
+.event-card,
+.academic-list article,
+.library-box article {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.event-card > span,
+.academic-list article > span,
+.library-box article > span {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #eef4ff;
+  color: var(--erp-primary);
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  font-weight: 900;
+  flex: 0 0 auto;
+}
+
+.event-card strong,
+.academic-list strong,
+.library-box strong,
+.recent-list strong {
+  display: block;
+  color: var(--erp-text-main);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.event-card p,
+.academic-list p,
+.library-box p,
+.recent-list p {
+  margin: 4px 0 0;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.event-card small {
+  display: block;
+  margin-top: 5px;
+  color: #475467;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.library-box {
+  display: grid;
+  gap: 12px;
+}
+
+.recent-list article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.recent-list small {
+  color: #667085;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.status-pill {
+  min-height: 28px;
+  border-radius: 999px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.status-pill--present {
+  background: #ecfdf3;
+  color: #039855;
+}
+
+.status-pill--absent {
+  background: #fff1f2;
+  color: #e11d48;
+}
+
+.status-pill--late {
+  background: #fff7ed;
+  color: #f59e0b;
+}
+
+.status-pill--half-day {
+  background: #eef4ff;
+  color: #3863ff;
+}
+
+.status-pill--n\/a {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.empty-state {
+  padding: 24px 0;
+  text-align: center;
+}
+
+.empty-state strong {
+  display: block;
+  color: var(--erp-text-main);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.empty-state p {
+  margin: 8px 0 0;
+  color: #667085;
+  font-size: 13px;
+}
+
+@keyframes skeleton-loading {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (max-width: 1199px) {
+  .summary-grid,
+  .summary-skeleton {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'attendance'
+      'calendar'
+      'events'
+      'fees'
+      'academic'
+      'library'
+      'recent';
+  }
+}
+
+@media (max-width: 767px) {
+  .student-dashboard__header,
+  .student-hero {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .student-hero__attendance {
+    width: 100%;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .header-actions button,
+  .header-actions a {
+    width: 100%;
+  }
+
+  .attendance-counts,
+  .fee-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .recent-list article {
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 575px) {
+  .summary-grid,
+  .summary-skeleton {
+    grid-template-columns: 1fr;
+  }
+
+  .student-hero,
+  .dashboard-card {
+    padding: 16px;
+  }
+
+  .student-hero h2 {
+    font-size: 26px;
+  }
+}
