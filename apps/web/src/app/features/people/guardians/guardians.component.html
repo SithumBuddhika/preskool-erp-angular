@@ -90,7 +90,7 @@
           <tbody>
             @for (guardian of guardians(); track guardian.id) {
               <tr>
-                <td>
+                <td data-label="Guardian">
                   <div class="guardian-name">
                     <span>{{ getInitials(guardian) }}</span>
 
@@ -101,17 +101,23 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Relation">
                   <span class="relation-pill">
                     {{ getRelationLabel(guardian.relation) }}
                   </span>
                 </td>
 
-                <td>{{ guardian.occupation || 'Not added' }}</td>
-                <td>{{ guardian.phone }}</td>
-                <td>{{ guardian.email || 'No email added' }}</td>
+                <td data-label="Occupation">
+                  {{ guardian.occupation || 'Not added' }}
+                </td>
 
-                <td>
+                <td data-label="Phone">{{ guardian.phone }}</td>
+
+                <td data-label="Email">
+                  {{ guardian.email || 'No email added' }}
+                </td>
+
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--inactive]="guardian.status !== 'ACTIVE'"
@@ -120,7 +126,7 @@
                   </span>
                 </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"

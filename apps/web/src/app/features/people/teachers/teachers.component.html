@@ -94,11 +94,11 @@
           <tbody>
             @for (teacher of teachers(); track teacher.id) {
               <tr>
-                <td>
+                <td data-label="Employee No">
                   <span class="employee-no">{{ teacher.employeeNo }}</span>
                 </td>
 
-                <td>
+                <td data-label="Teacher">
                   <div class="teacher-name">
                     <span>{{ getInitials(teacher) }}</span>
 
@@ -111,16 +111,23 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Subject">
                   <span class="subject-pill">{{ teacher.subject }}</span>
                 </td>
 
-                <td>{{ getGenderLabel(teacher.gender) }}</td>
-                <td>{{ teacher.phone }}</td>
-                <td>{{ teacher.email }}</td>
-                <td>{{ formatDisplayDate(teacher.joiningDate) }}</td>
+                <td data-label="Gender">
+                  {{ getGenderLabel(teacher.gender) }}
+                </td>
 
-                <td>
+                <td data-label="Phone">{{ teacher.phone }}</td>
+
+                <td data-label="Email">{{ teacher.email }}</td>
+
+                <td data-label="Joining Date">
+                  {{ formatDisplayDate(teacher.joiningDate) }}
+                </td>
+
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--inactive]="teacher.status !== 'ACTIVE'"
@@ -129,7 +136,7 @@
                   </span>
                 </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"
