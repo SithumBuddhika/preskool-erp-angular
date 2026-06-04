@@ -51,6 +51,21 @@ export class SidebarComponent {
           icon: 'layout-dashboard',
         },
         {
+          label: 'Student Dashboard',
+          route: '/dashboard/student',
+          icon: 'layout-dashboard',
+        },
+        {
+          label: 'Teacher Dashboard',
+          route: '/dashboard/teacher',
+          icon: 'layout-dashboard',
+        },
+        {
+          label: 'Parent Dashboard',
+          route: '/dashboard/parent',
+          icon: 'layout-dashboard',
+        },
+        {
           label: 'Applications',
           route: '/applications',
           icon: 'settings',

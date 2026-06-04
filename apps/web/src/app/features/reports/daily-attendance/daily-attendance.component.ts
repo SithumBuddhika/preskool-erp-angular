@@ -56,7 +56,7 @@ export class DailyAttendanceComponent implements OnInit {
   selectedStatus = signal<AttendanceStatus | 'ALL'>('ALL');
 
   selectedDateLabel = computed(() =>
-    new Date(this.selectedDate()).toLocaleDateString('en-US', {
+    new Date(`${this.selectedDate()}T00:00:00`).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: '2-digit',
@@ -218,11 +218,22 @@ export class DailyAttendanceComponent implements OnInit {
         .pipe(catchError(() => of([] as StaffAttendance[]))),
     }).subscribe({
       next: ({ students, teachers, staffs }) => {
-        this.allRecords.set([
+        const records = [
           ...students.map((record) => this.mapStudentRecord(record)),
           ...teachers.map((record) => this.mapTeacherRecord(record)),
           ...staffs.map((record) => this.mapStaffRecord(record)),
-        ]);
+        ];
+
+        this.allRecords.set(records);
+
+        const currentDateHasRecords = records.some(
+          (record) =>
+            this.toDateKey(record.attendanceDate) === this.selectedDate(),
+        );
+
+        if (!currentDateHasRecords && records.length > 0) {
+          this.selectedDate.set(this.getLatestAttendanceDate(records));
+        }
 
         this.isLoading.set(false);
       },
@@ -271,7 +282,7 @@ export class DailyAttendanceComponent implements OnInit {
 
   clearFilters(): void {
     this.searchTerm.set('');
-    this.selectedDate.set(this.getTodayDate());
+    this.selectedDate.set(this.getLatestAttendanceDate(this.allRecords()));
     this.selectedType.set('ALL');
     this.selectedGroup.set('ALL');
     this.selectedStatus.set('ALL');
@@ -368,11 +379,14 @@ export class DailyAttendanceComponent implements OnInit {
   }
 
   formatDate(date: string): string {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: '2-digit',
-    });
+    return new Date(`${this.toDateKey(date)}T00:00:00`).toLocaleDateString(
+      'en-US',
+      {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+      },
+    );
   }
 
   private mapStudentRecord(record: StudentAttendance): DailyAttendanceRecord {
@@ -433,7 +447,24 @@ export class DailyAttendanceComponent implements OnInit {
     };
   }
 
+  private getLatestAttendanceDate(records: DailyAttendanceRecord[]): string {
+    if (records.length === 0) {
+      return this.getTodayDate();
+    }
+
+    const dates = records
+      .map((record) => this.toDateKey(record.attendanceDate))
+      .filter(Boolean)
+      .sort((a, b) => b.localeCompare(a));
+
+    return dates[0] || this.getTodayDate();
+  }
+
   private toDateKey(date: string): string {
+    if (!date) {
+      return '';
+    }
+
     if (/^\d{4}-\d{2}-\d{2}/.test(date)) {
       return date.slice(0, 10);
     }

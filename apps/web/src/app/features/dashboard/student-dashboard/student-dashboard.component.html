@@ -1,0 +1,315 @@
+<section class="student-dashboard">
+  <div class="student-dashboard__header">
+    <div>
+      <h1>Student Dashboard</h1>
+      <p>Dashboard / Student Dashboard</p>
+    </div>
+
+    <div class="header-actions">
+      <button class="secondary-btn" type="button" (click)="loadDashboardData()">
+        Refresh
+      </button>
+
+      <a routerLink="/reports/student-day-wise" class="primary-link-btn">
+        View Attendance
+      </a>
+    </div>
+  </div>
+
+  <section class="student-hero">
+    <div>
+      <span>Student Overview</span>
+      <h2>Welcome back, {{ currentStudentName() }}</h2>
+      <p>
+        Track attendance, academic information, school events, fee progress, and
+        library updates from one live dashboard.
+      </p>
+    </div>
+
+    <div class="student-hero__attendance">
+      <strong>{{ attendanceSummary()?.rate || 0 }}%</strong>
+      <span>Today Attendance Rate</span>
+      <small
+        >{{ attendanceSummary()?.present || 0 }} present records today</small
+      >
+    </div>
+  </section>
+
+  @if (serverError()) {
+    <p class="server-error">{{ serverError() }}</p>
+  }
+
+  @if (isLoading()) {
+    <div class="summary-skeleton">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  } @else {
+    <div class="summary-grid">
+      @for (card of statCards(); track card.label) {
+        <article class="summary-card" [ngClass]="card.color">
+          <span>{{ card.short }}</span>
+
+          <div>
+            <strong>{{ card.value }}</strong>
+            <p>{{ card.label }}</p>
+            <small>{{ card.subLabel }}</small>
+          </div>
+        </article>
+      }
+    </div>
+  }
+
+  <div class="dashboard-grid">
+    <section class="dashboard-card dashboard-card--attendance">
+      <div class="dashboard-card__header">
+        <div>
+          <h3>Today Attendance</h3>
+          <p>Live student attendance summary</p>
+        </div>
+
+        <a routerLink="/reports/daily-attendance">Daily Report</a>
+      </div>
+
+      <div
+        class="attendance-ring"
+        [style.background]="attendanceRingBackground()"
+      >
+        <div>
+          <strong>{{ attendanceSummary()?.present || 0 }}</strong>
+          <span>Present</span>
+        </div>
+      </div>
+
+      <div class="attendance-counts">
+        <article>
+          <strong>{{ attendanceSummary()?.absent || 0 }}</strong>
+          <span>Absent</span>
+        </article>
+
+        <article>
+          <strong>{{ attendanceSummary()?.late || 0 }}</strong>
+          <span>Late</span>
+        </article>
+
+        <article>
+          <strong>{{ attendanceSummary()?.halfDay || 0 }}</strong>
+          <span>Half Day</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="dashboard-card dashboard-card--calendar">
+      <div class="dashboard-card__header">
+        <div>
+          <h3>Schedule Calendar</h3>
+          <p>{{ currentMonthLabel() }} events from Event Management</p>
+        </div>
+
+        <a routerLink="/management/events">Events</a>
+      </div>
+
+      <div class="student-calendar">
+        @for (day of calendarDays(); track day.dateKey) {
+          <span
+            [class.active]="day.active"
+            [ngClass]="getCalendarDayClass(day)"
+            [title]="day.title"
+          >
+            {{ day.label }}
+
+            @if (day.count > 1) {
+              <small>{{ day.count }}</small>
+            }
+          </span>
+        }
+      </div>
+
+      <div class="calendar-legend">
+        <span class="legend-event">Event</span>
+        <span class="legend-meeting">Meeting</span>
+        <span class="legend-exam">Exam</span>
+        <span class="legend-sport">Sports</span>
+        <span class="legend-holiday">Holiday</span>
+      </div>
+    </section>
+
+    <section class="dashboard-card dashboard-card--events">
+      <div class="dashboard-card__header">
+        <div>
+          <h3>Upcoming Events</h3>
+          <p>Real events from Event Management</p>
+        </div>
+
+        <a routerLink="/management/events">View All</a>
+      </div>
+
+      <div class="event-list">
+        @for (event of upcomingEvents(); track event.id) {
+          <article class="event-card">
+            <span>{{ getEventIcon(event.eventType) }}</span>
+
+            <div>
+              <strong>{{ event.title }}</strong>
+              <p>
+                {{ formatEventType(event.eventType) }} /
+                {{ event.location || 'No location' }}
+              </p>
+              <small>{{ formatEventDate(event) }}</small>
+            </div>
+          </article>
+        } @empty {
+          <div class="empty-state">
+            <strong>No upcoming events</strong>
+            <p>Add events from Management / Events.</p>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="dashboard-card dashboard-card--fees">
+      <div class="dashboard-card__header">
+        <div>
+          <h3>Fees Overview</h3>
+          <p>Live fee collection summary</p>
+        </div>
+
+        <a routerLink="/management/fees">Fees</a>
+      </div>
+
+      <div class="fee-grid">
+        <article>
+          <span>Total Fees</span>
+          <strong>{{ formatMoney(feeSummary()?.totalAmount) }}</strong>
+        </article>
+
+        <article>
+          <span>Paid</span>
+          <strong>{{ formatMoney(feeSummary()?.paidAmount) }}</strong>
+        </article>
+
+        <article>
+          <span>Pending</span>
+          <strong>{{ formatMoney(feeSummary()?.pendingAmount) }}</strong>
+        </article>
+
+        <article>
+          <span>Pending Records</span>
+          <strong>{{ feeSummary()?.pendingCount || 0 }}</strong>
+        </article>
+      </div>
+    </section>
+
+    <section class="dashboard-card dashboard-card--academic">
+      <div class="dashboard-card__header">
+        <div>
+          <h3>Academic Overview</h3>
+          <p>Classes, subjects, exams, and routines</p>
+        </div>
+
+        <a routerLink="/academic/classes">Academic</a>
+      </div>
+
+      <div class="academic-list">
+        <article>
+          <span>CL</span>
+          <div>
+            <strong>{{ academicSummary()?.classes || 0 }} Classes</strong>
+            <p>Class records available</p>
+          </div>
+        </article>
+
+        <article>
+          <span>SB</span>
+          <div>
+            <strong>{{ academicSummary()?.subjects || 0 }} Subjects</strong>
+            <p>Subjects connected to academic module</p>
+          </div>
+        </article>
+
+        <article>
+          <span>EX</span>
+          <div>
+            <strong>{{ academicSummary()?.exams || 0 }} Exams</strong>
+            <p>Exam schedule records</p>
+          </div>
+        </article>
+
+        <article>
+          <span>RT</span>
+          <div>
+            <strong>{{ academicSummary()?.routines || 0 }} Routines</strong>
+            <p>Class routine records</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="dashboard-card dashboard-card--library">
+      <div class="dashboard-card__header">
+        <div>
+          <h3>Library Overview</h3>
+          <p>Live library module summary</p>
+        </div>
+
+        <a routerLink="/management/library">Library</a>
+      </div>
+
+      <div class="library-box">
+        <article>
+          <span>📚</span>
+          <div>
+            <strong>{{ librarySummary()?.books || 0 }}</strong>
+            <p>Total Books</p>
+          </div>
+        </article>
+
+        <article>
+          <span>🎫</span>
+          <div>
+            <strong>{{ librarySummary()?.members || 0 }}</strong>
+            <p>Library Members</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="dashboard-card dashboard-card--recent">
+      <div class="dashboard-card__header">
+        <div>
+          <h3>Recent Student Attendance</h3>
+          <p>Latest marked attendance records</p>
+        </div>
+
+        <a routerLink="/reports/student-day-wise">View Matrix</a>
+      </div>
+
+      <div class="recent-list">
+        @for (record of recentAttendance(); track record.id) {
+          <article>
+            <div>
+              <strong>{{ record.studentName }}</strong>
+              <p>
+                {{ record.admissionNo }} /
+                {{ record.className || 'No class' }}
+              </p>
+            </div>
+
+            <span class="status-pill" [ngClass]="getStatusClass(record.status)">
+              {{ getStatusLabel(record.status) }}
+            </span>
+
+            <small>{{ formatDate(record.attendanceDate) }}</small>
+          </article>
+        } @empty {
+          <div class="empty-state">
+            <strong>No recent attendance</strong>
+            <p>Marked student attendance will appear here.</p>
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+</section>

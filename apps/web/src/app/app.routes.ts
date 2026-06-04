@@ -98,6 +98,28 @@ export const appRoutes: Routes = [
             './features/dashboard/admin-dashboard/admin-dashboard.component'
           ).then((m) => m.AdminDashboardComponent),
       },
+      {
+        path: 'dashboard/student',
+        loadComponent: () =>
+          import(
+            './features/dashboard/student-dashboard/student-dashboard.component'
+          ).then((m) => m.StudentDashboardComponent),
+      },
+      {
+        path: 'dashboard/teacher',
+        loadComponent: () =>
+          import(
+            './features/dashboard/teacher-dashboard/teacher-dashboard.component'
+          ).then((m) => m.TeacherDashboardComponent),
+      },
+
+      {
+        path: 'dashboard/parent',
+        loadComponent: () =>
+          import(
+            './features/dashboard/parent-dashboard/parent-dashboard.component'
+          ).then((m) => m.ParentDashboardComponent),
+      },
 
       {
         path: 'people',
