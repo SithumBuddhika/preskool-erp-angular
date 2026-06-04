@@ -96,11 +96,11 @@
           <tbody>
             @for (sport of sports(); track sport.id) {
               <tr>
-                <td>
+                <td data-label="Sport Code">
                   <span class="sport-code">{{ sport.sportCode }}</span>
                 </td>
 
-                <td>
+                <td data-label="Sport">
                   <div class="sport-info">
                     <span>{{ getSportInitial(sport) }}</span>
 
@@ -111,19 +111,23 @@
                   </div>
                 </td>
 
-                <td>{{ sport.category || '-' }}</td>
-                <td>{{ sport.coachName || '-' }}</td>
-                <td>{{ sport.venue || '-' }}</td>
-                <td>{{ sport.practiceDays || '-' }}</td>
-                <td>{{ sport.practiceTime || '-' }}</td>
+                <td data-label="Category">{{ sport.category || '-' }}</td>
+                <td data-label="Coach">{{ sport.coachName || '-' }}</td>
+                <td data-label="Venue">{{ sport.venue || '-' }}</td>
+                <td data-label="Practice Days">
+                  {{ sport.practiceDays || '-' }}
+                </td>
+                <td data-label="Practice Time">
+                  {{ sport.practiceTime || '-' }}
+                </td>
 
-                <td>
+                <td data-label="Participants">
                   <span class="participants-pill">
                     {{ getParticipantLabel(sport) }}
                   </span>
                 </td>
 
-                <td>
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--inactive]="sport.status === 'INACTIVE'"
@@ -132,7 +136,7 @@
                   </span>
                 </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"

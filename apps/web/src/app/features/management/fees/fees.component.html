@@ -99,11 +99,11 @@
           <tbody>
             @for (fee of fees(); track fee.id) {
               <tr>
-                <td>
+                <td data-label="Receipt ID">
                   <span class="receipt-no">{{ fee.receiptNo }}</span>
                 </td>
 
-                <td>
+                <td data-label="Student">
                   <div class="student-info">
                     <span>{{ fee.studentName.charAt(0).toUpperCase() }}</span>
 
@@ -114,7 +114,7 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Fee Group">
                   <div class="fee-group-info">
                     <strong>{{ getFeeGroupLabel(fee) }}</strong>
                     @if (!fee.feeGroupCode && !fee.feeGroupName) {
@@ -123,7 +123,7 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Class">
                   <div class="class-info">
                     <strong>{{ fee.className }}</strong>
                     @if (fee.section) {
@@ -132,20 +132,26 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Fee Type">
                   <span class="type-pill">
                     {{ getFeeTypeLabel(fee.feeType) }}
                   </span>
                 </td>
 
-                <td>{{ formatMoney(fee.amount) }}</td>
-                <td>{{ formatMoney(fee.paidAmount) }}</td>
-                <td>{{ formatMoney(fee.balance) }}</td>
-                <td>{{ getPaymentMethodLabel(fee.paymentMethod) }}</td>
-                <td>{{ formatDisplayDate(fee.dueDate) }}</td>
-                <td>{{ formatDisplayDate(fee.paidDate) }}</td>
+                <td data-label="Amount">{{ formatMoney(fee.amount) }}</td>
+                <td data-label="Paid">{{ formatMoney(fee.paidAmount) }}</td>
+                <td data-label="Balance">{{ formatMoney(fee.balance) }}</td>
+                <td data-label="Method">
+                  {{ getPaymentMethodLabel(fee.paymentMethod) }}
+                </td>
+                <td data-label="Due Date">
+                  {{ formatDisplayDate(fee.dueDate) }}
+                </td>
+                <td data-label="Paid Date">
+                  {{ formatDisplayDate(fee.paidDate) }}
+                </td>
 
-                <td>
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--pending]="
@@ -159,7 +165,7 @@
                   </span>
                 </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"

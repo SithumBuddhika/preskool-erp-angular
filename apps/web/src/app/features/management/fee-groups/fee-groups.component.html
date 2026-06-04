@@ -94,11 +94,11 @@
           <tbody>
             @for (feeGroup of feeGroups(); track feeGroup.id) {
               <tr>
-                <td>
+                <td data-label="Group ID">
                   <span class="group-code">{{ feeGroup.feeGroupCode }}</span>
                 </td>
 
-                <td>
+                <td data-label="Fee Group">
                   <div class="group-info">
                     <span>{{
                       feeGroup.feeGroupName.charAt(0).toUpperCase()
@@ -113,7 +113,7 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Class">
                   <div class="class-info">
                     <strong>{{ getGroupClassLabel(feeGroup) }}</strong>
                     @if (!feeGroup.className) {
@@ -122,14 +122,15 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Fee Type">
                   <span class="type-pill">{{
                     getFeeTypeLabel(feeGroup.feeType)
                   }}</span>
                 </td>
 
-                <td>{{ formatMoney(feeGroup.amount) }}</td>
-                <td>
+                <td data-label="Amount">{{ formatMoney(feeGroup.amount) }}</td>
+
+                <td data-label="Due Days">
                   {{
                     feeGroup.dueDays !== null && feeGroup.dueDays !== undefined
                       ? feeGroup.dueDays + ' days'
@@ -137,7 +138,7 @@
                   }}
                 </td>
 
-                <td>
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--inactive]="feeGroup.status !== 'ACTIVE'"
@@ -146,7 +147,7 @@
                   </span>
                 </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"

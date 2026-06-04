@@ -114,7 +114,7 @@
           <tbody>
             @for (event of events(); track event.id) {
               <tr>
-                <td>
+                <td data-label="Event">
                   <div class="event-info">
                     <span [class]="getEventTypeClass(event.eventType)">
                       {{ getEventIcon(event.eventType) }}
@@ -127,7 +127,7 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Type">
                   <span
                     class="event-type-pill"
                     [ngClass]="getEventTypeClass(event.eventType)"
@@ -136,13 +136,15 @@
                   </span>
                 </td>
 
-                <td>{{ getAudienceLabel(event.audience) }}</td>
-                <td>{{ formatDateRange(event) }}</td>
-                <td>{{ formatTimeRange(event) }}</td>
-                <td>{{ event.location || '-' }}</td>
-                <td>{{ event.organizer || '-' }}</td>
+                <td data-label="Audience">
+                  {{ getAudienceLabel(event.audience) }}
+                </td>
+                <td data-label="Date">{{ formatDateRange(event) }}</td>
+                <td data-label="Time">{{ formatTimeRange(event) }}</td>
+                <td data-label="Location">{{ event.location || '-' }}</td>
+                <td data-label="Organizer">{{ event.organizer || '-' }}</td>
 
-                <td>
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [ngClass]="getStatusClass(event.status)"
@@ -151,7 +153,7 @@
                   </span>
                 </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"
