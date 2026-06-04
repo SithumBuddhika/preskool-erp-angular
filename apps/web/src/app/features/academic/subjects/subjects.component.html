@@ -92,7 +92,7 @@
           <tbody>
             @for (subject of subjects(); track subject.id) {
               <tr>
-                <td>
+                <td data-label="Subject">
                   <div class="subject-name">
                     <span>{{ getSubjectInitial(subject) }}</span>
 
@@ -103,17 +103,21 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Subject Code">
                   <span class="code-badge">{{ subject.subjectCode }}</span>
                 </td>
 
-                <td>{{ subject.className || '-' }}</td>
+                <td data-label="Class">{{ subject.className || '-' }}</td>
 
-                <td>{{ subject.teacherName || 'Not assigned' }}</td>
+                <td data-label="Teacher">
+                  {{ subject.teacherName || 'Not assigned' }}
+                </td>
 
-                <td>{{ subject.weeklyHours || '-' }}</td>
+                <td data-label="Weekly Hours">
+                  {{ subject.weeklyHours || '-' }}
+                </td>
 
-                <td>
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--inactive]="
@@ -124,7 +128,7 @@
                   </span>
                 </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       type="button"

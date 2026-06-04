@@ -98,11 +98,11 @@
           <tbody>
             @for (exam of exams(); track exam.id) {
               <tr>
-                <td>
+                <td data-label="Exam ID">
                   <span class="exam-code">{{ exam.examCode }}</span>
                 </td>
 
-                <td>
+                <td data-label="Exam">
                   <div class="exam-name">
                     <span>{{ getExamInitial(exam) }}</span>
 
@@ -113,20 +113,22 @@
                   </div>
                 </td>
 
-                <td>{{ exam.className }}</td>
+                <td data-label="Class">{{ exam.className }}</td>
 
-                <td>
+                <td data-label="Section">
                   <span class="section-badge">{{ exam.section }}</span>
                 </td>
 
-                <td>{{ exam.subjectName }}</td>
-                <td>{{ exam.teacherName }}</td>
-                <td>{{ exam.roomNo }}</td>
-                <td>{{ getDateLabel(exam.examDate) }}</td>
-                <td>{{ getTimeRange(exam) }}</td>
-                <td>{{ exam.minMarks }} / {{ exam.maxMarks }}</td>
+                <td data-label="Subject">{{ exam.subjectName }}</td>
+                <td data-label="Teacher">{{ exam.teacherName }}</td>
+                <td data-label="Room No">{{ exam.roomNo }}</td>
+                <td data-label="Date">{{ getDateLabel(exam.examDate) }}</td>
+                <td data-label="Time">{{ getTimeRange(exam) }}</td>
+                <td data-label="Marks">
+                  {{ exam.minMarks }} / {{ exam.maxMarks }}
+                </td>
 
-                <td>
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--completed]="exam.status === 'COMPLETED'"
@@ -136,7 +138,7 @@
                   </span>
                 </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"

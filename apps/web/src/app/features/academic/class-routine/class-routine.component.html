@@ -96,11 +96,11 @@
           <tbody>
             @for (routine of routines(); track routine.id) {
               <tr>
-                <td>
+                <td data-label="Routine ID">
                   <span class="routine-code">{{ routine.routineCode }}</span>
                 </td>
 
-                <td>
+                <td data-label="Class">
                   <div class="routine-name">
                     <span>{{ getRoutineInitial(routine) }}</span>
 
@@ -111,17 +111,17 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Section">
                   <span class="section-badge">{{ routine.section }}</span>
                 </td>
 
-                <td>{{ routine.subjectName }}</td>
-                <td>{{ routine.teacherName }}</td>
-                <td>{{ routine.roomNo }}</td>
-                <td>{{ getDayLabel(routine.day) }}</td>
-                <td>{{ getTimeRange(routine) }}</td>
+                <td data-label="Subject">{{ routine.subjectName }}</td>
+                <td data-label="Teacher">{{ routine.teacherName }}</td>
+                <td data-label="Room No">{{ routine.roomNo }}</td>
+                <td data-label="Day">{{ getDayLabel(routine.day) }}</td>
+                <td data-label="Time">{{ getTimeRange(routine) }}</td>
 
-                <td>
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--inactive]="
@@ -132,7 +132,7 @@
                   </span>
                 </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"

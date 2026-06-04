@@ -98,11 +98,11 @@
           <tbody>
             @for (grade of grades(); track grade.id) {
               <tr>
-                <td>
+                <td data-label="Grade ID">
                   <span class="grade-code">{{ grade.gradeCode }}</span>
                 </td>
 
-                <td>
+                <td data-label="Student">
                   <div class="student-name">
                     <span>{{ getGradeInitial(grade) }}</span>
 
@@ -113,24 +113,26 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Exam">
                   <strong>{{ grade.examCode }}</strong>
                   <p class="muted-text">{{ grade.examName }}</p>
                 </td>
 
-                <td>{{ grade.className }}</td>
+                <td data-label="Class">{{ grade.className }}</td>
 
-                <td>
+                <td data-label="Section">
                   <span class="section-badge">{{ grade.section }}</span>
                 </td>
 
-                <td>{{ grade.subjectName }}</td>
+                <td data-label="Subject">{{ grade.subjectName }}</td>
 
-                <td>{{ grade.marksObtained }} / {{ grade.maxMarks }}</td>
+                <td data-label="Marks">
+                  {{ grade.marksObtained }} / {{ grade.maxMarks }}
+                </td>
 
-                <td>{{ getPercentage(grade) }}</td>
+                <td data-label="Percentage">{{ getPercentage(grade) }}</td>
 
-                <td>
+                <td data-label="Result">
                   <span
                     class="result-pill"
                     [class.result-pill--fail]="grade.result === 'FAIL'"
@@ -139,7 +141,7 @@
                   </span>
                 </td>
 
-                <td>
+                <td data-label="Grade">
                   <span
                     class="grade-letter"
                     [class.grade-letter--fail]="grade.gradeLetter === 'F'"
@@ -148,7 +150,7 @@
                   </span>
                 </td>
 
-                <td>
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--published]="
@@ -159,7 +161,7 @@
                   </span>
                 </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"
@@ -349,10 +351,10 @@
                     <span>{{ getStudentInitial(student) }}</span>
 
                     <div>
-                      <strong
-                        >{{ student.admissionNo }} -
-                        {{ getStudentName(student) }}</strong
-                      >
+                      <strong>
+                        {{ student.admissionNo }} -
+                        {{ getStudentName(student) }}
+                      </strong>
                       <p>
                         {{ student.className || 'No class' }}
                         {{ student.section || '' }}

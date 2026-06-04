@@ -92,11 +92,11 @@
           <tbody>
             @for (group of groups(); track group.id) {
               <tr>
-                <td>
+                <td data-label="Group ID">
                   <span class="group-code">{{ group.groupCode }}</span>
                 </td>
 
-                <td>
+                <td data-label="Group Name">
                   <div class="group-name">
                     <span>{{ getGroupInitial(group) }}</span>
 
@@ -107,15 +107,17 @@
                   </div>
                 </td>
 
-                <td>{{ group.className }}</td>
+                <td data-label="Class">{{ group.className }}</td>
 
-                <td>
+                <td data-label="Section">
                   <span class="section-badge">{{ group.section }}</span>
                 </td>
 
-                <td>{{ group.classTeacher || 'Not assigned' }}</td>
+                <td data-label="Class Teacher">
+                  {{ group.classTeacher || 'Not assigned' }}
+                </td>
 
-                <td>
+                <td data-label="Subjects">
                   <div class="subject-chip-list">
                     @for (
                       subjectName of getVisibleSubjects(group);
@@ -132,9 +134,9 @@
                   </div>
                 </td>
 
-                <td>{{ group.totalSubjects }}</td>
+                <td data-label="Total">{{ group.totalSubjects }}</td>
 
-                <td>
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--inactive]="group.status === 'INACTIVE'"
@@ -143,7 +145,7 @@
                   </span>
                 </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"

@@ -90,7 +90,7 @@
           <tbody>
             @for (schoolClass of classes(); track schoolClass.id) {
               <tr>
-                <td>
+                <td data-label="Class">
                   <div class="class-name">
                     <span>{{ schoolClass.className.charAt(0) }}</span>
 
@@ -101,17 +101,23 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Section">
                   <strong class="section-badge">
                     {{ schoolClass.section }}
                   </strong>
                 </td>
 
-                <td>{{ schoolClass.classTeacher || 'Not assigned' }}</td>
-                <td>{{ schoolClass.roomNo || '-' }}</td>
-                <td>{{ schoolClass.capacity || '-' }}</td>
+                <td data-label="Class Teacher">
+                  {{ schoolClass.classTeacher || 'Not assigned' }}
+                </td>
 
-                <td>
+                <td data-label="Room No">{{ schoolClass.roomNo || '-' }}</td>
+
+                <td data-label="Capacity">
+                  {{ schoolClass.capacity || '-' }}
+                </td>
+
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--inactive]="
@@ -122,7 +128,7 @@
                   </span>
                 </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"
