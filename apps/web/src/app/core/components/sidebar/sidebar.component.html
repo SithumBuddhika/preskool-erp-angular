@@ -1,4 +1,4 @@
-<aside class="erp-sidebar">
+<aside class="erp-sidebar" [class.is-mobile-open]="isMobileOpen">
   <div class="erp-sidebar__brand">
     <div class="erp-sidebar__brand-left">
       <img
@@ -10,8 +10,21 @@
       <strong>PreSkool</strong>
     </div>
 
-    <button type="button" aria-label="Toggle sidebar">
+    <button
+      type="button"
+      class="erp-sidebar__desktop-toggle"
+      aria-label="Toggle sidebar"
+    >
       <i-tabler name="chevron-right" />
+    </button>
+
+    <button
+      type="button"
+      class="erp-sidebar__mobile-close"
+      aria-label="Close sidebar"
+      (click)="closeMobileSidebar()"
+    >
+      ×
     </button>
   </div>
 
@@ -32,6 +45,7 @@
             routerLinkActive="active"
             [routerLinkActiveOptions]="{ exact: true }"
             class="erp-sidebar__link"
+            (click)="closeMobileSidebar()"
           >
             <span class="erp-sidebar__link-left">
               <i-tabler [name]="item.icon" />
