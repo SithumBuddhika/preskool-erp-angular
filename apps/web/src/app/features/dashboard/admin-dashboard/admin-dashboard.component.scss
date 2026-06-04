@@ -1,6 +1,12 @@
 .admin-dashboard {
   display: grid;
-  gap: 18px;
+  gap: 16px;
+  min-width: 0;
+  padding: 4px;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(61, 94, 225, 0.08), transparent 28%),
+    linear-gradient(180deg, #f5f7fb 0%, #eef2f7 100%);
 }
 
 /* TOP TITLE / ACTIONS */
@@ -23,11 +29,11 @@
 .primary-link-btn,
 .secondary-link-btn {
   height: 38px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 0;
   padding: 0 16px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 900;
   cursor: pointer;
   text-decoration: none;
   display: inline-flex;
@@ -38,26 +44,27 @@
 
 .primary-btn,
 .primary-link-btn {
-  background: #3d5ee1;
+  background: linear-gradient(135deg, #3d5ee1, #5576ff);
   color: #ffffff;
-  box-shadow: 0 10px 20px rgba(61, 94, 225, 0.22);
+  box-shadow: 0 10px 22px rgba(61, 94, 225, 0.24);
 }
 
 .secondary-btn,
 .secondary-link-btn {
-  background: #eef1f6;
-  color: #26345d;
+  background: #e9eef7;
+  color: #172554;
 }
 
 .primary-btn:hover,
-.primary-link-btn:hover {
-  filter: brightness(0.96);
+.primary-link-btn:hover,
+.secondary-btn:hover,
+.secondary-link-btn:hover {
   transform: translateY(-1px);
 }
 
 .secondary-btn:hover,
 .secondary-link-btn:hover {
-  background: #e5e9f2;
+  background: #dfe7f4;
 }
 
 .primary-btn:disabled,
@@ -71,24 +78,24 @@
   transform: none;
 }
 
-/* REAL WELCOME CARD */
+/* WELCOME */
 
 .real-dashboard-welcome {
-  min-height: 150px;
-  border-radius: 16px;
-  padding: 26px;
+  min-height: 138px;
+  border-radius: 18px;
+  padding: 24px 28px;
   background:
     radial-gradient(
-      circle at 88% 10%,
-      rgba(34, 211, 238, 0.24),
-      transparent 26%
+      circle at 90% 18%,
+      rgba(255, 255, 255, 0.18),
+      transparent 28%
     ),
-    linear-gradient(135deg, #0f172a 0%, #172554 45%, #3d5ee1 100%);
+    linear-gradient(135deg, #07111f 0%, #172554 48%, #3d5ee1 100%);
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: 22px;
   overflow: hidden;
   box-shadow: 0 18px 42px rgba(15, 23, 42, 0.18);
 }
@@ -100,33 +107,33 @@
   align-items: center;
   border-radius: 999px;
   padding: 0 12px;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.16);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .real-dashboard-welcome h2 {
-  margin: 14px 0 0;
+  margin: 12px 0 0;
   font-size: 30px;
-  line-height: 1.15;
-  font-weight: 900;
-  letter-spacing: -0.03em;
+  line-height: 1.12;
+  font-weight: 950;
+  letter-spacing: -0.04em;
 }
 
 .real-dashboard-welcome p {
-  max-width: 720px;
-  margin: 10px 0 0;
-  color: rgba(255, 255, 255, 0.82);
+  max-width: 760px;
+  margin: 9px 0 0;
+  color: rgba(255, 255, 255, 0.84);
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.55;
 }
 
 .real-dashboard-welcome__meta {
   width: 220px;
-  min-height: 112px;
-  border-radius: 16px;
+  min-height: 106px;
+  border-radius: 18px;
   padding: 18px;
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(12px);
   flex: 0 0 auto;
 }
@@ -135,87 +142,122 @@
   display: block;
   font-size: 42px;
   line-height: 1;
-  font-weight: 900;
+  font-weight: 950;
 }
 
 .real-dashboard-welcome__meta span {
   display: block;
-  margin-top: 10px;
+  margin-top: 9px;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .real-dashboard-welcome__meta small {
   display: block;
-  margin-top: 8px;
-  color: rgba(255, 255, 255, 0.75);
+  margin-top: 7px;
+  color: rgba(255, 255, 255, 0.78);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 /* ERRORS / SKELETONS */
 
 .dashboard-error,
 .admin-error {
-  margin: 0 0 14px;
+  margin: 0 0 12px;
   color: #e11d48;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
-.admin-dashboard__stats {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-}
-
+.admin-dashboard__stats,
 .stats-skeleton {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
+  gap: 14px;
 }
 
 .stats-skeleton span,
 .admin-users-skeleton span,
 .chart-skeleton {
-  border-radius: 14px;
-  background: linear-gradient(90deg, #edf1f7 25%, #f8fafc 50%, #edf1f7 75%);
+  border-radius: 16px;
+  background: linear-gradient(90deg, #e9eef7 25%, #f8fafc 50%, #e9eef7 75%);
   background-size: 200% 100%;
   animation: skeleton-loading 1.4s infinite;
 }
 
 .stats-skeleton span {
-  height: 128px;
+  height: 112px;
 }
 
 .chart-skeleton {
-  height: 260px;
+  height: 210px;
+}
+
+/* ADMIN TOP STAT CARDS */
+
+.admin-dashboard__stats app-stat-card {
+  display: block;
+  min-width: 0;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid #dde6f3;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.07);
+  overflow: hidden;
+  transition: 0.18s ease;
+}
+
+.admin-dashboard__stats app-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.1);
+}
+
+:host ::ng-deep .admin-dashboard__stats app-stat-card > * {
+  min-height: 112px !important;
+  padding: 16px 18px !important;
+  background: transparent !important;
+}
+
+:host ::ng-deep .admin-dashboard__stats app-stat-card strong,
+:host ::ng-deep .admin-dashboard__stats app-stat-card h3,
+:host ::ng-deep .admin-dashboard__stats app-stat-card h4 {
+  color: #061b4a !important;
+  font-size: 24px !important;
+  font-weight: 950 !important;
+}
+
+:host ::ng-deep .admin-dashboard__stats app-stat-card p,
+:host ::ng-deep .admin-dashboard__stats app-stat-card span,
+:host ::ng-deep .admin-dashboard__stats app-stat-card small {
+  color: #475467;
+  font-weight: 750;
 }
 
 /* MAIN GRID */
 
 .dashboard-content-grid {
   display: grid;
-  grid-template-columns: minmax(0, 2.1fr) minmax(320px, 0.95fr);
+  grid-template-columns: minmax(0, 2fr) minmax(330px, 0.9fr);
   grid-template-areas:
     'fees leave'
     'schedule attendance'
     'notice finance';
-  gap: 16px;
+  gap: 14px;
   align-items: start;
 }
 
 .dashboard-card,
 .finance-side-stack article {
-  background: #ffffff;
-  border: 1px solid #edf1f7;
-  border-radius: 12px;
-  box-shadow: 0 12px 30px rgba(16, 24, 40, 0.05);
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid #dfe7f2;
+  border-radius: 16px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
 }
 
 .dashboard-card {
   padding: 18px;
   min-width: 0;
+  height: auto;
 }
 
 .dashboard-card--fees {
@@ -232,6 +274,9 @@
 
 .dashboard-card--attendance {
   grid-area: attendance;
+  align-self: start;
+  height: auto !important;
+  min-height: 0;
 }
 
 .dashboard-card--notice {
@@ -246,84 +291,84 @@
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 16px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid #edf1f7;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5ebf5;
 }
 
 .dashboard-card__header h3 {
   margin: 0;
-  color: #101828;
+  color: #07173a;
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 950;
 }
 
 .dashboard-card__header p {
-  margin: 5px 0 0;
-  color: #667085;
+  margin: 4px 0 0;
+  color: #64748b;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .dashboard-card__header a {
   color: #3d5ee1;
   text-decoration: none;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 900;
   white-space: nowrap;
 }
 
-/* FEES COLLECTION */
+/* FEES */
 
 .fee-summary-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 18px;
+  gap: 10px;
+  margin-bottom: 14px;
 }
 
 .fee-summary-row article {
-  border-radius: 12px;
-  background: #f8fafc;
-  border: 1px solid #edf1f7;
-  padding: 14px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f8fafc, #eef4ff);
+  border: 1px solid #dfe7f2;
+  padding: 13px;
 }
 
 .fee-summary-row span {
   display: block;
-  color: #667085;
+  color: #64748b;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .fee-summary-row strong {
   display: block;
-  margin-top: 8px;
-  color: #101828;
-  font-size: 18px;
-  font-weight: 900;
+  margin-top: 7px;
+  color: #07173a;
+  font-size: 20px;
+  font-weight: 950;
 }
 
 .fee-chart {
-  height: 260px;
+  height: 218px;
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   align-items: end;
-  gap: 18px;
-  padding: 10px 10px 0;
+  gap: 14px;
+  padding: 6px 8px 0;
 }
 
 .fee-chart__item {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   justify-items: center;
 }
 
 .fee-chart__bar {
-  height: 190px;
-  width: 42px;
+  height: 150px;
+  width: 38px;
   border-radius: 12px;
-  background: #eef1f6;
+  background: #e8eef7;
   display: flex;
   align-items: end;
   overflow: hidden;
@@ -333,39 +378,39 @@
   width: 100%;
   min-height: 6px;
   border-radius: 12px;
-  background: linear-gradient(180deg, #5b7cfa, #3d5ee1);
+  background: linear-gradient(180deg, #6f8cff, #3d5ee1);
   transition: height 0.35s ease;
 }
 
 .fee-chart small {
-  font-size: 11px;
-  color: #667085;
-  font-weight: 700;
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 800;
 }
 
-/* LEAVE REQUESTS */
+/* LEAVE */
 
 .leave-request-card {
-  border: 1px solid #edf1f7;
-  border-radius: 12px;
-  padding: 14px;
+  border: 1px solid #dfe7f2;
+  border-radius: 14px;
+  padding: 12px;
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #fbfcff;
-  margin-bottom: 12px;
+  background: linear-gradient(135deg, #ffffff, #f7f9fd);
+  margin-bottom: 10px;
 }
 
 .leave-request-card__avatar {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: 12px;
   background: #eef4ff;
   color: #3d5ee1;
   display: grid;
   place-items: center;
-  font-size: 18px;
-  font-weight: 900;
+  font-size: 17px;
+  font-weight: 950;
   flex: 0 0 auto;
 }
 
@@ -382,9 +427,9 @@
 }
 
 .leave-request-card strong {
-  color: #101828;
+  color: #07173a;
   font-size: 14px;
-  font-weight: 900;
+  font-weight: 950;
 }
 
 .leave-request-card__content > div span {
@@ -396,55 +441,55 @@
   display: inline-flex;
   align-items: center;
   font-size: 10px;
-  font-weight: 900;
+  font-weight: 950;
 }
 
 .leave-request-card p {
   margin: 4px 0 0;
-  color: #667085;
+  color: #64748b;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .leave-request-card small {
   display: block;
-  margin-top: 10px;
-  color: #475467;
-  font-size: 12px;
-  font-weight: 700;
+  margin-top: 8px;
+  color: #334155;
+  font-size: 11px;
+  font-weight: 800;
 }
 
-/* REAL SCHEDULE / EVENTS CALENDAR */
+/* SCHEDULE */
 
 .mini-calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
+  gap: 7px;
 }
 
 .mini-calendar span {
   position: relative;
-  height: 34px;
+  height: 31px;
   display: grid;
   place-items: center;
-  border-radius: 8px;
+  border-radius: 9px;
   color: #64748b;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 850;
   cursor: help;
-  background: #ffffff;
-  border: 1px solid transparent;
+  background: #f8fafc;
+  border: 1px solid #e5ebf5;
   transition: 0.18s ease;
 }
 
 .mini-calendar span:hover {
   transform: translateY(-1px);
-  border-color: #dfe5ef;
+  border-color: #cbd5e1;
 }
 
 .mini-calendar span.active {
   color: #ffffff;
-  box-shadow: 0 10px 20px rgba(61, 94, 225, 0.22);
+  box-shadow: 0 8px 18px rgba(61, 94, 225, 0.22);
 }
 
 .mini-calendar span.has-event {
@@ -466,19 +511,19 @@
   width: 16px;
   height: 16px;
   border-radius: 999px;
-  background: #101828;
+  background: #07173a;
   color: #ffffff;
   display: grid;
   place-items: center;
   font-size: 9px;
-  font-weight: 900;
+  font-weight: 950;
   border: 2px solid #ffffff;
 }
 
 .upcoming-events {
-  margin-top: 18px;
+  margin-top: 14px;
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .upcoming-events__header {
@@ -490,27 +535,27 @@
 
 .upcoming-events__header h4 {
   margin: 0;
-  color: #101828;
+  color: #07173a;
   font-size: 14px;
-  font-weight: 900;
+  font-weight: 950;
 }
 
 .upcoming-events__header a {
   color: #3d5ee1;
   text-decoration: none;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .event-card {
-  border-left: 3px solid #3d5ee1;
-  border-radius: 10px;
-  background: #fbfcff;
-  padding: 12px;
+  border-left: 4px solid #3d5ee1;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffffff, #f7f9fd);
+  padding: 10px 12px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  box-shadow: 0 8px 20px rgba(16, 24, 40, 0.04);
+  gap: 11px;
+  box-shadow: 0 6px 16px rgba(16, 24, 40, 0.04);
 }
 
 .event-card--holiday {
@@ -522,8 +567,8 @@
 }
 
 .event-card__icon {
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: 10px;
   background: #eef4ff;
   display: grid;
@@ -540,43 +585,53 @@
 }
 
 .event-card strong {
-  color: #101828;
+  color: #07173a;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 950;
 }
 
 .event-card p {
-  margin: 4px 0 0;
-  color: #667085;
+  margin: 3px 0 0;
+  color: #64748b;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .event-card small {
   display: block;
-  margin-top: 4px;
-  color: #475467;
+  margin-top: 3px;
+  color: #334155;
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 850;
 }
 
 /* ATTENDANCE */
 
+.dashboard-card--attendance .dashboard-card__header {
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+}
+
 .attendance-tabs {
   display: flex;
-  gap: 16px;
-  margin-bottom: 14px;
-  border-bottom: 1px solid #edf1f7;
+  gap: 14px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #e5ebf5;
 }
 
-.attendance-tabs span {
-  padding-bottom: 9px;
-  color: #667085;
+.attendance-tabs span,
+.attendance-tabs button {
+  border: 0;
+  background: transparent;
+  padding: 0 0 8px;
+  color: #64748b;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 900;
+  cursor: pointer;
 }
 
-.attendance-tabs span.active {
+.attendance-tabs span.active,
+.attendance-tabs button.active {
   color: #3d5ee1;
   border-bottom: 2px solid #3d5ee1;
 }
@@ -585,36 +640,36 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 
 .attendance-counts article {
-  border-radius: 10px;
-  background: #f8fafc;
-  border: 1px solid #edf1f7;
-  padding: 10px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  border: 1px solid #dfe7f2;
+  padding: 9px;
   text-align: center;
 }
 
 .attendance-counts strong {
   display: block;
-  color: #101828;
+  color: #07173a;
   font-size: 16px;
-  font-weight: 900;
+  font-weight: 950;
 }
 
 .attendance-counts span {
   display: block;
-  margin-top: 4px;
-  color: #667085;
-  font-size: 11px;
-  font-weight: 700;
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 800;
 }
 
 .attendance-ring {
-  width: 190px;
-  height: 190px;
-  margin: 12px auto 18px;
+  width: 148px;
+  height: 148px;
+  margin: 8px auto 12px;
   border-radius: 999px;
   display: grid;
   place-items: center;
@@ -622,49 +677,49 @@
 }
 
 .attendance-ring > div {
-  width: 102px;
-  height: 102px;
+  width: 82px;
+  height: 82px;
   border-radius: 999px;
   background: #ffffff;
   display: grid;
   place-items: center;
   text-align: center;
-  box-shadow: inset 0 0 0 1px #edf1f7;
+  box-shadow: inset 0 0 0 1px #dfe7f2;
 }
 
 .attendance-ring strong {
-  font-size: 24px;
-  font-weight: 900;
-  color: #101828;
+  font-size: 22px;
+  font-weight: 950;
+  color: #07173a;
 }
 
 .attendance-ring span {
-  font-size: 11px;
-  color: #667085;
-  font-weight: 700;
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 800;
 }
 
 .view-attendance-btn {
   width: fit-content;
-  height: 34px;
-  border-radius: 8px;
+  height: 32px;
+  border-radius: 10px;
   padding: 0 14px;
   margin: 0 auto;
-  background: #eef1f6;
-  color: #26345d;
+  background: #e9eef7;
+  color: #172554;
   text-decoration: none;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 950;
 }
 
 /* NOTICE BOARD */
 
 .notice-list {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .notice-list article {
@@ -672,10 +727,10 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
-  padding: 12px;
-  border-radius: 12px;
-  background: #fbfcff;
-  border: 1px solid #edf1f7;
+  padding: 11px 12px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ffffff, #f7f9fd);
+  border: 1px solid #dfe7f2;
 }
 
 .notice-icon {
@@ -685,7 +740,7 @@
   display: grid;
   place-items: center;
   font-size: 11px;
-  font-weight: 900;
+  font-weight: 950;
 }
 
 .notice-icon.is-blue {
@@ -710,16 +765,16 @@
 
 .notice-list strong {
   display: block;
-  color: #101828;
+  color: #07173a;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 950;
 }
 
 .notice-list p {
-  margin: 4px 0 0;
-  color: #667085;
+  margin: 3px 0 0;
+  color: #64748b;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .notice-list small {
@@ -728,45 +783,58 @@
   color: #3d5ee1;
   padding: 5px 8px;
   font-size: 10px;
-  font-weight: 900;
+  font-weight: 950;
 }
 
 /* FINANCE STACK */
 
 .finance-side-stack {
   display: grid;
-  gap: 14px;
+  gap: 12px;
 }
 
 .finance-side-stack article {
-  min-height: 108px;
-  padding: 18px;
+  min-height: 96px;
+  padding: 16px;
+}
+
+.finance-side-stack article:nth-child(1) {
+  background: linear-gradient(135deg, #ffffff, #ecfdf3);
+}
+
+.finance-side-stack article:nth-child(2) {
+  background: linear-gradient(135deg, #ffffff, #eef4ff);
+}
+
+.finance-side-stack article:nth-child(3),
+.finance-side-stack article:nth-child(4) {
+  background: linear-gradient(135deg, #ffffff, #fff1f2);
 }
 
 .finance-side-stack span {
   display: block;
-  color: #667085;
+  color: #64748b;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .finance-side-stack strong {
   display: block;
-  margin-top: 10px;
-  color: #101828;
-  font-size: 22px;
-  font-weight: 900;
+  margin-top: 8px;
+  color: #07173a;
+  font-size: 21px;
+  font-weight: 950;
 }
 
 .finance-side-stack small {
   display: inline-flex;
   align-items: center;
-  margin-top: 10px;
+  margin-top: 8px;
   min-height: 22px;
   border-radius: 999px;
   padding: 0 8px;
   font-size: 10px;
-  font-weight: 900;
+  font-weight: 950;
 }
 
 .finance-side-stack small.positive {
@@ -784,13 +852,13 @@
 .dashboard-action-tiles {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
+  gap: 12px;
 }
 
 .action-tile {
-  min-height: 86px;
-  border-radius: 14px;
-  padding: 14px;
+  min-height: 74px;
+  border-radius: 16px;
+  padding: 12px 14px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -804,28 +872,28 @@
 }
 
 .action-tile > span {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
   display: grid;
   place-items: center;
-  font-size: 22px;
+  font-size: 20px;
   flex: 0 0 auto;
-  background: rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .action-tile strong {
   display: block;
-  color: #101828;
+  color: #07173a;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 950;
 }
 
 .action-tile p {
-  margin: 5px 0 0;
-  color: #667085;
+  margin: 4px 0 0;
+  color: #64748b;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 750;
 }
 
 .action-tile.is-yellow {
@@ -851,39 +919,39 @@
 /* ADMIN USER MANAGEMENT */
 
 .admin-users-dock {
-  background: #ffffff;
-  border: 1px solid #edf1f7;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 12px 30px rgba(16, 24, 40, 0.05);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #dfe7f2;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
 }
 
 .admin-users-dock__header {
   display: flex;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .admin-users-dock__header span {
   color: #3d5ee1;
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 950;
   text-transform: uppercase;
 }
 
 .admin-users-dock__header h3 {
   margin: 5px 0 0;
-  color: #101828;
+  color: #07173a;
   font-size: 20px;
-  font-weight: 900;
+  font-weight: 950;
 }
 
 .admin-users-dock__header p {
   margin: 6px 0 0;
-  color: #667085;
+  color: #64748b;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .admin-users-dock__actions {
@@ -895,30 +963,30 @@
 .admin-users-summary {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  gap: 10px;
 }
 
 .admin-users-summary article {
-  border-radius: 12px;
-  background: #f8fafc;
-  border: 1px solid #edf1f7;
-  padding: 14px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f8fafc, #eef4ff);
+  border: 1px solid #dfe7f2;
+  padding: 13px;
 }
 
 .admin-users-summary strong {
   display: block;
-  color: #101828;
+  color: #07173a;
   font-size: 24px;
   line-height: 1;
-  font-weight: 900;
+  font-weight: 950;
 }
 
 .admin-users-summary span {
   display: block;
-  margin-top: 8px;
-  color: #667085;
+  margin-top: 7px;
+  color: #64748b;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .admin-users-table-wrap {
@@ -935,13 +1003,13 @@
 }
 
 .admin-users-table-wrap th {
-  background: #f8fafc;
-  color: #667085;
+  background: #f1f5f9;
+  color: #475569;
   font-size: 12px;
   text-align: left;
   padding: 13px 12px;
-  font-weight: 800;
-  border-bottom: 1px solid #edf1f7;
+  font-weight: 900;
+  border-bottom: 1px solid #dfe7f2;
   white-space: nowrap;
 }
 
@@ -949,7 +1017,7 @@
   padding: 14px 12px;
   color: #253858;
   font-size: 13px;
-  border-bottom: 1px solid #edf1f7;
+  border-bottom: 1px solid #e5ebf5;
   white-space: nowrap;
 }
 
@@ -972,20 +1040,20 @@
   display: grid;
   place-items: center;
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 950;
 }
 
 .admin-user-info strong {
   display: block;
-  color: #101828;
+  color: #07173a;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .admin-user-info small {
   display: block;
   margin-top: 4px;
-  color: #667085;
+  color: #64748b;
   font-size: 11px;
 }
 
@@ -997,7 +1065,7 @@
   display: inline-flex;
   align-items: center;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .role-pill {
@@ -1027,10 +1095,10 @@
 .danger-btn {
   height: 34px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 9px;
   padding: 0 12px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 900;
   cursor: pointer;
 }
 
@@ -1056,32 +1124,22 @@
 
 .admin-empty-state,
 .empty-widget-state {
-  padding: 30px 0;
+  padding: 28px 0;
   text-align: center;
 }
 
 .admin-empty-state strong,
 .empty-widget-state strong {
   display: block;
-  color: #101828;
+  color: #07173a;
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .admin-empty-state p,
 .empty-widget-state p {
   margin: 8px 0 0;
-  color: #667085;
-}
-
-.admin-users-skeleton {
-  display: grid;
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.admin-users-skeleton span {
-  height: 54px;
+  color: #64748b;
 }
 
 /* MODALS */
@@ -1101,7 +1159,7 @@
   max-height: 90vh;
   overflow-y: auto;
   background: #ffffff;
-  border-radius: 16px;
+  border-radius: 18px;
   padding: 24px;
   box-shadow: 0 28px 80px rgba(15, 23, 42, 0.25);
 }
@@ -1115,14 +1173,14 @@
 
 .admin-user-modal__header h2 {
   margin: 0;
-  color: #101828;
+  color: #07173a;
   font-size: 22px;
-  font-weight: 900;
+  font-weight: 950;
 }
 
 .admin-user-modal__header p {
   margin: 6px 0 0;
-  color: #667085;
+  color: #64748b;
   font-size: 13px;
 }
 
@@ -1147,9 +1205,9 @@
 .admin-user-form-grid label {
   display: grid;
   gap: 8px;
-  color: #101828;
+  color: #07173a;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .admin-user-form-grid input,
@@ -1157,7 +1215,7 @@
   width: 100%;
   height: 42px;
   border: 1px solid #dfe5ef;
-  border-radius: 8px;
+  border-radius: 10px;
   outline: 0;
   padding: 0 12px;
   color: #253858;
@@ -1174,7 +1232,7 @@
 .admin-user-form-grid small {
   color: #e11d48;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .admin-user-modal__actions {
@@ -1187,7 +1245,7 @@
 .confirm-modal {
   width: min(100%, 420px);
   background: #ffffff;
-  border-radius: 16px;
+  border-radius: 18px;
   padding: 28px;
   text-align: center;
   box-shadow: 0 28px 80px rgba(15, 23, 42, 0.25);
@@ -1203,26 +1261,26 @@
   background: #fff1f2;
   color: #e11d48;
   font-size: 24px;
-  font-weight: 900;
+  font-weight: 950;
 }
 
 .confirm-modal h2 {
   margin: 0;
-  color: #101828;
+  color: #07173a;
   font-size: 22px;
-  font-weight: 900;
+  font-weight: 950;
 }
 
 .confirm-modal p {
   margin: 12px 0 0;
-  color: #667085;
+  color: #64748b;
   font-size: 14px;
   line-height: 1.6;
 }
 
 .confirm-modal p strong {
-  color: #101828;
-  font-weight: 800;
+  color: #07173a;
+  font-weight: 900;
 }
 
 .confirm-modal__actions {
@@ -1235,12 +1293,12 @@
 .danger-confirm-btn {
   height: 42px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 0 18px;
   background: #e11d48;
   color: #ffffff;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 900;
   cursor: pointer;
 }
 
@@ -1253,14 +1311,14 @@
   z-index: 120;
   min-width: 260px;
   max-width: 360px;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 14px 16px;
   background: #ecfdf3;
   color: #027a48;
   border: 1px solid #abefc6;
   box-shadow: 0 18px 50px rgba(16, 24, 40, 0.16);
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 800;
   animation: toast-slide-in 0.22s ease;
 }
 
@@ -1321,7 +1379,7 @@
 
   .fee-chart {
     overflow-x: auto;
-    grid-template-columns: repeat(8, 64px);
+    grid-template-columns: repeat(8, 58px);
   }
 }
 
@@ -1381,4 +1439,176 @@
     top: 16px;
     max-width: none;
   }
+}
+
+/* FINAL ADMIN DASHBOARD COMPACT PACKING FIX */
+
+.dashboard-content-grid {
+  grid-template-columns: minmax(0, 2.15fr) minmax(300px, 0.85fr);
+  grid-template-areas:
+    'fees leave'
+    'schedule attendance'
+    'schedule finance'
+    'notice finance';
+  gap: 12px;
+  align-items: start;
+}
+
+.dashboard-card {
+  padding: 16px;
+}
+
+.dashboard-card__header {
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+}
+
+.dashboard-card__header h3 {
+  font-size: 17px;
+}
+
+.dashboard-card__header p {
+  font-size: 11px;
+}
+
+/* Make schedule card less huge */
+
+.dashboard-card--schedule {
+  align-self: start;
+}
+
+.mini-calendar {
+  gap: 6px;
+}
+
+.mini-calendar span {
+  height: 28px;
+  border-radius: 8px;
+  font-size: 10px;
+}
+
+.upcoming-events {
+  margin-top: 10px;
+  gap: 6px;
+}
+
+.upcoming-events__header {
+  margin-bottom: 2px;
+}
+
+.upcoming-events__header h4 {
+  font-size: 13px;
+}
+
+.event-card {
+  min-height: 54px;
+  padding: 8px 10px;
+  gap: 10px;
+}
+
+.event-card__icon {
+  width: 31px;
+  height: 31px;
+  border-radius: 9px;
+}
+
+.event-card strong {
+  font-size: 12px;
+}
+
+.event-card p {
+  margin-top: 2px;
+  font-size: 10px;
+}
+
+.event-card small {
+  margin-top: 2px;
+  font-size: 10px;
+}
+
+/* Keep attendance compact */
+
+.dashboard-card--attendance {
+  align-self: start;
+  height: auto !important;
+}
+
+.dashboard-card--attendance .dashboard-card__header {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+}
+
+.attendance-tabs {
+  margin-bottom: 8px;
+}
+
+.attendance-counts {
+  margin-bottom: 8px;
+}
+
+.dashboard-card--attendance .attendance-ring {
+  width: 136px;
+  height: 136px;
+  margin: 6px auto 10px;
+}
+
+.dashboard-card--attendance .attendance-ring > div {
+  width: 76px;
+  height: 76px;
+}
+
+.dashboard-card--attendance .attendance-ring strong {
+  font-size: 20px;
+}
+
+.dashboard-card--attendance .view-attendance-btn {
+  height: 30px;
+}
+
+/* Compact finance side cards */
+
+.finance-side-stack {
+  align-self: start;
+  gap: 10px;
+}
+
+.finance-side-stack article {
+  min-height: 78px;
+  padding: 13px 15px;
+}
+
+.finance-side-stack strong {
+  margin-top: 5px;
+  font-size: 19px;
+}
+
+.finance-side-stack small {
+  margin-top: 6px;
+}
+
+/* Compact notice/action/admin sections */
+
+.notice-list {
+  gap: 8px;
+}
+
+.notice-list article {
+  padding: 9px 11px;
+}
+
+.dashboard-action-tiles {
+  gap: 10px;
+}
+
+.action-tile {
+  min-height: 64px;
+  padding: 10px 12px;
+}
+
+.admin-users-dock {
+  padding: 16px;
+}
+
+.admin-users-summary article {
+  padding: 11px 13px;
 }

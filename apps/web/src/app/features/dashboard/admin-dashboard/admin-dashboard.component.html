@@ -223,34 +223,40 @@
       </div>
 
       <div class="attendance-tabs">
-        <span class="active">Students</span>
-        <span>Teachers</span>
-        <span>Staff</span>
+        @for (tab of attendanceTabs; track tab.type) {
+          <button
+            type="button"
+            [class.active]="activeAttendanceType() === tab.type"
+            (click)="setActiveAttendanceType(tab.type)"
+          >
+            {{ tab.label }}
+          </button>
+        }
       </div>
 
       <div class="attendance-counts">
         <article>
-          <strong>{{ attendanceSummary()?.absent || 0 }}</strong>
+          <strong>{{ activeAttendanceSummary().absent }}</strong>
           <span>Absent</span>
         </article>
 
         <article>
-          <strong>{{ attendanceSummary()?.late || 0 }}</strong>
+          <strong>{{ activeAttendanceSummary().late }}</strong>
           <span>Late</span>
         </article>
 
         <article>
-          <strong>{{ attendanceSummary()?.halfDay || 0 }}</strong>
+          <strong>{{ activeAttendanceSummary().halfDay }}</strong>
           <span>Half Day</span>
         </article>
       </div>
 
       <div
         class="attendance-ring"
-        [style.background]="attendanceRingBackground()"
+        [style.background]="activeAttendanceRingBackground()"
       >
         <div>
-          <strong>{{ attendanceSummary()?.present || 0 }}</strong>
+          <strong>{{ activeAttendanceSummary().present }}</strong>
           <span>Present</span>
         </div>
       </div>
