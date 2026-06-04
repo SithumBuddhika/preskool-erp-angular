@@ -1,16 +1,41 @@
+.page-title {
+  min-width: 0;
+}
+
 .page-title h1 {
   margin: 0 0 6px;
   color: var(--erp-text-main);
-  font-size: 20px;
-  font-weight: 800;
+  font-size: 22px;
+  line-height: 1.2;
+  font-weight: 900;
+  letter-spacing: -0.04em;
 }
 
 .page-title p {
   margin: 0;
   color: var(--erp-text-muted);
   font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
-.page-title span {
-  margin: 0 7px;
+.page-title__separator {
+  color: #98a2b3;
+}
+
+.page-title__current {
+  color: #3d5ee1;
+}
+
+@media (max-width: 575px) {
+  .page-title h1 {
+    font-size: 20px;
+  }
+
+  .page-title p {
+    font-size: 11px;
+  }
 }
