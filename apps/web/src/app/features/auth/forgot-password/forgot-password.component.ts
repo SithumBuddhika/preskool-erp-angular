@@ -1,11 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import {
   FormControl,
   FormGroup,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-forgot-password',
@@ -15,6 +16,10 @@ import { RouterLink } from '@angular/router';
   styleUrl: './forgot-password.component.scss',
 })
 export class ForgotPasswordComponent {
+  isSubmitting = signal(false);
+  serverError = signal('');
+  successMessage = signal('');
+
   forgotForm = new FormGroup({
     email: new FormControl('', {
       nonNullable: true,
@@ -22,12 +27,45 @@ export class ForgotPasswordComponent {
     }),
   });
 
+  constructor(
+    private readonly authService: AuthService,
+    private readonly router: Router,
+  ) {}
+
   submitForgotPassword(): void {
     this.forgotForm.markAllAsTouched();
+    this.serverError.set('');
+    this.successMessage.set('');
 
-    if (this.forgotForm.invalid) return;
+    if (this.forgotForm.invalid || this.isSubmitting()) {
+      return;
+    }
 
-    console.log('Forgot password:', this.forgotForm.getRawValue());
+    this.isSubmitting.set(true);
+
+    const { email } = this.forgotForm.getRawValue();
+
+    this.authService
+      .forgotPassword({
+        email: email.trim(),
+      })
+      .subscribe({
+        next: (response) => {
+          this.isSubmitting.set(false);
+          this.successMessage.set(response.message);
+
+          setTimeout(() => {
+            this.router.navigateByUrl('/auth/reset-password-sent');
+          }, 1200);
+        },
+        error: (error) => {
+          this.isSubmitting.set(false);
+          this.serverError.set(
+            error?.error?.message ||
+              'Failed to send reset link. Please try again.',
+          );
+        },
+      });
   }
 
   get emailInvalid(): boolean {
