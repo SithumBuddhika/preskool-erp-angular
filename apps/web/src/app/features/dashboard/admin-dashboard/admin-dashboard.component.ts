@@ -55,6 +55,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   adminUsers = signal<AdminUser[]>([]);
   selectedAdminUser = signal<AdminUser | null>(null);
   adminUserToDelete = signal<AdminUser | null>(null);
+  isTwoStepUpdating = signal<string | null>(null);
 
   isAdminUsersLoading = signal(false);
   isAdminSubmitting = signal(false);
@@ -78,6 +79,10 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   activeAttendanceType = signal<DashboardAttendanceType>('STUDENTS');
 
   isAdminEditMode = computed(() => this.selectedAdminUser() !== null);
+
+  twoStepEnabledAdminUsers = computed(
+    () => this.adminUsers().filter((user) => user.twoStepEnabled).length,
+  );
 
   statCards = computed(() => this.dashboardData()?.statCards || []);
   feeBars = computed(() => this.dashboardData()?.feeBars || []);
@@ -448,6 +453,57 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       });
   }
 
+  toggleAdminTwoStep(user: AdminUser): void {
+    this.adminUserError.set('');
+
+    const nextTwoStepValue = !user.twoStepEnabled;
+
+    if (nextTwoStepValue && this.isUnsafeDemoEmail(user.email)) {
+      this.showToast(
+        '2FA needs a real email address. Keep fake/demo emails with 2FA disabled.',
+        'error',
+      );
+      return;
+    }
+
+    this.isTwoStepUpdating.set(user.id);
+
+    this.adminUsersService
+      .updateAdminTwoStep(user.id, {
+        twoStepEnabled: nextTwoStepValue,
+      })
+      .subscribe({
+        next: (updatedUser) => {
+          this.isTwoStepUpdating.set(null);
+
+          this.adminUsers.update((users) =>
+            users.map((existingUser) =>
+              existingUser.id === updatedUser.id ? updatedUser : existingUser,
+            ),
+          );
+
+          if (this.isCurrentUser(updatedUser)) {
+            this.authService.loadCurrentUser().subscribe();
+          }
+
+          this.showToast(
+            updatedUser.twoStepEnabled
+              ? '2-step verification enabled.'
+              : '2-step verification disabled.',
+            'success',
+          );
+        },
+        error: (error) => {
+          this.isTwoStepUpdating.set(null);
+          this.showToast(
+            error?.error?.message ||
+              'Failed to update 2-step verification setting.',
+            'error',
+          );
+        },
+      });
+  }
+
   openDeleteAdminModal(user: AdminUser): void {
     if (this.isCurrentUser(user)) {
       this.showToast('You cannot delete your own account.', 'error');
@@ -597,5 +653,16 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.toastTimer = setTimeout(() => {
       this.toast.set(null);
     }, 2800);
+  }
+
+  private isUnsafeDemoEmail(email: string): boolean {
+    const normalizedEmail = email.toLowerCase().trim();
+
+    return (
+      normalizedEmail.endsWith('@example.com') ||
+      normalizedEmail.endsWith('@test.com') ||
+      normalizedEmail.endsWith('@localhost') ||
+      normalizedEmail.includes('example.')
+    );
   }
 }

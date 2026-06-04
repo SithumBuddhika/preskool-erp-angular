@@ -1,54 +1,84 @@
-<section class="auth-page">
-  <div class="auth-page__visual">
+<section class="two-step-page">
+  <div class="two-step-page__visual">
     <img
-      class="auth-page__illustration"
+      class="two-step-page__illustration"
       src="/assets/images/auth/two-step-verification.png"
       alt="Two step verification illustration"
     />
-    <div class="auth-page__wave"></div>
+
+    <div class="two-step-page__wave"></div>
   </div>
 
-  <div class="auth-page__content">
-    <div class="auth-shell">
-      <div class="auth-brand">
+  <div class="two-step-page__content">
+    <div class="two-step-shell">
+      <div class="two-step-brand">
         <img
-          class="auth-brand__icon"
+          class="two-step-brand__icon"
           src="/assets/logos/preskool-logo.png"
           alt="PreSkool logo"
         />
+
         <strong>PreSkool</strong>
       </div>
 
       <form
-        class="auth-card"
-        [formGroup]="twoStepForm"
-        (ngSubmit)="submitTwoStep()"
+        class="two-step-card"
+        [formGroup]="otpForm"
+        (ngSubmit)="submitOtp()"
       >
-        <div class="auth-card__header">
-          <h1>2 Step Verification</h1>
-          <p>Enter the 6-digit authentication code to continue.</p>
+        <div class="two-step-card__header">
+          <span>Security Check</span>
+          <h1>Two Step Verification</h1>
+          <p>
+            We sent a 6-digit verification code to
+            <strong>{{ email() || 'your email' }}</strong>
+          </p>
         </div>
 
-        <div class="otp-row">
-          <input maxlength="1" formControlName="one" />
-          <input maxlength="1" formControlName="two" />
-          <input maxlength="1" formControlName="three" />
-          <input maxlength="1" formControlName="four" />
-          <input maxlength="1" formControlName="five" />
-          <input maxlength="1" formControlName="six" />
-        </div>
+        <label class="form-field">
+          <span>Verification Code</span>
 
-        <button class="auth-submit-btn" type="submit">Verify</button>
+          <div class="otp-control" [class.is-invalid]="otpInvalid">
+            <input
+              type="text"
+              inputmode="numeric"
+              maxlength="6"
+              formControlName="otp"
+              placeholder="000000"
+              (keydown)="allowOnlyNumbers($event)"
+            />
+          </div>
 
-        <p class="switch-auth">
-          Back to
-          <a routerLink="/auth/login">Sign In</a>
+          @if (otpInvalid) {
+            <small>Please enter the 6-digit OTP code.</small>
+          }
+        </label>
+
+        @if (serverError()) {
+          <p class="auth-server-error">{{ serverError() }}</p>
+        }
+
+        @if (successMessage()) {
+          <p class="auth-success-message">{{ successMessage() }}</p>
+        }
+
+        <button
+          class="verify-btn"
+          type="submit"
+          [disabled]="isSubmitting() || !email()"
+        >
+          {{ isSubmitting() ? 'Verifying...' : 'Verify & Login' }}
+        </button>
+
+        <p class="return-login">
+          Wrong account?
+          <a routerLink="/auth/login">Back to Login</a>
         </p>
       </form>
-
-      <p class="auth-footer">
-        Copyright © 2026 - PreSkool | Sithum Buddhika Jayalal
-      </p>
     </div>
+
+    <p class="two-step-footer">
+      Copyright © 2026 - PreSkool | Sithum Buddhika Jayalal
+    </p>
   </div>
 </section>

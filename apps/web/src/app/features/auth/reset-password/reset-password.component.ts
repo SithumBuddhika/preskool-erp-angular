@@ -1,24 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
-  AbstractControl,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
-  ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-
-function passwordsMatchValidator(
-  control: AbstractControl,
-): ValidationErrors | null {
-  const password = control.get('password')?.value;
-  const confirmPassword = control.get('confirmPassword')?.value;
-
-  if (!password || !confirmPassword) return null;
-
-  return password === confirmPassword ? null : { passwordMismatch: true };
-}
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-reset-password',
@@ -27,23 +15,41 @@ function passwordsMatchValidator(
   templateUrl: './reset-password.component.html',
   styleUrl: './reset-password.component.scss',
 })
-export class ResetPasswordComponent {
+export class ResetPasswordComponent implements OnInit {
   showPassword = false;
   showConfirmPassword = false;
 
-  resetForm = new FormGroup(
-    {
-      password: new FormControl('', {
-        nonNullable: true,
-        validators: [Validators.required, Validators.minLength(7)],
-      }),
-      confirmPassword: new FormControl('', {
-        nonNullable: true,
-        validators: [Validators.required],
-      }),
-    },
-    { validators: [passwordsMatchValidator] },
-  );
+  token = signal('');
+  isSubmitting = signal(false);
+  serverError = signal('');
+  successMessage = signal('');
+
+  resetForm = new FormGroup({
+    password: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(7)],
+    }),
+    confirmPassword: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+  });
+
+  constructor(
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly authService: AuthService,
+  ) {}
+
+  ngOnInit(): void {
+    const token = this.route.snapshot.queryParamMap.get('token') || '';
+
+    this.token.set(token);
+
+    if (!token) {
+      this.serverError.set('Invalid reset link. Please request a new one.');
+    }
+  }
 
   togglePassword(): void {
     this.showPassword = !this.showPassword;
@@ -55,10 +61,49 @@ export class ResetPasswordComponent {
 
   submitResetPassword(): void {
     this.resetForm.markAllAsTouched();
+    this.serverError.set('');
+    this.successMessage.set('');
 
-    if (this.resetForm.invalid) return;
+    if (!this.token()) {
+      this.serverError.set('Invalid reset link. Please request a new one.');
+      return;
+    }
 
-    console.log('Reset password:', this.resetForm.getRawValue());
+    if (this.resetForm.invalid || this.isSubmitting()) {
+      return;
+    }
+
+    const { password, confirmPassword } = this.resetForm.getRawValue();
+
+    if (password !== confirmPassword) {
+      this.serverError.set('Passwords do not match.');
+      return;
+    }
+
+    this.isSubmitting.set(true);
+
+    this.authService
+      .resetPassword({
+        token: this.token(),
+        password,
+      })
+      .subscribe({
+        next: (response) => {
+          this.isSubmitting.set(false);
+          this.successMessage.set(response.message);
+
+          setTimeout(() => {
+            this.router.navigateByUrl('/auth/login');
+          }, 1800);
+        },
+        error: (error) => {
+          this.isSubmitting.set(false);
+          this.serverError.set(
+            error?.error?.message ||
+              'Failed to reset password. Please request a new reset link.',
+          );
+        },
+      });
   }
 
   get passwordInvalid(): boolean {
@@ -68,9 +113,6 @@ export class ResetPasswordComponent {
 
   get confirmPasswordInvalid(): boolean {
     const confirmPassword = this.resetForm.controls.confirmPassword;
-    return (
-      confirmPassword.touched &&
-      (confirmPassword.invalid || this.resetForm.hasError('passwordMismatch'))
-    );
+    return confirmPassword.invalid && confirmPassword.touched;
   }
 }

@@ -4,6 +4,7 @@ import {
   AdminUser,
   CreateAdminUserPayload,
   UpdateAdminStatusPayload,
+  UpdateAdminTwoStepPayload,
   UpdateAdminUserPayload,
 } from '../models/admin-user.model';
 import { AuthService } from './auth.service';
@@ -41,6 +42,16 @@ export class AdminUsersService {
     return this.http.patch<AdminUser>(`${this.apiUrl}/${id}/status`, payload, {
       headers: this.getAuthHeaders(),
     });
+  }
+
+  updateAdminTwoStep(id: string, payload: UpdateAdminTwoStepPayload) {
+    return this.http.patch<AdminUser>(
+      `${this.apiUrl}/${id}/two-step`,
+      payload,
+      {
+        headers: this.getAuthHeaders(),
+      },
+    );
   }
 
   deleteAdminUser(id: string) {
