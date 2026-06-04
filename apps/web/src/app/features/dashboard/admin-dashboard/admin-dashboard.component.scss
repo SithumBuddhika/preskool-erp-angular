@@ -194,7 +194,7 @@
   height: 210px;
 }
 
-/* ADMIN STAT CARD FIX - makes app-stat-card readable */
+/* ADMIN TOP STAT CARDS */
 
 .admin-dashboard__stats app-stat-card {
   display: block;
@@ -243,7 +243,7 @@
     'schedule attendance'
     'notice finance';
   gap: 14px;
-  align-items: stretch;
+  align-items: start;
 }
 
 .dashboard-card,
@@ -257,7 +257,7 @@
 .dashboard-card {
   padding: 18px;
   min-width: 0;
-  height: 100%;
+  height: auto;
 }
 
 .dashboard-card--fees {
@@ -274,6 +274,9 @@
 
 .dashboard-card--attendance {
   grid-area: attendance;
+  align-self: start;
+  height: auto !important;
+  min-height: 0;
 }
 
 .dashboard-card--notice {
@@ -604,21 +607,31 @@
 
 /* ATTENDANCE */
 
+.dashboard-card--attendance .dashboard-card__header {
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+}
+
 .attendance-tabs {
   display: flex;
-  gap: 16px;
-  margin-bottom: 12px;
+  gap: 14px;
+  margin-bottom: 10px;
   border-bottom: 1px solid #e5ebf5;
 }
 
-.attendance-tabs span {
-  padding-bottom: 8px;
+.attendance-tabs span,
+.attendance-tabs button {
+  border: 0;
+  background: transparent;
+  padding: 0 0 8px;
   color: #64748b;
   font-size: 12px;
-  font-weight: 850;
+  font-weight: 900;
+  cursor: pointer;
 }
 
-.attendance-tabs span.active {
+.attendance-tabs span.active,
+.attendance-tabs button.active {
   color: #3d5ee1;
   border-bottom: 2px solid #3d5ee1;
 }
@@ -627,7 +640,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .attendance-counts article {
@@ -654,9 +667,9 @@
 }
 
 .attendance-ring {
-  width: 168px;
-  height: 168px;
-  margin: 8px auto 14px;
+  width: 148px;
+  height: 148px;
+  margin: 8px auto 12px;
   border-radius: 999px;
   display: grid;
   place-items: center;
@@ -664,8 +677,8 @@
 }
 
 .attendance-ring > div {
-  width: 92px;
-  height: 92px;
+  width: 82px;
+  height: 82px;
   border-radius: 999px;
   background: #ffffff;
   display: grid;
@@ -675,20 +688,20 @@
 }
 
 .attendance-ring strong {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 950;
   color: #07173a;
 }
 
 .attendance-ring span {
-  font-size: 11px;
+  font-size: 10px;
   color: #64748b;
   font-weight: 800;
 }
 
 .view-attendance-btn {
   width: fit-content;
-  height: 34px;
+  height: 32px;
   border-radius: 10px;
   padding: 0 14px;
   margin: 0 auto;
@@ -1426,4 +1439,176 @@
     top: 16px;
     max-width: none;
   }
+}
+
+/* FINAL ADMIN DASHBOARD COMPACT PACKING FIX */
+
+.dashboard-content-grid {
+  grid-template-columns: minmax(0, 2.15fr) minmax(300px, 0.85fr);
+  grid-template-areas:
+    'fees leave'
+    'schedule attendance'
+    'schedule finance'
+    'notice finance';
+  gap: 12px;
+  align-items: start;
+}
+
+.dashboard-card {
+  padding: 16px;
+}
+
+.dashboard-card__header {
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+}
+
+.dashboard-card__header h3 {
+  font-size: 17px;
+}
+
+.dashboard-card__header p {
+  font-size: 11px;
+}
+
+/* Make schedule card less huge */
+
+.dashboard-card--schedule {
+  align-self: start;
+}
+
+.mini-calendar {
+  gap: 6px;
+}
+
+.mini-calendar span {
+  height: 28px;
+  border-radius: 8px;
+  font-size: 10px;
+}
+
+.upcoming-events {
+  margin-top: 10px;
+  gap: 6px;
+}
+
+.upcoming-events__header {
+  margin-bottom: 2px;
+}
+
+.upcoming-events__header h4 {
+  font-size: 13px;
+}
+
+.event-card {
+  min-height: 54px;
+  padding: 8px 10px;
+  gap: 10px;
+}
+
+.event-card__icon {
+  width: 31px;
+  height: 31px;
+  border-radius: 9px;
+}
+
+.event-card strong {
+  font-size: 12px;
+}
+
+.event-card p {
+  margin-top: 2px;
+  font-size: 10px;
+}
+
+.event-card small {
+  margin-top: 2px;
+  font-size: 10px;
+}
+
+/* Keep attendance compact */
+
+.dashboard-card--attendance {
+  align-self: start;
+  height: auto !important;
+}
+
+.dashboard-card--attendance .dashboard-card__header {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+}
+
+.attendance-tabs {
+  margin-bottom: 8px;
+}
+
+.attendance-counts {
+  margin-bottom: 8px;
+}
+
+.dashboard-card--attendance .attendance-ring {
+  width: 136px;
+  height: 136px;
+  margin: 6px auto 10px;
+}
+
+.dashboard-card--attendance .attendance-ring > div {
+  width: 76px;
+  height: 76px;
+}
+
+.dashboard-card--attendance .attendance-ring strong {
+  font-size: 20px;
+}
+
+.dashboard-card--attendance .view-attendance-btn {
+  height: 30px;
+}
+
+/* Compact finance side cards */
+
+.finance-side-stack {
+  align-self: start;
+  gap: 10px;
+}
+
+.finance-side-stack article {
+  min-height: 78px;
+  padding: 13px 15px;
+}
+
+.finance-side-stack strong {
+  margin-top: 5px;
+  font-size: 19px;
+}
+
+.finance-side-stack small {
+  margin-top: 6px;
+}
+
+/* Compact notice/action/admin sections */
+
+.notice-list {
+  gap: 8px;
+}
+
+.notice-list article {
+  padding: 9px 11px;
+}
+
+.dashboard-action-tiles {
+  gap: 10px;
+}
+
+.action-tile {
+  min-height: 64px;
+  padding: 10px 12px;
+}
+
+.admin-users-dock {
+  padding: 16px;
+}
+
+.admin-users-summary article {
+  padding: 11px 13px;
 }

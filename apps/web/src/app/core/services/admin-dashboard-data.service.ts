@@ -33,6 +33,14 @@ export type DashboardAttendanceSummary = {
   total: number;
 };
 
+export type DashboardAttendanceType = 'STUDENTS' | 'TEACHERS' | 'STAFF';
+
+export type DashboardAttendanceGroupSummaries = {
+  students: DashboardAttendanceSummary;
+  teachers: DashboardAttendanceSummary;
+  staff: DashboardAttendanceSummary;
+};
+
 export type DashboardQuickSummary = {
   libraryBooks: number;
   libraryMembers: number;
@@ -71,6 +79,7 @@ export type AdminDashboardData = {
   feeBars: DashboardFeeBar[];
   feeSummary: DashboardFeeSummary;
   attendanceSummary: DashboardAttendanceSummary;
+  attendanceSummaries: DashboardAttendanceGroupSummaries;
   quickSummary: DashboardQuickSummary;
   recentLeaves: DashboardRecentLeave[];
   upcomingItems: DashboardCalendarItem[];
@@ -189,6 +198,22 @@ export class AdminDashboardDataService {
           data.leaves,
         );
 
+        const studentAttendanceSummary = this.buildAttendanceSummary(
+          data.studentAttendance,
+        );
+        const teacherAttendanceSummary = this.buildAttendanceSummary(
+          data.teacherAttendance,
+        );
+        const staffAttendanceSummary = this.buildAttendanceSummary(
+          data.staffAttendance,
+        );
+
+        const attendanceSummaries: DashboardAttendanceGroupSummaries = {
+          students: studentAttendanceSummary,
+          teachers: teacherAttendanceSummary,
+          staff: staffAttendanceSummary,
+        };
+
         return {
           statCards: [
             this.buildStatCard(
@@ -208,11 +233,12 @@ export class AdminDashboardDataService {
           ],
           feeBars: this.buildFeeBars(data.fees),
           feeSummary: this.buildFeeSummary(data.fees),
-          attendanceSummary: this.buildAttendanceSummary([
-            ...data.studentAttendance,
-            ...data.teacherAttendance,
-            ...data.staffAttendance,
+          attendanceSummary: this.combineAttendanceSummaries([
+            studentAttendanceSummary,
+            teacherAttendanceSummary,
+            staffAttendanceSummary,
           ]),
+          attendanceSummaries,
           quickSummary: {
             libraryBooks: data.libraryBooks.length,
             libraryMembers: data.libraryMembers.length,
@@ -265,7 +291,7 @@ export class AdminDashboardDataService {
   }
 
   private buildFeeSummary(fees: FeeRecord[]): DashboardFeeSummary {
-    return fees.reduce(
+    return fees.reduce<DashboardFeeSummary>(
       (summary, fee) => ({
         totalAmount: summary.totalAmount + Number(fee.amount || 0),
         collectedAmount: summary.collectedAmount + Number(fee.paidAmount || 0),
@@ -328,22 +354,48 @@ export class AdminDashboardDataService {
   private buildAttendanceSummary(
     attendanceRecords: AttendanceRecord[],
   ): DashboardAttendanceSummary {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = this.getTodayDate();
 
-    const todayRecords = attendanceRecords.filter((record) =>
-      record.attendanceDate?.startsWith(today),
+    const todayRecords = attendanceRecords.filter(
+      (record) => this.toDateKey(record.attendanceDate) === today,
     );
 
     return {
-      present: todayRecords.filter((record) => record.status === 'PRESENT')
-        .length,
-      absent: todayRecords.filter((record) => record.status === 'ABSENT')
-        .length,
-      late: todayRecords.filter((record) => record.status === 'LATE').length,
-      halfDay: todayRecords.filter((record) => record.status === 'HALF_DAY')
-        .length,
+      present: todayRecords.filter(
+        (record) => String(record.status || '').toUpperCase() === 'PRESENT',
+      ).length,
+      absent: todayRecords.filter(
+        (record) => String(record.status || '').toUpperCase() === 'ABSENT',
+      ).length,
+      late: todayRecords.filter(
+        (record) => String(record.status || '').toUpperCase() === 'LATE',
+      ).length,
+      halfDay: todayRecords.filter(
+        (record) => String(record.status || '').toUpperCase() === 'HALF_DAY',
+      ).length,
       total: todayRecords.length,
     };
+  }
+
+  private combineAttendanceSummaries(
+    summaries: DashboardAttendanceSummary[],
+  ): DashboardAttendanceSummary {
+    return summaries.reduce<DashboardAttendanceSummary>(
+      (total, summary) => ({
+        present: total.present + summary.present,
+        absent: total.absent + summary.absent,
+        late: total.late + summary.late,
+        halfDay: total.halfDay + summary.halfDay,
+        total: total.total + summary.total,
+      }),
+      {
+        present: 0,
+        absent: 0,
+        late: 0,
+        halfDay: 0,
+        total: 0,
+      },
+    );
   }
 
   private buildRecentLeaves(leaves: LeaveRecord[]): DashboardRecentLeave[] {
@@ -432,7 +484,7 @@ export class AdminDashboardDataService {
   private buildUpcomingItems(
     calendarItems: DashboardCalendarItem[],
   ): DashboardCalendarItem[] {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = this.getTodayDate();
     const uniqueItems = new Map<string, DashboardCalendarItem>();
 
     calendarItems
@@ -534,6 +586,15 @@ export class AdminDashboardDataService {
     }
 
     return date.toISOString().slice(0, 10);
+  }
+
+  private getTodayDate(): string {
+    const today = new Date();
+
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(
+      2,
+      '0',
+    )}-${String(today.getDate()).padStart(2, '0')}`;
   }
 
   private getRate(active: number, total: number): string {

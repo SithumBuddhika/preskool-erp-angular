@@ -15,6 +15,8 @@ import {
 import {
   AdminDashboardData,
   AdminDashboardDataService,
+  DashboardAttendanceSummary,
+  DashboardAttendanceType,
   DashboardCalendarItem,
 } from '../../../core/services/admin-dashboard-data.service';
 import { AdminUsersService } from '../../../core/services/admin-users.service';
@@ -66,6 +68,15 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   toast = signal<{ message: string; type: ToastType } | null>(null);
   private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
+  readonly attendanceTabs: { type: DashboardAttendanceType; label: string }[] =
+    [
+      { type: 'STUDENTS', label: 'Students' },
+      { type: 'TEACHERS', label: 'Teachers' },
+      { type: 'STAFF', label: 'Staff' },
+    ];
+
+  activeAttendanceType = signal<DashboardAttendanceType>('STUDENTS');
+
   isAdminEditMode = computed(() => this.selectedAdminUser() !== null);
 
   statCards = computed(() => this.dashboardData()?.statCards || []);
@@ -76,6 +87,52 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   recentLeaves = computed(() => this.dashboardData()?.recentLeaves || []);
   upcomingItems = computed(() => this.dashboardData()?.upcomingItems || []);
   calendarItems = computed(() => this.dashboardData()?.calendarItems || []);
+
+  activeAttendanceSummary = computed<DashboardAttendanceSummary>(() => {
+    const summaries = this.dashboardData()?.attendanceSummaries;
+
+    if (!summaries) {
+      return {
+        present: 0,
+        absent: 0,
+        late: 0,
+        halfDay: 0,
+        total: 0,
+      };
+    }
+
+    switch (this.activeAttendanceType()) {
+      case 'TEACHERS':
+        return summaries.teachers;
+      case 'STAFF':
+        return summaries.staff;
+      case 'STUDENTS':
+      default:
+        return summaries.students;
+    }
+  });
+
+  activeAttendancePercent = computed(() => {
+    const attendance = this.activeAttendanceSummary();
+
+    if (!attendance || attendance.total === 0) {
+      return 0;
+    }
+
+    return Math.round((attendance.present / attendance.total) * 100);
+  });
+
+  activeAttendanceRingBackground = computed(() => {
+    const percent = this.activeAttendancePercent();
+
+    if (percent === 0) {
+      return `conic-gradient(#e5ebf5 0 100%)`;
+    }
+
+    return `conic-gradient(#3d5ee1 0 ${percent}%, #22d3ee ${percent}% ${
+      percent + 8
+    }%, #eef1f6 ${percent + 8}% 100%)`;
+  });
 
   currentMonthLabel = computed(() =>
     new Date().toLocaleDateString('en-US', {
@@ -132,6 +189,10 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   attendanceRingBackground = computed(() => {
     const percent = this.attendancePercent();
 
+    if (percent === 0) {
+      return `conic-gradient(#e5ebf5 0 100%)`;
+    }
+
     return `conic-gradient(#3d5ee1 0 ${percent}%, #22d3ee ${percent}% ${
       percent + 8
     }%, #eef1f6 ${percent + 8}% 100%)`;
@@ -187,6 +248,10 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   currentAdminName(): string {
     return this.authService.currentUser()?.fullName || 'Admin';
+  }
+
+  setActiveAttendanceType(type: DashboardAttendanceType): void {
+    this.activeAttendanceType.set(type);
   }
 
   loadDashboardData(): void {
