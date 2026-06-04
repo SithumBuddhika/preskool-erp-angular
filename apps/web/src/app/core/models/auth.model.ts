@@ -12,6 +12,8 @@ export type AuthUser = {
   email: string;
   role: UserRole;
   isActive: boolean;
+  twoStepEnabled: boolean;
+  emailVerified: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -20,6 +22,14 @@ export type AuthResponse = {
   user: AuthUser;
   accessToken: string;
 };
+
+export type LoginOtpRequiredResponse = {
+  otpRequired: true;
+  email: string;
+  message: string;
+};
+
+export type LoginResponse = AuthResponse | LoginOtpRequiredResponse;
 
 export type RegisterPayload = {
   fullName: string;
@@ -30,6 +40,11 @@ export type RegisterPayload = {
 export type LoginPayload = {
   email: string;
   password: string;
+};
+
+export type VerifyLoginOtpPayload = {
+  email: string;
+  otp: string;
 };
 
 export type ForgotPasswordPayload = {
@@ -44,3 +59,9 @@ export type ResetPasswordPayload = {
 export type AuthMessageResponse = {
   message: string;
 };
+
+export function isOtpRequiredResponse(
+  response: LoginResponse,
+): response is LoginOtpRequiredResponse {
+  return 'otpRequired' in response && response.otpRequired === true;
+}

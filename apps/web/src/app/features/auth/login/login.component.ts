@@ -7,6 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
+import { isOtpRequiredResponse } from '../../../core/models/auth.model';
 
 @Component({
   selector: 'app-login',
@@ -56,8 +57,20 @@ export class LoginComponent {
     const { email, password } = this.loginForm.getRawValue();
 
     this.authService.login({ email, password }).subscribe({
-      next: () => {
+      next: (response) => {
         this.isSubmitting.set(false);
+
+        if (isOtpRequiredResponse(response)) {
+          this.authService.saveOtpEmail(response.email);
+          this.router.navigate(['/auth/two-step-verification'], {
+            queryParams: {
+              email: response.email,
+            },
+          });
+          return;
+        }
+
+        this.authService.saveSession(response);
         this.router.navigateByUrl('/dashboard/admin');
       },
       error: (error) => {
