@@ -105,6 +105,13 @@ export const appRoutes: Routes = [
             './features/dashboard/student-dashboard/student-dashboard.component'
           ).then((m) => m.StudentDashboardComponent),
       },
+      {
+        path: 'dashboard/teacher',
+        loadComponent: () =>
+          import(
+            './features/dashboard/teacher-dashboard/teacher-dashboard.component'
+          ).then((m) => m.TeacherDashboardComponent),
+      },
 
       {
         path: 'people',
