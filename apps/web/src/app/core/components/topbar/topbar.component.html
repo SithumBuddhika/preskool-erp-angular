@@ -1,7 +1,33 @@
 <header class="erp-topbar">
-  <div class="erp-topbar__search">
-    <i-tabler name="search" />
-    <input type="text" placeholder="Search" />
+  <div class="erp-topbar__search-wrap">
+    <div class="erp-topbar__search">
+      <i-tabler name="search" />
+
+      <input
+        type="text"
+        placeholder="Search modules..."
+        [(ngModel)]="searchTerm"
+        (focus)="openSearch()"
+        (blur)="closeSearchWithDelay()"
+        (keyup.enter)="runQuickSearch()"
+      />
+    </div>
+
+    @if (isSearchOpen && searchTerm.trim()) {
+      <div class="erp-topbar__search-results">
+        @for (item of filteredQuickLinks; track item.route) {
+          <button type="button" (click)="navigateToQuickLink(item)">
+            <span>{{ item.label }}</span>
+            <small>{{ item.route }}</small>
+          </button>
+        } @empty {
+          <div class="erp-topbar__no-result">
+            <strong>No module found</strong>
+            <small>Try students, fees, attendance, events, routes...</small>
+          </div>
+        }
+      </div>
+    }
   </div>
 
   <div class="erp-topbar__actions">
