@@ -11,13 +11,16 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAdminUserDto } from './dto/create-admin-user.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UpdateAdminStatusDto } from './dto/update-admin-status.dto';
 import { UpdateAdminUserDto } from './dto/update-admin-user.dto';
+import { VerifyLoginOtpDto } from './dto/verify-login-otp.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { AuthRequest } from './types/auth-request.type';
-import { AuthResponse, AuthUser } from './types/auth-user.type';
+import { AuthResponse, AuthUser, LoginResponse } from './types/auth-user.type';
 
 @Controller('auth')
 export class AuthController {
@@ -29,8 +32,25 @@ export class AuthController {
   }
 
   @Post('login')
-  login(@Body() loginDto: LoginDto): Promise<AuthResponse> {
+  login(@Body() loginDto: LoginDto): Promise<LoginResponse> {
     return this.authService.login(loginDto);
+  }
+
+  @Post('verify-login-otp')
+  verifyLoginOtp(
+    @Body() verifyLoginOtpDto: VerifyLoginOtpDto,
+  ): Promise<AuthResponse> {
+    return this.authService.verifyLoginOtp(verifyLoginOtpDto);
+  }
+
+  @Post('forgot-password')
+  forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(forgotPasswordDto);
+  }
+
+  @Post('reset-password')
+  resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.authService.resetPassword(resetPasswordDto);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -5,16 +5,22 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
+import { randomBytes, randomInt, createHash } from 'crypto';
 import { UserRole } from '../../../generated/prisma/enums';
 import { CreateAdminUserDto } from './dto/create-admin-user.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UpdateAdminStatusDto } from './dto/update-admin-status.dto';
 import { UpdateAdminUserDto } from './dto/update-admin-user.dto';
+import { VerifyLoginOtpDto } from './dto/verify-login-otp.dto';
+import { MailService } from './mail.service';
 import { PrismaService } from './prisma.service';
-import { AuthResponse, AuthUser } from './types/auth-user.type';
+import { AuthResponse, AuthUser, LoginResponse } from './types/auth-user.type';
 
 type DbUser = AuthUser & {
   passwordHash: string;
@@ -25,6 +31,8 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+    private readonly mailService: MailService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponse> {
@@ -47,13 +55,15 @@ export class AuthService {
         passwordHash,
         role: 'ADMIN',
         isActive: true,
+        twoStepEnabled: false,
+        emailVerified: false,
       },
     });
 
     return this.createAuthResponse(user as DbUser);
   }
 
-  async login(loginDto: LoginDto): Promise<AuthResponse> {
+  async login(loginDto: LoginDto): Promise<LoginResponse> {
     const email = loginDto.email.toLowerCase().trim();
 
     const user = await this.prisma.user.findUnique({
@@ -77,7 +87,177 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
+    if (!user.twoStepEnabled) {
+      return this.createAuthResponse(user as DbUser);
+    }
+
+    const otp = this.generateOtp();
+    const otpHash = this.hashToken(otp);
+
+    await this.prisma.loginOtp.updateMany({
+      where: {
+        userId: user.id,
+        usedAt: null,
+      },
+      data: {
+        usedAt: new Date(),
+      },
+    });
+
+    await this.prisma.loginOtp.create({
+      data: {
+        userId: user.id,
+        otpHash,
+        expiresAt: this.addMinutes(10),
+      },
+    });
+
+    await this.mailService.sendLoginOtpEmail(user.email, user.fullName, otp);
+
+    return {
+      otpRequired: true,
+      email: user.email,
+      message: 'OTP sent to your email address.',
+    };
+  }
+
+  async verifyLoginOtp(
+    verifyLoginOtpDto: VerifyLoginOtpDto,
+  ): Promise<AuthResponse> {
+    const email = verifyLoginOtpDto.email.toLowerCase().trim();
+    const otpHash = this.hashToken(verifyLoginOtpDto.otp.trim());
+
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid verification code');
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException('Your account is inactive');
+    }
+
+    const otpRecord = await this.prisma.loginOtp.findFirst({
+      where: {
+        userId: user.id,
+        otpHash,
+        usedAt: null,
+        expiresAt: {
+          gt: new Date(),
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    if (!otpRecord) {
+      throw new UnauthorizedException('Invalid or expired verification code');
+    }
+
+    await this.prisma.loginOtp.update({
+      where: { id: otpRecord.id },
+      data: {
+        usedAt: new Date(),
+      },
+    });
+
     return this.createAuthResponse(user as DbUser);
+  }
+
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
+    const email = forgotPasswordDto.email.toLowerCase().trim();
+
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    const genericResponse = {
+      message:
+        'If this email exists in PreSkool ERP, a password reset link has been sent.',
+    };
+
+    if (!user || !user.isActive) {
+      return genericResponse;
+    }
+
+    const rawToken = randomBytes(32).toString('hex');
+    const tokenHash = this.hashToken(rawToken);
+
+    await this.prisma.passwordResetToken.updateMany({
+      where: {
+        userId: user.id,
+        usedAt: null,
+      },
+      data: {
+        usedAt: new Date(),
+      },
+    });
+
+    await this.prisma.passwordResetToken.create({
+      data: {
+        userId: user.id,
+        tokenHash,
+        expiresAt: this.addMinutes(30),
+      },
+    });
+
+    const frontendUrl =
+      this.configService.get<string>('FRONTEND_URL') || 'http://localhost:4200';
+
+    const resetLink = `${frontendUrl}/auth/reset-password?token=${rawToken}`;
+
+    await this.mailService.sendPasswordResetEmail(
+      user.email,
+      user.fullName,
+      resetLink,
+    );
+
+    return genericResponse;
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    const tokenHash = this.hashToken(resetPasswordDto.token.trim());
+
+    const resetToken = await this.prisma.passwordResetToken.findFirst({
+      where: {
+        tokenHash,
+        usedAt: null,
+        expiresAt: {
+          gt: new Date(),
+        },
+      },
+      include: {
+        user: true,
+      },
+    });
+
+    if (!resetToken || !resetToken.user || !resetToken.user.isActive) {
+      throw new BadRequestException('Invalid or expired reset link');
+    }
+
+    const passwordHash = await bcrypt.hash(resetPasswordDto.password, 10);
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: resetToken.userId },
+        data: {
+          passwordHash,
+        },
+      }),
+      this.prisma.passwordResetToken.update({
+        where: { id: resetToken.id },
+        data: {
+          usedAt: new Date(),
+        },
+      }),
+    ]);
+
+    return {
+      message: 'Password reset successfully. You can now login.',
+    };
   }
 
   async getMe(userId: string): Promise<AuthUser> {
@@ -142,6 +322,8 @@ export class AuthService {
         passwordHash,
         role,
         isActive: true,
+        twoStepEnabled: false,
+        emailVerified: false,
       },
     });
 
@@ -282,6 +464,8 @@ export class AuthService {
       email: user.email,
       role: user.role,
       isActive: user.isActive,
+      twoStepEnabled: user.twoStepEnabled,
+      emailVerified: user.emailVerified,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
@@ -335,5 +519,21 @@ export class AuthService {
         'At least one active super admin must remain',
       );
     }
+  }
+
+  private generateOtp(): string {
+    return String(randomInt(100000, 1000000));
+  }
+
+  private hashToken(value: string): string {
+    return createHash('sha256').update(value).digest('hex');
+  }
+
+  private addMinutes(minutes: number): Date {
+    const date = new Date();
+
+    date.setMinutes(date.getMinutes() + minutes);
+
+    return date;
   }
 }

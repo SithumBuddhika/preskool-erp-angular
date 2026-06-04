@@ -9,6 +9,20 @@ export const appRoutes: Routes = [
     pathMatch: 'full',
     redirectTo: 'dashboard/admin',
   },
+
+  /*
+    IMPORTANT:
+    Reset password must be outside guestGuard.
+    Otherwise, if you are already logged in, guestGuard sends you to dashboard/admin.
+  */
+  {
+    path: 'auth/reset-password',
+    loadComponent: () =>
+      import('./features/auth/reset-password/reset-password.component').then(
+        (m) => m.ResetPasswordComponent,
+      ),
+  },
+
   {
     path: 'auth',
     canActivate: [guestGuard],
@@ -44,13 +58,6 @@ export const appRoutes: Routes = [
           ).then((m) => m.ForgotPasswordComponent),
       },
       {
-        path: 'reset-password',
-        loadComponent: () =>
-          import(
-            './features/auth/reset-password/reset-password.component'
-          ).then((m) => m.ResetPasswordComponent),
-      },
-      {
         path: 'reset-password-sent',
         loadComponent: () =>
           import(
@@ -73,6 +80,7 @@ export const appRoutes: Routes = [
       },
     ],
   },
+
   {
     path: '',
     canActivate: [authGuard],
@@ -112,7 +120,6 @@ export const appRoutes: Routes = [
             './features/dashboard/teacher-dashboard/teacher-dashboard.component'
           ).then((m) => m.TeacherDashboardComponent),
       },
-
       {
         path: 'dashboard/parent',
         loadComponent: () =>
@@ -517,6 +524,7 @@ export const appRoutes: Routes = [
       },
     ],
   },
+
   {
     path: '**',
     redirectTo: 'dashboard/admin',

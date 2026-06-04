@@ -24,10 +24,45 @@ model User {
   role         UserRole @default(ADMIN)
   isActive     Boolean  @default(true)
 
+  // Auth email flows
+  twoStepEnabled Boolean @default(false)
+  emailVerified  Boolean @default(false)
+
+  passwordResetTokens PasswordResetToken[]
+  loginOtps           LoginOtp[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("users")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+model LoginOtp {
+  id        String    @id @default(uuid())
+  userId    String
+  otpHash   String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("login_otps")
 }
 
 enum StudentGender {

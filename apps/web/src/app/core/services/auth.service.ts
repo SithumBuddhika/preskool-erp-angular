@@ -2,10 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
 import { Observable, catchError, of, tap } from 'rxjs';
 import {
+  AuthMessageResponse,
   AuthResponse,
   AuthUser,
+  ForgotPasswordPayload,
   LoginPayload,
   RegisterPayload,
+  ResetPasswordPayload,
 } from '../models/auth.model';
 
 @Injectable({
@@ -88,5 +91,23 @@ export class AuthService {
       localStorage.removeItem('preskool_user');
       return null;
     }
+  }
+
+  forgotPassword(
+    payload: ForgotPasswordPayload,
+  ): Observable<AuthMessageResponse> {
+    return this.http.post<AuthMessageResponse>(
+      `${this.apiUrl}/forgot-password`,
+      payload,
+    );
+  }
+
+  resetPassword(
+    payload: ResetPasswordPayload,
+  ): Observable<AuthMessageResponse> {
+    return this.http.post<AuthMessageResponse>(
+      `${this.apiUrl}/reset-password`,
+      payload,
+    );
   }
 }
