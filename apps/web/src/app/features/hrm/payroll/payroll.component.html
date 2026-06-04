@@ -105,11 +105,11 @@
           <tbody>
             @for (payroll of payrollRecords(); track payroll.id) {
               <tr>
-                <td>
+                <td data-label="Payroll ID">
                   <span class="payroll-code">{{ payroll.payrollCode }}</span>
                 </td>
 
-                <td>
+                <td data-label="Staff">
                   <div class="staff-info">
                     <span>{{ getPayrollInitial(payroll) }}</span>
 
@@ -120,23 +120,34 @@
                   </div>
                 </td>
 
-                <td>
-                  <strong>{{ payroll.department || 'Not added' }}</strong>
-                  <p class="muted-text">
-                    {{ payroll.designation || 'Not added' }}
-                  </p>
+                <td data-label="Department">
+                  <div class="department-meta">
+                    <strong>{{ payroll.department || 'Not added' }}</strong>
+                    <p class="muted-text">
+                      {{ payroll.designation || 'Not added' }}
+                    </p>
+                  </div>
                 </td>
 
-                <td>{{ payroll.salaryMonth }}</td>
-                <td>{{ formatCurrency(payroll.basicSalary) }}</td>
-                <td>{{ formatCurrency(payroll.allowance) }}</td>
-                <td>{{ formatCurrency(payroll.deduction) }}</td>
+                <td data-label="Month">{{ payroll.salaryMonth }}</td>
 
-                <td>
+                <td data-label="Basic">
+                  {{ formatCurrency(payroll.basicSalary) }}
+                </td>
+
+                <td data-label="Allowance">
+                  {{ formatCurrency(payroll.allowance) }}
+                </td>
+
+                <td data-label="Deduction">
+                  {{ formatCurrency(payroll.deduction) }}
+                </td>
+
+                <td data-label="Net Salary">
                   <strong>{{ formatCurrency(payroll.netSalary) }}</strong>
                 </td>
 
-                <td>
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--paid]="payroll.status === 'PAID'"
@@ -146,9 +157,11 @@
                   </span>
                 </td>
 
-                <td>{{ formatDisplayDate(payroll.paymentDate) }}</td>
+                <td data-label="Payment Date">
+                  {{ formatDisplayDate(payroll.paymentDate) }}
+                </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"

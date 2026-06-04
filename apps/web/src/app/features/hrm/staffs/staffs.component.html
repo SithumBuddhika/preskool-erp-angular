@@ -97,11 +97,11 @@
           <tbody>
             @for (staff of staffs(); track staff.id) {
               <tr>
-                <td>
+                <td data-label="Staff ID">
                   <span class="staff-code">{{ staff.staffCode }}</span>
                 </td>
 
-                <td>
+                <td data-label="Staff Name">
                   <div class="staff-name">
                     <span>{{ getInitials(staff) }}</span>
 
@@ -112,7 +112,7 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Department">
                   <div class="department-info">
                     <strong>{{ staff.departmentName }}</strong>
                     @if (staff.departmentCode) {
@@ -121,7 +121,7 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Designation">
                   <div class="designation-info">
                     <strong>{{ staff.designation }}</strong>
                     @if (staff.designationCode) {
@@ -132,18 +132,20 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Employment">
                   <span class="employment-pill">
                     {{ getEmploymentTypeLabel(staff.employmentType) }}
                   </span>
                 </td>
 
-                <td>{{ staff.phone }}</td>
-                <td>{{ staff.email }}</td>
-                <td>{{ formatDisplayDate(staff.joiningDate) }}</td>
-                <td>{{ formatSalary(staff.salary) }}</td>
+                <td data-label="Phone">{{ staff.phone }}</td>
+                <td data-label="Email">{{ staff.email }}</td>
+                <td data-label="Joining Date">
+                  {{ formatDisplayDate(staff.joiningDate) }}
+                </td>
+                <td data-label="Salary">{{ formatSalary(staff.salary) }}</td>
 
-                <td>
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--inactive]="staff.status !== 'ACTIVE'"
@@ -152,7 +154,7 @@
                   </span>
                 </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"

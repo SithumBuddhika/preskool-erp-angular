@@ -95,13 +95,13 @@
           <tbody>
             @for (attendance of attendanceRecords(); track attendance.id) {
               <tr>
-                <td>
+                <td data-label="Attendance ID">
                   <span class="attendance-code">
                     {{ attendance.attendanceCode }}
                   </span>
                 </td>
 
-                <td>
+                <td data-label="Student">
                   <div class="student-info">
                     <span>{{ getAttendanceInitial(attendance) }}</span>
 
@@ -114,7 +114,7 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Class">
                   <div class="class-info">
                     <strong>{{ attendance.className }}</strong>
                     @if (attendance.section) {
@@ -123,9 +123,11 @@
                   </div>
                 </td>
 
-                <td>{{ formatDisplayDate(attendance.attendanceDate) }}</td>
+                <td data-label="Date">
+                  {{ formatDisplayDate(attendance.attendanceDate) }}
+                </td>
 
-                <td>
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--absent]="attendance.status === 'ABSENT'"
@@ -136,11 +138,19 @@
                   </span>
                 </td>
 
-                <td>{{ attendance.checkInTime || 'Not added' }}</td>
-                <td>{{ attendance.checkOutTime || 'Not added' }}</td>
-                <td>{{ attendance.remarks || 'No remarks' }}</td>
+                <td data-label="Check In">
+                  {{ attendance.checkInTime || 'Not added' }}
+                </td>
 
-                <td class="text-right">
+                <td data-label="Check Out">
+                  {{ attendance.checkOutTime || 'Not added' }}
+                </td>
+
+                <td data-label="Remarks">
+                  {{ attendance.remarks || 'No remarks' }}
+                </td>
+
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"

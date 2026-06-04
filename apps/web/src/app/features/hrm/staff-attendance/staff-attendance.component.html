@@ -99,7 +99,7 @@
           <tbody>
             @for (record of attendanceRecords(); track record.id) {
               <tr>
-                <td>
+                <td data-label="Staff">
                   <div class="staff-info">
                     <span>{{ getStaffInitial(record) }}</span>
 
@@ -110,15 +110,19 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Staff Code">
                   <span class="staff-code">{{ record.staffCode }}</span>
                 </td>
 
-                <td>{{ record.department || '-' }}</td>
-                <td>{{ record.designation || '-' }}</td>
-                <td>{{ formatDate(record.attendanceDate) }}</td>
+                <td data-label="Department">{{ record.department || '-' }}</td>
+                <td data-label="Designation">
+                  {{ record.designation || '-' }}
+                </td>
+                <td data-label="Date">
+                  {{ formatDate(record.attendanceDate) }}
+                </td>
 
-                <td>
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class]="getStatusClass(record.status)"
@@ -127,9 +131,9 @@
                   </span>
                 </td>
 
-                <td>{{ record.remarks || '-' }}</td>
+                <td data-label="Remarks">{{ record.remarks || '-' }}</td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"
