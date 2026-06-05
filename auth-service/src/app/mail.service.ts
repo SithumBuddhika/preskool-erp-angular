@@ -127,208 +127,74 @@ export class MailService {
     const logoUrl = this.escapeHtml(
       this.getAssetUrl('/assets/logos/preskool-logo.png'),
     );
+
     const heroImageUrl = this.escapeHtml(
-      this.getAssetUrl('/assets/images/auth/forget-password.png'),
+      this.getAssetUrl('/assets/images/auth/forgot-password.png'),
     );
 
-    return `
-      <!DOCTYPE html>
-      <html lang="en">
-        <head>
-          <meta charset="UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>Reset your PreSkool ERP password</title>
-        </head>
-        <body style="margin:0;padding:0;background:#edf2fc;font-family:Arial,Helvetica,sans-serif;">
-          <div style="display:none;max-height:0;overflow:hidden;opacity:0;">
-            Reset your PreSkool ERP password.
-          </div>
+    return this.buildEmailShell({
+      subtitle: 'Secure account recovery',
+      heroImageUrl,
+      heroAlt: 'Forgot password',
+      title: 'Reset your password',
+      body: `
+        <p style="margin:0 0 10px;color:#44516a;font-size:15px;line-height:1.7;text-align:center;">
+          Hi <strong>${safeName}</strong>, we received a request to reset your
+          PreSkool ERP password.
+        </p>
 
-          <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#edf2fc;margin:0;padding:32px 12px;">
-            <tr>
-              <td align="center">
-                <table
-                  role="presentation"
-                  cellpadding="0"
-                  cellspacing="0"
-                  width="100%"
-                  style="
-                    max-width:500px;
-                    background:#ffffff;
-                    border:1px solid #d9e2f2;
-                    border-radius:22px;
-                    overflow:hidden;
-                  "
-                >
-                  <tr>
-                    <td style="padding:20px 24px 10px;">
-                      <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
-                        <tr>
-                          <td align="left" style="vertical-align:middle;">
-                            <table role="presentation" cellpadding="0" cellspacing="0">
-                              <tr>
-                                <td style="vertical-align:middle;">
-                                  <img
-                                    src="${logoUrl}"
-                                    alt="PreSkool ERP"
-                                    width="28"
-                                    height="28"
-                                    style="display:block;width:28px;height:28px;object-fit:contain;"
-                                  />
-                                </td>
-                                <td style="padding-left:10px;vertical-align:middle;">
-                                  <div style="font-size:18px;font-weight:800;line-height:1.1;color:#10224d;">
-                                    PreSkool ERP
-                                  </div>
-                                  <div style="font-size:13px;font-weight:600;color:#60708f;padding-top:2px;">
-                                    Secure account recovery
-                                  </div>
-                                </td>
-                              </tr>
-                            </table>
-                          </td>
+        <p style="margin:0;color:#44516a;font-size:15px;line-height:1.7;text-align:center;">
+          Click the button below to create a new password. This link expires in
+          <strong>30 minutes</strong>.
+        </p>
 
-                          <td align="right" style="vertical-align:middle;">
-                            <span
-                              style="
-                                display:inline-block;
-                                background:#eef2ff;
-                                color:#3b5bdb;
-                                font-size:13px;
-                                font-weight:700;
-                                padding:10px 16px;
-                                border-radius:999px;
-                              "
-                            >
-                              Password Reset
-                            </span>
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
+        <div style="text-align:center;margin:24px 0 14px;">
+          <a
+            href="${safeResetUrl}"
+            style="
+              display:inline-block;
+              min-width:172px;
+              background:#3d5ee1;
+              color:#ffffff;
+              text-decoration:none;
+              font-size:15px;
+              font-weight:800;
+              padding:13px 24px;
+              border-radius:11px;
+            "
+          >
+            Reset Password
+          </a>
+        </div>
 
-                  <tr>
-                    <td style="padding:6px 24px 0;">
-                      <div
-                        style="
-                          background:#eef3fb;
-                          border-radius:18px;
-                          padding:26px 20px;
-                          text-align:center;
-                        "
-                      >
-                        <img
-                          src="${heroImageUrl}"
-                          alt="Forgot password"
-                          width="220"
-                          style="max-width:220px;width:100%;height:auto;display:block;margin:0 auto;"
-                        />
-                      </div>
-                    </td>
-                  </tr>
+        <p style="margin:0 0 16px;color:#8a97b3;font-size:14px;line-height:1.7;text-align:center;">
+          If you did not request this, you can safely ignore this email.
+        </p>
 
-                  <tr>
-                    <td style="padding:22px 28px 12px;text-align:center;">
-                      <h1
-                        style="
-                          margin:0 0 14px;
-                          color:#3d5ee1;
-                          font-size:28px;
-                          line-height:1.2;
-                          font-weight:800;
-                        "
-                      >
-                        Reset your password
-                      </h1>
-
-                      <p style="margin:0 0 10px;color:#44516a;font-size:16px;line-height:1.75;">
-                        Hi <strong>${safeName}</strong>, we received a request to reset your
-                        PreSkool ERP password.
-                      </p>
-
-                      <p style="margin:0;color:#44516a;font-size:16px;line-height:1.75;">
-                        Click the button below to create a new password. This link expires in
-                        <strong>30 minutes</strong>.
-                      </p>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td align="center" style="padding:8px 28px 8px;">
-                      <a
-                        href="${safeResetUrl}"
-                        style="
-                          display:inline-block;
-                          min-width:190px;
-                          background:#3d5ee1;
-                          color:#ffffff;
-                          text-decoration:none;
-                          font-size:16px;
-                          font-weight:800;
-                          padding:14px 26px;
-                          border-radius:12px;
-                        "
-                      >
-                        Reset Password
-                      </a>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td style="padding:0 28px 18px;text-align:center;">
-                      <p style="margin:0;color:#8a97b3;font-size:15px;line-height:1.8;">
-                        If you did not request this, you can safely ignore this email.
-                      </p>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td style="padding:0 24px 22px;">
-                      <div
-                        style="
-                          border:1px solid #d9e2f2;
-                          border-radius:14px;
-                          background:#f8fafd;
-                          padding:14px 16px;
-                        "
-                      >
-                        <p style="margin:0 0 10px;color:#60708f;font-size:15px;font-weight:700;">
-                          Button not working? Copy this link:
-                        </p>
-                        <p style="margin:0;word-break:break-word;">
-                          <a
-                            href="${safeResetUrl}"
-                            style="color:#2563eb;font-size:13px;line-height:1.8;text-decoration:underline;"
-                          >
-                            ${safeResetUrl}
-                          </a>
-                        </p>
-                      </div>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td
-                      style="
-                        padding:16px 20px;
-                        border-top:1px solid #dfe7f2;
-                        text-align:center;
-                        background:#f9fbff;
-                      "
-                    >
-                      <p style="margin:0;color:#7584a2;font-size:13px;line-height:1.6;">
-                        © 2026 PreSkool ERP. Automated security email.
-                      </p>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
-        </body>
-      </html>
-    `;
+        <div
+          style="
+            border:1px solid #d9e2f2;
+            border-radius:13px;
+            background:#f8fafd;
+            padding:13px 15px;
+          "
+        >
+          <p style="margin:0 0 8px;color:#60708f;font-size:13px;font-weight:800;">
+            Button not working? Copy this link:
+          </p>
+          <p style="margin:0;word-break:break-word;">
+            <a
+              href="${safeResetUrl}"
+              style="color:#2563eb;font-size:12px;line-height:1.7;text-decoration:underline;"
+            >
+              ${safeResetUrl}
+            </a>
+          </p>
+        </div>
+      `,
+      footer: '© 2026 PreSkool ERP. Automated security email.',
+      logoUrl,
+    });
   }
 
   private buildTwoStepVerificationTemplate(name: string, otp: string): string {
@@ -338,24 +204,89 @@ export class MailService {
     const logoUrl = this.escapeHtml(
       this.getAssetUrl('/assets/logos/preskool-logo.png'),
     );
+
     const heroImageUrl = this.escapeHtml(
       this.getAssetUrl('/assets/images/auth/two-step-verification.png'),
     );
 
+    return this.buildEmailShell({
+      subtitle: 'Account protection',
+      heroImageUrl,
+      heroAlt: 'Two-step verification',
+      title: 'Verify your identity',
+      body: `
+        <p style="margin:0 0 14px;color:#44516a;font-size:15px;line-height:1.7;text-align:center;">
+          Hi <strong>${safeName}</strong>, use the following verification code
+          to complete your PreSkool ERP sign in.
+        </p>
+
+        <div
+          style="
+            margin:20px auto 18px;
+            max-width:250px;
+            background:#eef3ff;
+            border:1px solid #d9e2f2;
+            border-radius:15px;
+            text-align:center;
+            padding:17px 14px;
+          "
+        >
+          <div
+            style="
+              color:#60708f;
+              font-size:12px;
+              font-weight:800;
+              text-transform:uppercase;
+              letter-spacing:0.08em;
+              margin-bottom:9px;
+            "
+          >
+            Verification Code
+          </div>
+
+          <div
+            style="
+              color:#3d5ee1;
+              font-size:32px;
+              font-weight:900;
+              letter-spacing:8px;
+              line-height:1.2;
+            "
+          >
+            ${safeOtp}
+          </div>
+        </div>
+
+        <p style="margin:0;color:#44516a;font-size:14px;line-height:1.8;text-align:center;">
+          This code expires in <strong>10 minutes</strong>. Do not share it
+          with anyone.
+        </p>
+      `,
+      footer: '© 2026 PreSkool ERP. Automated login security email.',
+      logoUrl,
+    });
+  }
+
+  private buildEmailShell(params: {
+    subtitle: string;
+    heroImageUrl: string;
+    heroAlt: string;
+    title: string;
+    body: string;
+    footer: string;
+    logoUrl: string;
+  }): string {
     return `
       <!DOCTYPE html>
       <html lang="en">
         <head>
           <meta charset="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>PreSkool ERP verification code</title>
+          <title>PreSkool ERP</title>
         </head>
-        <body style="margin:0;padding:0;background:#edf2fc;font-family:Arial,Helvetica,sans-serif;">
-          <div style="display:none;max-height:0;overflow:hidden;opacity:0;">
-            Your PreSkool ERP two-step verification code.
-          </div>
 
-          <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#edf2fc;margin:0;padding:32px 12px;">
+        <body style="margin:0;padding:0;background:#edf2fc;font-family:Arial,Helvetica,sans-serif;">
+          <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#edf2fc;margin:0;padding:22px 10px;">
             <tr>
               <td align="center">
                 <table
@@ -364,55 +295,34 @@ export class MailService {
                   cellspacing="0"
                   width="100%"
                   style="
-                    max-width:500px;
+                    max-width:430px;
                     background:#ffffff;
                     border:1px solid #d9e2f2;
-                    border-radius:22px;
+                    border-radius:19px;
                     overflow:hidden;
                   "
                 >
                   <tr>
-                    <td style="padding:20px 24px 10px;">
-                      <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                    <td style="padding:18px 22px 8px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0">
                         <tr>
-                          <td align="left" style="vertical-align:middle;">
-                            <table role="presentation" cellpadding="0" cellspacing="0">
-                              <tr>
-                                <td style="vertical-align:middle;">
-                                  <img
-                                    src="${logoUrl}"
-                                    alt="PreSkool ERP"
-                                    width="28"
-                                    height="28"
-                                    style="display:block;width:28px;height:28px;object-fit:contain;"
-                                  />
-                                </td>
-                                <td style="padding-left:10px;vertical-align:middle;">
-                                  <div style="font-size:18px;font-weight:800;line-height:1.1;color:#10224d;">
-                                    PreSkool ERP
-                                  </div>
-                                  <div style="font-size:13px;font-weight:600;color:#60708f;padding-top:2px;">
-                                    Account protection
-                                  </div>
-                                </td>
-                              </tr>
-                            </table>
+                          <td style="vertical-align:middle;">
+                            <img
+                              src="${params.logoUrl}"
+                              alt="PreSkool ERP"
+                              width="36"
+                              height="36"
+                              style="display:block;width:36px;height:36px;object-fit:contain;"
+                            />
                           </td>
 
-                          <td align="right" style="vertical-align:middle;">
-                            <span
-                              style="
-                                display:inline-block;
-                                background:#eef2ff;
-                                color:#3b5bdb;
-                                font-size:13px;
-                                font-weight:700;
-                                padding:10px 16px;
-                                border-radius:999px;
-                              "
-                            >
-                              2-Step Verification
-                            </span>
+                          <td style="padding-left:6px;vertical-align:middle;">
+                            <div style="font-size:20px;font-weight:900;line-height:1.05;color:#10224d;">
+                              PreSkool ERP
+                            </div>
+                            <div style="font-size:13px;font-weight:700;color:#60708f;padding-top:2px;">
+                              ${params.subtitle}
+                            </div>
                           </td>
                         </tr>
                       </table>
@@ -420,106 +330,62 @@ export class MailService {
                   </tr>
 
                   <tr>
-                    <td style="padding:6px 24px 0;">
+                    <td style="padding:4px 22px 0;">
                       <div
                         style="
+                          height:132px;
                           background:#eef3fb;
-                          border-radius:18px;
-                          padding:26px 20px;
+                          border-radius:16px;
                           text-align:center;
+                          overflow:hidden;
                         "
                       >
                         <img
-                          src="${heroImageUrl}"
-                          alt="Two-step verification"
-                          width="220"
-                          style="max-width:220px;width:100%;height:auto;display:block;margin:0 auto;"
+                          src="${params.heroImageUrl}"
+                          alt="${params.heroAlt}"
+                          width="210"
+                          style="
+                            display:block;
+                            max-width:210px;
+                            width:82%;
+                            height:auto;
+                            margin:13px auto 0;
+                            border:0;
+                          "
                         />
                       </div>
                     </td>
                   </tr>
 
                   <tr>
-                    <td style="padding:22px 28px 8px;text-align:center;">
+                    <td style="padding:20px 24px 10px;text-align:center;">
                       <h1
                         style="
                           margin:0 0 14px;
                           color:#3d5ee1;
-                          font-size:28px;
+                          font-size:27px;
                           line-height:1.2;
-                          font-weight:800;
+                          font-weight:900;
                         "
                       >
-                        Verify your identity
+                        ${params.title}
                       </h1>
 
-                      <p style="margin:0 0 10px;color:#44516a;font-size:16px;line-height:1.75;">
-                        Hi <strong>${safeName}</strong>, use the following verification code
-                        to complete your PreSkool ERP sign in.
-                      </p>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td style="padding:4px 28px 8px;">
-                      <div
-                        style="
-                          margin:0 auto;
-                          max-width:280px;
-                          background:#f3f6ff;
-                          border:1px solid #d9e2f2;
-                          border-radius:16px;
-                          text-align:center;
-                          padding:18px 14px;
-                        "
-                      >
-                        <div
-                          style="
-                            color:#60708f;
-                            font-size:13px;
-                            font-weight:700;
-                            text-transform:uppercase;
-                            letter-spacing:0.08em;
-                            margin-bottom:10px;
-                          "
-                        >
-                          Verification Code
-                        </div>
-                        <div
-                          style="
-                            color:#10224d;
-                            font-size:34px;
-                            font-weight:800;
-                            letter-spacing:8px;
-                            line-height:1.2;
-                          "
-                        >
-                          ${safeOtp}
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td style="padding:8px 28px 16px;text-align:center;">
-                      <p style="margin:0;color:#44516a;font-size:15px;line-height:1.8;">
-                        This code expires in <strong>10 minutes</strong>. Do not share it
-                        with anyone.
-                      </p>
+                      ${params.body}
                     </td>
                   </tr>
 
                   <tr>
                     <td
                       style="
-                        padding:16px 20px;
+                        padding:14px 18px;
                         border-top:1px solid #dfe7f2;
                         text-align:center;
                         background:#f9fbff;
                       "
                     >
-                      <p style="margin:0;color:#7584a2;font-size:13px;line-height:1.6;">
-                        © 2026 PreSkool ERP. Automated login security email.
+                      <p style="margin:0;color:#7584a2;font-size:12px;line-height:1.6;">
+                        ${params.footer}
                       </p>
                     </td>
                   </tr>
@@ -535,6 +401,7 @@ export class MailService {
   private getAssetUrl(path: string): string {
     const baseUrl = (this.frontendUrl || '').replace(/\/+$/, '');
     const cleanPath = path.startsWith('/') ? path : `/${path}`;
+
     return `${baseUrl}${cleanPath}`;
   }
 
