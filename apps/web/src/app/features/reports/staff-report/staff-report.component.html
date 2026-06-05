@@ -174,16 +174,21 @@
             <tbody>
               @for (row of departmentSummary(); track row.label) {
                 <tr>
-                  <td>
+                  <td data-label="Department">
                     <span class="group-pill">{{ row.label }}</span>
                   </td>
-                  <td>{{ row.total }}</td>
-                  <td>
+
+                  <td data-label="Total">
+                    {{ row.total }}
+                  </td>
+
+                  <td data-label="Active">
                     <span class="mini-count mini-count--active">
                       {{ row.active }}
                     </span>
                   </td>
-                  <td>
+
+                  <td data-label="Inactive">
                     <span class="mini-count mini-count--inactive">
                       {{ row.inactive }}
                     </span>
@@ -191,7 +196,7 @@
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="4">
+                  <td class="empty-cell" colspan="4">
                     <div class="empty-state">
                       <strong>No department summary found</strong>
                       <p>Try changing filters or add staff records first.</p>
@@ -238,16 +243,21 @@
             <tbody>
               @for (row of designationSummary(); track row.label) {
                 <tr>
-                  <td>
+                  <td data-label="Designation">
                     <span class="group-pill">{{ row.label }}</span>
                   </td>
-                  <td>{{ row.total }}</td>
-                  <td>
+
+                  <td data-label="Total">
+                    {{ row.total }}
+                  </td>
+
+                  <td data-label="Active">
                     <span class="mini-count mini-count--active">
                       {{ row.active }}
                     </span>
                   </td>
-                  <td>
+
+                  <td data-label="Inactive">
                     <span class="mini-count mini-count--inactive">
                       {{ row.inactive }}
                     </span>
@@ -255,7 +265,7 @@
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="4">
+                  <td class="empty-cell" colspan="4">
                     <div class="empty-state">
                       <strong>No designation summary found</strong>
                       <p>Try changing filters or add staff records first.</p>
@@ -313,11 +323,11 @@
           <tbody>
             @for (staff of filteredStaffRows(); track staff.id) {
               <tr>
-                <td>
+                <td data-label="Staff ID">
                   <span class="staff-code">{{ staff.staffCode }}</span>
                 </td>
 
-                <td>
+                <td data-label="Staff">
                   <div class="staff-info">
                     <span>{{ getStaffInitial(staff) }}</span>
 
@@ -328,22 +338,36 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Department">
                   <span class="group-pill">{{ staff.department }}</span>
                 </td>
 
-                <td>
+                <td data-label="Designation">
                   <strong>{{ staff.designation }}</strong>
                   <p class="muted-text">{{ staff.designationCode }}</p>
                 </td>
 
-                <td>{{ staff.employmentType }}</td>
-                <td>{{ staff.phone }}</td>
-                <td>{{ staff.email }}</td>
-                <td>{{ staff.joiningDate }}</td>
-                <td>{{ staff.salary }}</td>
+                <td data-label="Employment">
+                  {{ staff.employmentType }}
+                </td>
 
-                <td>
+                <td data-label="Phone">
+                  {{ staff.phone }}
+                </td>
+
+                <td data-label="Email">
+                  {{ staff.email }}
+                </td>
+
+                <td data-label="Joining Date">
+                  {{ staff.joiningDate }}
+                </td>
+
+                <td data-label="Salary">
+                  {{ staff.salary }}
+                </td>
+
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--inactive]="staff.status === 'INACTIVE'"
@@ -354,7 +378,7 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="10">
+                <td class="empty-cell" colspan="10">
                   <div class="empty-state">
                     <strong>No staff records found</strong>
                     <p>Try changing filters or add staff records first.</p>

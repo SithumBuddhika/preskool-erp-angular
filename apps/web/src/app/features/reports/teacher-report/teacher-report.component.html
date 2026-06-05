@@ -152,16 +152,21 @@
           <tbody>
             @for (row of subjectSummary(); track row.subject) {
               <tr>
-                <td>
+                <td data-label="Subject">
                   <span class="subject-pill">{{ row.subject }}</span>
                 </td>
-                <td>{{ row.total }}</td>
-                <td>
+
+                <td data-label="Total Teachers">
+                  {{ row.total }}
+                </td>
+
+                <td data-label="Active">
                   <span class="mini-count mini-count--active">
                     {{ row.active }}
                   </span>
                 </td>
-                <td>
+
+                <td data-label="Inactive">
                   <span class="mini-count mini-count--inactive">
                     {{ row.inactive }}
                   </span>
@@ -169,7 +174,7 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="4">
+                <td class="empty-cell" colspan="4">
                   <div class="empty-state">
                     <strong>No subject summary found</strong>
                     <p>Try changing filters or add teacher records first.</p>
@@ -225,13 +230,13 @@
           <tbody>
             @for (teacher of filteredTeachers(); track teacher.id) {
               <tr>
-                <td>
+                <td data-label="Employee No">
                   <span class="employee-code">
                     {{ teacher.employeeNo }}
                   </span>
                 </td>
 
-                <td>
+                <td data-label="Teacher">
                   <div class="teacher-info">
                     <span>{{ getTeacherInitial(teacher) }}</span>
 
@@ -242,17 +247,31 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Subject">
                   <span class="subject-pill">{{ teacher.subject }}</span>
                 </td>
 
-                <td>{{ getGenderLabel(teacher.gender) }}</td>
-                <td>{{ teacher.phone }}</td>
-                <td>{{ teacher.email }}</td>
-                <td>{{ teacher.qualification || 'Not added' }}</td>
-                <td>{{ formatDisplayDate(teacher.joiningDate) }}</td>
+                <td data-label="Gender">
+                  {{ getGenderLabel(teacher.gender) }}
+                </td>
 
-                <td>
+                <td data-label="Phone">
+                  {{ teacher.phone }}
+                </td>
+
+                <td data-label="Email">
+                  {{ teacher.email }}
+                </td>
+
+                <td data-label="Qualification">
+                  {{ teacher.qualification || 'Not added' }}
+                </td>
+
+                <td data-label="Joining Date">
+                  {{ formatDisplayDate(teacher.joiningDate) }}
+                </td>
+
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--inactive]="
@@ -265,7 +284,7 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="9">
+                <td class="empty-cell" colspan="9">
                   <div class="empty-state">
                     <strong>No teacher records found</strong>
                     <p>Try changing filters or add teacher records first.</p>

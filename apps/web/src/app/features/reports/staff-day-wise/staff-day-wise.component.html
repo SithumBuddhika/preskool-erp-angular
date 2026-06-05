@@ -1,13 +1,19 @@
-<section class="staff-day-wise-page">
+<!-- <section class="staff-day-wise-page">
   <div class="staff-day-wise-page__header">
     <div>
       <h1>Staff Day Wise</h1>
       <p>Reports / Staff Day Wise Attendance</p>
     </div>
 
-    <button class="secondary-btn" type="button" (click)="loadStaffAttendance()">
-      Refresh Report
-    </button>
+    <div class="header-actions">
+      <button
+        class="secondary-btn"
+        type="button"
+        (click)="loadStaffAttendance()"
+      >
+        Refresh Report
+      </button>
+    </div>
   </div>
 
   <div class="summary-grid">
@@ -147,7 +153,190 @@
               </tr>
             } @empty {
               <tr>
-                <td [attr.colspan]="daysInMonth().length + 2">
+                <td
+                  class="empty-cell"
+                  [attr.colspan]="daysInMonth().length + 2"
+                >
+                  <div class="empty-state">
+                    <strong>No staff attendance records found</strong>
+                    <p>
+                      Mark staff attendance first or change the month/search
+                      filter.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section> -->
+
+<section class="staff-day-wise-page">
+  <div class="staff-day-wise-page__header">
+    <div>
+      <h1>Staff Day Wise</h1>
+      <p>Reports / Staff Day Wise Attendance</p>
+    </div>
+
+    <div class="header-actions">
+      <button
+        class="secondary-btn"
+        type="button"
+        (click)="loadStaffAttendance()"
+      >
+        Refresh Report
+      </button>
+
+      <button class="primary-btn" type="button" (click)="exportCsv()">
+        Export CSV
+      </button>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--blue">R</span>
+      <div>
+        <strong>{{ monthRecords().length }}</strong>
+        <p>Total Marked Records</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--green">P</span>
+      <div>
+        <strong>{{ presentCount() }}</strong>
+        <p>Present</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--red">A</span>
+      <div>
+        <strong>{{ absentCount() }}</strong>
+        <p>Absent</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-card__icon summary-card__icon--orange">L</span>
+      <div>
+        <strong>{{ lateCount() + halfDayCount() }}</strong>
+        <p>Late / Half Day</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="report-card">
+    <div class="report-card__top">
+      <div>
+        <h2>{{ monthLabel() }} Staff Attendance Matrix</h2>
+        <p>
+          Real day-wise staff attendance generated from Staff Attendance
+          records.
+        </p>
+      </div>
+
+      <div class="filter-row">
+        <input
+          type="month"
+          [value]="selectedMonth()"
+          (change)="onMonthChange($event)"
+        />
+
+        <input
+          type="text"
+          placeholder="Search staff / code / department..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </div>
+
+    <div class="legend-row">
+      <span class="legend-item legend-item--present">P = Present</span>
+      <span class="legend-item legend-item--absent">A = Absent</span>
+      <span class="legend-item legend-item--late">L = Late</span>
+      <span class="legend-item legend-item--half-day">H = Half Day</span>
+      <span class="legend-item legend-item--empty">- = Not Marked</span>
+    </div>
+
+    @if (serverError()) {
+      <p class="server-error">{{ serverError() }}</p>
+    }
+
+    @if (isLoading()) {
+      <div class="table-skeleton">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="staff-column">Staff</th>
+
+              @for (day of daysInMonth(); track day.dateKey) {
+                <th class="day-column" [class.today-column]="day.isToday">
+                  <span>{{ day.day }}</span>
+                  <small>{{ day.weekday }}</small>
+                </th>
+              }
+
+              <th class="total-column">Marked</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (row of staffRows(); track row.staffCode) {
+              <tr>
+                <td class="staff-column">
+                  <div class="staff-info">
+                    <span>{{ getStaffInitial(row) }}</span>
+
+                    <div>
+                      <strong>{{ row.staffName }}</strong>
+                      <p>
+                        {{ row.staffCode }}
+                        @if (row.department) {
+                          / {{ row.department }}
+                        }
+                      </p>
+                      <small>{{ row.designation || 'No designation' }}</small>
+                    </div>
+                  </div>
+                </td>
+
+                @for (day of daysInMonth(); track day.dateKey) {
+                  @let record = getRecordForDay(row, day);
+
+                  <td>
+                    <span
+                      class="status-cell"
+                      [ngClass]="getStatusClass(record?.status)"
+                      [title]="getCellTitle(row, day)"
+                    >
+                      {{ getStatusShort(record?.status) }}
+                    </span>
+                  </td>
+                }
+
+                <td class="total-column">
+                  <strong>{{ getMarkedDays(row) }}</strong>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td
+                  class="empty-cell"
+                  [attr.colspan]="daysInMonth().length + 2"
+                >
                   <div class="empty-state">
                     <strong>No staff attendance records found</strong>
                     <p>

@@ -6,6 +6,7 @@ import {
   TeacherAttendanceStatus,
 } from '../../../core/models/teacher-attendance.model';
 import { TeacherAttendanceService } from '../../../core/services/teacher-attendance.service';
+import { ReportTabsComponent } from '../components/report-tabs/report-tabs.component';
 
 type DayColumn = {
   day: number;
@@ -28,7 +29,7 @@ type TeacherDayWiseRow = {
 @Component({
   selector: 'app-teacher-day-wise',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ReportTabsComponent],
   templateUrl: './teacher-day-wise.component.html',
   styleUrl: './teacher-day-wise.component.scss',
 })

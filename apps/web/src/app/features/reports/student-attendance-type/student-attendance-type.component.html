@@ -219,37 +219,45 @@
             <tbody>
               @for (row of classWiseSummary(); track row.classLabel) {
                 <tr>
-                  <td>
+                  <td data-label="Class">
                     <span class="class-pill">{{ row.classLabel }}</span>
                   </td>
-                  <td>{{ row.total }}</td>
-                  <td>
+
+                  <td data-label="Total">
+                    {{ row.total }}
+                  </td>
+
+                  <td data-label="Present">
                     <span class="mini-count mini-count--present">
                       {{ row.present }}
                     </span>
                   </td>
-                  <td>
+
+                  <td data-label="Absent">
                     <span class="mini-count mini-count--absent">
                       {{ row.absent }}
                     </span>
                   </td>
-                  <td>
+
+                  <td data-label="Late">
                     <span class="mini-count mini-count--late">
                       {{ row.late }}
                     </span>
                   </td>
-                  <td>
+
+                  <td data-label="Half Day">
                     <span class="mini-count mini-count--half">
                       {{ row.halfDay }}
                     </span>
                   </td>
-                  <td>
+
+                  <td data-label="Attendance Rate">
                     <strong>{{ row.attendanceRate }}%</strong>
                   </td>
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="7">
+                  <td class="empty-cell" colspan="7">
                     <div class="empty-state">
                       <strong>No class-wise records found</strong>
                       <p>
@@ -307,21 +315,29 @@
           <tbody>
             @for (record of filteredRecords(); track record.id) {
               <tr>
-                <td>
+                <td data-label="Attendance ID">
                   <span class="attendance-code">
                     {{ record.attendanceCode }}
                   </span>
                 </td>
 
-                <td>
+                <td data-label="Student">
                   <strong>{{ record.studentName }}</strong>
                 </td>
 
-                <td>{{ record.studentAdmissionNo || 'Not added' }}</td>
-                <td>{{ getClassLabel(record) }}</td>
-                <td>{{ formatDisplayDate(record.attendanceDate) }}</td>
+                <td data-label="Admission No">
+                  {{ record.studentAdmissionNo || 'Not added' }}
+                </td>
 
-                <td>
+                <td data-label="Class">
+                  {{ getClassLabel(record) }}
+                </td>
+
+                <td data-label="Date">
+                  {{ formatDisplayDate(record.attendanceDate) }}
+                </td>
+
+                <td data-label="Type">
                   <span
                     class="status-pill"
                     [class.status-pill--absent]="record.status === 'ABSENT'"
@@ -332,13 +348,21 @@
                   </span>
                 </td>
 
-                <td>{{ record.checkInTime || 'Not added' }}</td>
-                <td>{{ record.checkOutTime || 'Not added' }}</td>
-                <td>{{ record.remarks || 'No remarks' }}</td>
+                <td data-label="Check In">
+                  {{ record.checkInTime || 'Not added' }}
+                </td>
+
+                <td data-label="Check Out">
+                  {{ record.checkOutTime || 'Not added' }}
+                </td>
+
+                <td data-label="Remarks">
+                  {{ record.remarks || 'No remarks' }}
+                </td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="9">
+                <td class="empty-cell" colspan="9">
                   <div class="empty-state">
                     <strong>No detailed records found</strong>
                     <p>Try changing filters or add attendance records first.</p>

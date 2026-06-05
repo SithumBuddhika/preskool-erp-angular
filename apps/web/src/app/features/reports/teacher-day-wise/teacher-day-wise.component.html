@@ -20,6 +20,8 @@
     </div>
   </div>
 
+  <app-report-tabs></app-report-tabs>
+
   <div class="summary-grid">
     <article class="summary-card">
       <span class="summary-card__icon summary-card__icon--blue">R</span>
@@ -171,7 +173,10 @@
               </tr>
             } @empty {
               <tr>
-                <td [attr.colspan]="daysInMonth().length + 2">
+                <td
+                  class="empty-cell"
+                  [attr.colspan]="daysInMonth().length + 2"
+                >
                   <div class="empty-state">
                     <strong>No teacher attendance records found</strong>
                     <p>

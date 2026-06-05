@@ -207,21 +207,37 @@
           <tbody>
             @for (row of summaryRows(); track row.groupLabel) {
               <tr>
-                <td>
+                <td data-label="Group">
                   <strong>{{ row.groupLabel }}</strong>
                 </td>
-                <td>{{ row.total }}</td>
-                <td>{{ row.present }}</td>
-                <td>{{ row.absent }}</td>
-                <td>{{ row.late }}</td>
-                <td>{{ row.halfDay }}</td>
-                <td>
+
+                <td data-label="Total">
+                  {{ row.total }}
+                </td>
+
+                <td data-label="Present">
+                  {{ row.present }}
+                </td>
+
+                <td data-label="Absent">
+                  {{ row.absent }}
+                </td>
+
+                <td data-label="Late">
+                  {{ row.late }}
+                </td>
+
+                <td data-label="Half Day">
+                  {{ row.halfDay }}
+                </td>
+
+                <td data-label="Attendance Rate">
                   <span class="rate-pill">{{ row.rate }}%</span>
                 </td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="7">
+                <td class="empty-cell" colspan="7">
                   <div class="empty-state">
                     <strong>No daily summary records found</strong>
                     <p>Try changing filters or add attendance records first.</p>
@@ -275,7 +291,7 @@
               track record.type + '-' + record.id
             ) {
               <tr>
-                <td>
+                <td data-label="Person">
                   <div class="person-info">
                     <span>{{ getInitial(record) }}</span>
 
@@ -286,18 +302,29 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Type">
                   <span class="type-pill" [ngClass]="getTypeClass(record.type)">
                     {{ getTypeLabel(record.type) }}
                   </span>
                 </td>
 
-                <td>{{ record.code }}</td>
-                <td>{{ record.groupLabel }}</td>
-                <td>{{ record.subLabel }}</td>
-                <td>{{ formatDate(record.attendanceDate) }}</td>
+                <td data-label="Code">
+                  {{ record.code }}
+                </td>
 
-                <td>
+                <td data-label="Group">
+                  {{ record.groupLabel }}
+                </td>
+
+                <td data-label="Details">
+                  {{ record.subLabel }}
+                </td>
+
+                <td data-label="Date">
+                  {{ formatDate(record.attendanceDate) }}
+                </td>
+
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [ngClass]="getStatusClass(record.status)"
@@ -306,13 +333,21 @@
                   </span>
                 </td>
 
-                <td>{{ record.checkIn || '-' }}</td>
-                <td>{{ record.checkOut || '-' }}</td>
-                <td>{{ record.remarks || '-' }}</td>
+                <td data-label="Check In">
+                  {{ record.checkIn || '-' }}
+                </td>
+
+                <td data-label="Check Out">
+                  {{ record.checkOut || '-' }}
+                </td>
+
+                <td data-label="Remarks">
+                  {{ record.remarks || '-' }}
+                </td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="10">
+                <td class="empty-cell" colspan="10">
                   <div class="empty-state">
                     <strong>No daily attendance records found</strong>
                     <p>Try changing filters or add attendance records first.</p>
