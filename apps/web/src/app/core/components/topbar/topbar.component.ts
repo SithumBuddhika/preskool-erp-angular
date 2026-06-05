@@ -297,4 +297,21 @@ export class TopbarComponent {
     this.isSearchOpen = false;
     this.router.navigateByUrl(item.route);
   }
+
+  private readonly academicYearStartMonth = 1; // September
+
+  get academicYearLabel(): string {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth() + 1;
+
+    const startYear =
+      currentMonth >= this.academicYearStartMonth
+        ? currentYear
+        : currentYear - 1;
+
+    const endYear = startYear + 1;
+
+    return `${startYear} / ${endYear}`;
+  }
 }
