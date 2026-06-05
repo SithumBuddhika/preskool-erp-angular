@@ -47,3 +47,5 @@ Thumbs.db
 
 /generated/prisma
 .env
+# Local database backups
+*.sql
