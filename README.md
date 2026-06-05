@@ -40,6 +40,7 @@ This is not just a CRUD demo. It is a complete ERP-style product built module-by
 - [🔐 Authentication & Admin Management](#-authentication--admin-management)
   - [Auth Features](#auth-features)
   - [Admin User Management](#admin-user-management)
+  - [Email Service Notice](#-email-service-notice)
 - [🧩 Core Modules](#-core-modules)
   - [1. 👥 People Management](#1--people-management)
   - [2. 🎓 Academic Management](#2--academic-management)
@@ -189,6 +190,23 @@ The main admin can manage other admin/test accounts:
 - Block inactive admins from logging in
 
 This is especially useful for hosted portfolio demos where test admin accounts need to be controlled safely.
+
+## 📧 Email Service Notice
+
+PreSkool ERP uses the **Brevo Transactional Email API** for production email delivery. This is used by the `auth-service` to send real authentication emails such as **Forgot Password reset links** and **Two-Step Verification (2FA) OTP codes**.
+
+The project originally used SMTP-based email delivery, but during Render deployment the email service was moved to Brevo’s HTTPS API to avoid SMTP port timeout issues on hosted environments. This makes the production email flow more reliable for deployed usage.
+
+Required email environment variables are configured only in the Render `auth-service`:
+
+```env
+BREVO_API_KEY=your_brevo_api_key
+BREVO_SENDER_EMAIL=your_verified_sender_email
+BREVO_SENDER_NAME=PreSkool ERP
+FRONTEND_URL=https://your-vercel-frontend-url.vercel.app
+```
+
+Users do not need Brevo accounts. Brevo is used internally by the backend, and emails are sent directly to the real email addresses stored in the ERP database.
 
 ## 🧩 Core Modules
 

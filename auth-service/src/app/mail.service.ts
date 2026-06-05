@@ -138,54 +138,55 @@ export class MailService {
       heroAlt: 'Forgot password',
       title: 'Reset your password',
       body: `
-        <p style="margin:0 0 10px;color:#44516a;font-size:15px;line-height:1.7;text-align:center;">
+        <p style="margin:0 0 10px;color:#44516a;font-size:14px;line-height:1.7;text-align:left;">
           Hi <strong>${safeName}</strong>, we received a request to reset your
           PreSkool ERP password.
         </p>
 
-        <p style="margin:0;color:#44516a;font-size:15px;line-height:1.7;text-align:center;">
+        <p style="margin:0;color:#44516a;font-size:14px;line-height:1.7;text-align:left;">
           Click the button below to create a new password. This link expires in
           <strong>30 minutes</strong>.
         </p>
 
-        <div style="text-align:center;margin:24px 0 14px;">
+        <div style="margin:18px 0 14px;text-align:left;">
           <a
             href="${safeResetUrl}"
             style="
               display:inline-block;
-              min-width:172px;
+              min-width:160px;
               background:#3d5ee1;
               color:#ffffff;
               text-decoration:none;
-              font-size:15px;
+              font-size:14px;
               font-weight:800;
-              padding:13px 24px;
+              padding:13px 22px;
               border-radius:11px;
+              text-align:center;
             "
           >
             Reset Password
           </a>
         </div>
 
-        <p style="margin:0 0 16px;color:#8a97b3;font-size:14px;line-height:1.7;text-align:center;">
+        <p style="margin:0 0 14px;color:#8a97b3;font-size:13px;line-height:1.7;text-align:left;">
           If you did not request this, you can safely ignore this email.
         </p>
 
         <div
           style="
             border:1px solid #d9e2f2;
-            border-radius:13px;
+            border-radius:12px;
             background:#f8fafd;
-            padding:13px 15px;
+            padding:12px 13px;
           "
         >
-          <p style="margin:0 0 8px;color:#60708f;font-size:13px;font-weight:800;">
+          <p style="margin:0 0 7px;color:#60708f;font-size:12px;font-weight:800;">
             Button not working? Copy this link:
           </p>
           <p style="margin:0;word-break:break-word;">
             <a
               href="${safeResetUrl}"
-              style="color:#2563eb;font-size:12px;line-height:1.7;text-decoration:underline;"
+              style="color:#2563eb;font-size:11px;line-height:1.65;text-decoration:underline;"
             >
               ${safeResetUrl}
             </a>
@@ -215,30 +216,30 @@ export class MailService {
       heroAlt: 'Two-step verification',
       title: 'Verify your identity',
       body: `
-        <p style="margin:0 0 14px;color:#44516a;font-size:15px;line-height:1.7;text-align:center;">
+        <p style="margin:0 0 14px;color:#44516a;font-size:14px;line-height:1.7;text-align:left;">
           Hi <strong>${safeName}</strong>, use the following verification code
           to complete your PreSkool ERP sign in.
         </p>
 
         <div
           style="
-            margin:20px auto 18px;
-            max-width:250px;
+            margin:17px 0 14px;
+            max-width:235px;
             background:#eef3ff;
             border:1px solid #d9e2f2;
-            border-radius:15px;
+            border-radius:14px;
             text-align:center;
-            padding:17px 14px;
+            padding:15px 12px;
           "
         >
           <div
             style="
               color:#60708f;
-              font-size:12px;
+              font-size:11px;
               font-weight:800;
               text-transform:uppercase;
               letter-spacing:0.08em;
-              margin-bottom:9px;
+              margin-bottom:8px;
             "
           >
             Verification Code
@@ -247,9 +248,9 @@ export class MailService {
           <div
             style="
               color:#3d5ee1;
-              font-size:32px;
+              font-size:30px;
               font-weight:900;
-              letter-spacing:8px;
+              letter-spacing:7px;
               line-height:1.2;
             "
           >
@@ -257,7 +258,7 @@ export class MailService {
           </div>
         </div>
 
-        <p style="margin:0;color:#44516a;font-size:14px;line-height:1.8;text-align:center;">
+        <p style="margin:0;color:#44516a;font-size:13px;line-height:1.8;text-align:left;">
           This code expires in <strong>10 minutes</strong>. Do not share it
           with anyone.
         </p>
@@ -295,7 +296,7 @@ export class MailService {
                   cellspacing="0"
                   width="100%"
                   style="
-                    max-width:430px;
+                    max-width:660px;
                     background:#ffffff;
                     border:1px solid #d9e2f2;
                     border-radius:19px;
@@ -303,21 +304,21 @@ export class MailService {
                   "
                 >
                   <tr>
-                    <td style="padding:18px 22px 8px;">
+                    <td style="padding:16px 22px 8px;">
                       <table role="presentation" cellpadding="0" cellspacing="0">
                         <tr>
                           <td style="vertical-align:middle;">
                             <img
                               src="${params.logoUrl}"
                               alt="PreSkool ERP"
-                              width="36"
-                              height="36"
-                              style="display:block;width:36px;height:36px;object-fit:contain;"
+                              width="38"
+                              height="38"
+                              style="display:block;width:38px;height:38px;object-fit:contain;border:0;"
                             />
                           </td>
 
-                          <td style="padding-left:6px;vertical-align:middle;">
-                            <div style="font-size:20px;font-weight:900;line-height:1.05;color:#10224d;">
+                          <td style="padding-left:5px;vertical-align:middle;">
+                            <div style="font-size:21px;font-weight:900;line-height:1.05;color:#10224d;">
                               PreSkool ERP
                             </div>
                             <div style="font-size:13px;font-weight:700;color:#60708f;padding-top:2px;">
@@ -330,55 +331,67 @@ export class MailService {
                   </tr>
 
                   <tr>
-                    <td style="padding:4px 22px 0;">
-                      <div
-                        style="
-                          height:132px;
-                          background:#eef3fb;
-                          border-radius:16px;
-                          text-align:center;
-                          overflow:hidden;
-                        "
-                      >
-                        <img
-                          src="${params.heroImageUrl}"
-                          alt="${params.heroAlt}"
-                          width="210"
-                          style="
-                            display:block;
-                            max-width:210px;
-                            width:82%;
-                            height:auto;
-                            margin:13px auto 0;
-                            border:0;
-                          "
-                        />
-                      </div>
-                    </td>
-                  </tr>
+                    <td style="padding:10px 22px 22px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                        <tr>
+                          <td width="42%" style="vertical-align:middle;padding-right:20px;">
+                            <table
+                              role="presentation"
+                              cellpadding="0"
+                              cellspacing="0"
+                              width="100%"
+                              style="
+                                background:#eef3fb;
+                                border-radius:16px;
+                              "
+                            >
+                              <tr>
+                                <td align="center" style="padding:18px 14px;">
+                                  <img
+                                    src="${params.heroImageUrl}"
+                                    alt="${params.heroAlt}"
+                                    width="210"
+                                    style="
+                                      display:block;
+                                      width:100%;
+                                      max-width:210px;
+                                      height:auto;
+                                      border:0;
+                                      outline:none;
+                                      text-decoration:none;
+                                      margin:0 auto;
+                                    "
+                                  />
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
 
-                  <tr>
-                    <td style="padding:20px 24px 10px;text-align:center;">
-                      <h1
-                        style="
-                          margin:0 0 14px;
-                          color:#3d5ee1;
-                          font-size:27px;
-                          line-height:1.2;
-                          font-weight:900;
-                        "
-                      >
-                        ${params.title}
-                      </h1>
+                          <td width="58%" style="vertical-align:middle;">
+                            <h1
+                              style="
+                                margin:0 0 13px;
+                                color:#3d5ee1;
+                                font-size:27px;
+                                line-height:1.18;
+                                font-weight:900;
+                                text-align:left;
+                              "
+                            >
+                              ${params.title}
+                            </h1>
 
-                      ${params.body}
+                            ${params.body}
+                          </td>
+                        </tr>
+                      </table>
                     </td>
                   </tr>
 
                   <tr>
                     <td
                       style="
-                        padding:14px 18px;
+                        padding:13px 18px;
                         border-top:1px solid #dfe7f2;
                         text-align:center;
                         background:#f9fbff;
