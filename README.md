@@ -855,8 +855,6 @@ npx nx lint web
 
 ## 🖼️ Screenshots
 
-> Add your latest screenshots inside a `screenshots/` folder and update these paths.
-
 ### Admin Dashboard
 
 <p align="center">
