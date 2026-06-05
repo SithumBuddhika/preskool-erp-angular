@@ -1635,3 +1635,527 @@
 .admin-users-summary article {
   padding: 11px 13px;
 }
+
+/* FINAL ADMIN DASHBOARD RESPONSIVE FIX */
+@media (max-width: 1199px) {
+  .dashboard-content-grid {
+    grid-template-columns: 1fr !important;
+    grid-template-areas:
+      'fees'
+      'leave'
+      'schedule'
+      'attendance'
+      'notice'
+      'finance' !important;
+  }
+
+  .admin-dashboard__stats,
+  .stats-skeleton,
+  .dashboard-action-tiles,
+  .admin-users-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .finance-side-stack {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .admin-dashboard {
+    gap: 14px;
+    padding: 0;
+    background: transparent;
+  }
+
+  .admin-dashboard__title-row {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .admin-dashboard__actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .admin-dashboard__actions button,
+  .admin-dashboard__actions a {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  .real-dashboard-welcome {
+    min-height: auto;
+    align-items: stretch;
+    flex-direction: column;
+    padding: 18px;
+    border-radius: 16px;
+    gap: 16px;
+  }
+
+  .real-dashboard-welcome h2 {
+    font-size: 24px;
+  }
+
+  .real-dashboard-welcome p {
+    font-size: 12px;
+  }
+
+  .real-dashboard-welcome__meta {
+    width: 100%;
+    min-height: 92px;
+  }
+
+  .real-dashboard-welcome__meta strong {
+    font-size: 34px;
+  }
+
+  .admin-dashboard__stats,
+  .stats-skeleton,
+  .admin-users-summary,
+  .dashboard-action-tiles,
+  .fee-summary-row,
+  .attendance-counts,
+  .finance-side-stack {
+    grid-template-columns: 1fr !important;
+  }
+
+  :host ::ng-deep .admin-dashboard__stats app-stat-card > * {
+    min-height: 92px !important;
+    padding: 14px !important;
+  }
+
+  :host ::ng-deep .admin-dashboard__stats app-stat-card strong,
+  :host ::ng-deep .admin-dashboard__stats app-stat-card h3,
+  :host ::ng-deep .admin-dashboard__stats app-stat-card h4 {
+    font-size: 22px !important;
+  }
+
+  .dashboard-card,
+  .admin-users-dock {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .dashboard-card__header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .dashboard-card__header h3 {
+    font-size: 17px;
+  }
+
+  .dashboard-card__header p {
+    font-size: 11px;
+  }
+
+  .fee-chart {
+    height: 190px;
+    overflow-x: auto;
+    grid-template-columns: repeat(8, 52px);
+    padding-bottom: 6px;
+  }
+
+  .fee-chart__bar {
+    width: 34px;
+    height: 130px;
+  }
+
+  .mini-calendar {
+    grid-template-columns: repeat(7, minmax(32px, 1fr));
+    gap: 5px;
+  }
+
+  .mini-calendar span {
+    height: 30px;
+    font-size: 10px;
+  }
+
+  .upcoming-events__header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .event-card {
+    align-items: flex-start;
+  }
+
+  .attendance-tabs {
+    overflow-x: auto;
+    gap: 12px;
+    padding-bottom: 2px;
+  }
+
+  .attendance-tabs button {
+    flex: 0 0 auto;
+  }
+
+  .attendance-ring {
+    width: 132px;
+    height: 132px;
+  }
+
+  .attendance-ring > div {
+    width: 74px;
+    height: 74px;
+  }
+
+  .notice-list article {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .notice-list small {
+    grid-column: 2;
+    width: fit-content;
+  }
+
+  .action-tile {
+    min-height: 78px;
+  }
+
+  .admin-users-dock__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-users-dock__actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .admin-users-dock__actions button {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  .admin-users-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 12px;
+  }
+
+  .admin-users-table-wrap table {
+    min-width: 920px;
+  }
+
+  .admin-user-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-width: 360px;
+  }
+
+  .admin-user-actions button {
+    width: 100%;
+  }
+
+  .modal-backdrop {
+    place-items: end center;
+    padding: 10px;
+  }
+
+  .admin-user-modal {
+    width: 100%;
+    max-height: calc(100vh - 20px);
+    padding: 18px;
+    border-radius: 18px 18px 12px 12px;
+  }
+
+  .admin-user-modal__header {
+    position: sticky;
+    top: -18px;
+    z-index: 5;
+    background: #ffffff;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #edf1f7;
+  }
+
+  .admin-user-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-user-modal__actions,
+  .confirm-modal__actions {
+    flex-direction: column-reverse;
+  }
+
+  .admin-user-modal__actions button,
+  .confirm-modal__actions button {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  .confirm-modal {
+    width: 100%;
+    padding: 24px 18px;
+  }
+}
+
+@media (max-width: 575px) {
+  .admin-dashboard__title-row {
+    gap: 10px;
+  }
+
+  .primary-btn,
+  .secondary-btn,
+  .primary-link-btn,
+  .secondary-link-btn {
+    min-height: 48px;
+  }
+
+  .real-dashboard-welcome {
+    padding: 16px;
+  }
+
+  .real-dashboard-welcome h2 {
+    font-size: 22px;
+  }
+
+  .dashboard-card,
+  .admin-users-dock {
+    padding: 12px;
+  }
+
+  .fee-summary-row article,
+  .admin-users-summary article {
+    padding: 12px;
+  }
+
+  .leave-request-card,
+  .event-card {
+    padding: 10px;
+  }
+
+  .finance-side-stack article {
+    min-height: 82px;
+  }
+
+  .admin-users-table-wrap {
+    margin-inline: -4px;
+    padding-bottom: 4px;
+  }
+
+  .toast {
+    left: 16px;
+    right: 16px;
+    top: 16px;
+    max-width: none;
+  }
+}
+
+/* FINAL ADMIN USER TABLE MOBILE FIX */
+@media (max-width: 767px) {
+  .admin-dashboard,
+  .admin-users-dock,
+  .admin-users-dock__header,
+  .admin-users-dock__header > div,
+  .admin-users-table-wrap {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .admin-users-dock {
+    overflow: hidden;
+  }
+
+  .admin-users-dock__header p {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-users-table-wrap {
+    overflow: visible;
+    margin-top: 14px;
+  }
+
+  .admin-users-table-wrap table,
+  .admin-users-table-wrap thead,
+  .admin-users-table-wrap tbody,
+  .admin-users-table-wrap tr,
+  .admin-users-table-wrap th,
+  .admin-users-table-wrap td {
+    display: block;
+  }
+
+  .admin-users-table-wrap table {
+    min-width: 0 !important;
+    width: 100%;
+  }
+
+  .admin-users-table-wrap thead {
+    display: none;
+  }
+
+  .admin-users-table-wrap tbody {
+    display: grid;
+    gap: 12px;
+  }
+
+  .admin-users-table-wrap tr {
+    border: 1px solid #dfe7f2;
+    border-radius: 14px;
+    background: #ffffff;
+    overflow: hidden;
+    box-shadow: 0 8px 22px rgba(16, 24, 40, 0.05);
+  }
+
+  .admin-users-table-wrap td {
+    min-height: 44px;
+    border-bottom: 1px solid #edf1f7;
+    padding: 11px 12px;
+    white-space: normal;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-users-table-wrap td:last-child {
+    border-bottom: 0;
+  }
+
+  .admin-users-table-wrap td::before {
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 850;
+    text-align: left;
+    flex: 0 0 86px;
+  }
+
+  .admin-users-table-wrap td:nth-child(1)::before {
+    content: 'Admin';
+  }
+
+  .admin-users-table-wrap td:nth-child(2)::before {
+    content: 'Email';
+  }
+
+  .admin-users-table-wrap td:nth-child(3)::before {
+    content: 'Role';
+  }
+
+  .admin-users-table-wrap td:nth-child(4)::before {
+    content: 'Status';
+  }
+
+  .admin-users-table-wrap td:nth-child(5)::before {
+    content: '2FA';
+  }
+
+  .admin-users-table-wrap td:nth-child(6)::before {
+    content: 'Created';
+  }
+
+  .admin-users-table-wrap td:nth-child(7)::before {
+    content: 'Action';
+  }
+
+  .admin-users-table-wrap td:nth-child(1) {
+    align-items: flex-start;
+  }
+
+  .admin-users-table-wrap td:nth-child(1)::before {
+    padding-top: 12px;
+  }
+
+  .admin-user-info {
+    width: 100%;
+    justify-content: flex-end;
+    min-width: 0;
+  }
+
+  .admin-user-info > div {
+    min-width: 0;
+  }
+
+  .admin-user-info strong,
+  .admin-user-info small {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .admin-users-table-wrap td:nth-child(2) {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .role-pill,
+  .admin-status-pill,
+  .two-step-pill {
+    max-width: 150px;
+    justify-content: center;
+  }
+
+  .admin-users-table-wrap td.text-right {
+    display: block;
+    text-align: left;
+  }
+
+  .admin-users-table-wrap td.text-right::before {
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .admin-user-actions {
+    width: 100%;
+    min-width: 0 !important;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .admin-user-actions button {
+    width: 100%;
+    min-width: 0;
+    height: 38px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+
+  .admin-empty-state {
+    padding: 24px 12px;
+  }
+
+  .admin-users-table-wrap td[colspan] {
+    display: block;
+    text-align: center;
+  }
+
+  .admin-users-table-wrap td[colspan]::before {
+    display: none;
+  }
+}
+
+@media (max-width: 430px) {
+  .admin-users-table-wrap td {
+    gap: 10px;
+  }
+
+  .admin-users-table-wrap td::before {
+    flex-basis: 76px;
+  }
+
+  .admin-user-info strong,
+  .admin-user-info small,
+  .role-pill,
+  .admin-status-pill,
+  .two-step-pill {
+    max-width: 130px;
+  }
+
+  .admin-user-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-user-actions button {
+    min-height: 40px;
+  }
+}

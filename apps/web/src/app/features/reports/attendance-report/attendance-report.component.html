@@ -170,13 +170,13 @@
           <tbody>
             @for (record of filteredRecords(); track record.id) {
               <tr>
-                <td>
+                <td data-label="Attendance ID">
                   <span class="attendance-code">
                     {{ record.attendanceCode }}
                   </span>
                 </td>
 
-                <td>
+                <td data-label="Student">
                   <div class="student-info">
                     <span>{{ getAttendanceInitial(record) }}</span>
 
@@ -187,11 +187,19 @@
                   </div>
                 </td>
 
-                <td>{{ record.studentAdmissionNo || 'Not added' }}</td>
-                <td>{{ getClassLabel(record) }}</td>
-                <td>{{ formatDisplayDate(record.attendanceDate) }}</td>
+                <td data-label="Admission No">
+                  {{ record.studentAdmissionNo || 'Not added' }}
+                </td>
 
-                <td>
+                <td data-label="Class">
+                  {{ getClassLabel(record) }}
+                </td>
+
+                <td data-label="Date">
+                  {{ formatDisplayDate(record.attendanceDate) }}
+                </td>
+
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--absent]="record.status === 'ABSENT'"
@@ -202,13 +210,21 @@
                   </span>
                 </td>
 
-                <td>{{ formatTime(record.checkInTime) }}</td>
-                <td>{{ formatTime(record.checkOutTime) }}</td>
-                <td>{{ record.remarks || 'No remarks' }}</td>
+                <td data-label="Check In">
+                  {{ formatTime(record.checkInTime) }}
+                </td>
+
+                <td data-label="Check Out">
+                  {{ formatTime(record.checkOutTime) }}
+                </td>
+
+                <td data-label="Remarks">
+                  {{ record.remarks || 'No remarks' }}
+                </td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="9">
+                <td class="empty-cell" colspan="9">
                   <div class="empty-state">
                     <strong>No attendance report records found</strong>
                     <p>

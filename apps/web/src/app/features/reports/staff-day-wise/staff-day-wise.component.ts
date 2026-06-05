@@ -179,6 +179,52 @@ export class StaffDayWiseComponent implements OnInit {
     this.searchTerm.set(value);
   }
 
+  exportCsv(): void {
+    const rows = this.staffRows();
+    const days = this.daysInMonth();
+
+    if (rows.length === 0) {
+      return;
+    }
+
+    const headers = [
+      'Staff Code',
+      'Staff Name',
+      'Department',
+      'Designation',
+      'Marked Days',
+      ...days.map((day) => String(day.day).padStart(2, '0')),
+    ];
+
+    const csvRows = rows.map((row) => [
+      row.staffCode || 'Not added',
+      row.staffName || 'Not added',
+      row.department || 'Not added',
+      row.designation || 'Not added',
+      String(this.getMarkedDays(row)),
+      ...days.map((day) =>
+        this.getStatusShort(this.getRecordForDay(row, day)?.status),
+      ),
+    ]);
+
+    const csvContent = [headers, ...csvRows]
+      .map((row) => row.map((cell) => this.escapeCsvValue(cell)).join(','))
+      .join('\n');
+
+    const blob = new Blob([csvContent], {
+      type: 'text/csv;charset=utf-8;',
+    });
+
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = `staff-day-wise-${this.selectedMonth()}.csv`;
+    link.click();
+
+    window.URL.revokeObjectURL(url);
+  }
+
   getRecordForDay(
     row: StaffDayWiseRow,
     day: DayColumn,
@@ -261,5 +307,9 @@ export class StaffDayWiseComponent implements OnInit {
 
   private getTodayDateKey(): string {
     return new Date().toISOString().slice(0, 10);
+  }
+
+  private escapeCsvValue(value: string): string {
+    return `"${String(value).replace(/"/g, '""')}"`;
   }
 }

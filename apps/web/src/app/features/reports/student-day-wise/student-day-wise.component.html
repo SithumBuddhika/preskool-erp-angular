@@ -163,7 +163,10 @@
               </tr>
             } @empty {
               <tr>
-                <td [attr.colspan]="daysInMonth().length + 2">
+                <td
+                  class="empty-cell"
+                  [attr.colspan]="daysInMonth().length + 2"
+                >
                   <div class="empty-state">
                     <strong>No student attendance records found</strong>
                     <p>
