@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import {
   CreateStaffAttendancePayload,
   StaffAttendance,
@@ -9,7 +10,7 @@ import {
   providedIn: 'root',
 })
 export class StaffAttendanceService {
-  private readonly apiUrl = 'http://localhost:3002/api/staff-attendance';
+  private readonly apiUrl = environment.peopleApiUrl + '/staff-attendance';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -42,3 +43,4 @@ export class StaffAttendanceService {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
   }
 }
+

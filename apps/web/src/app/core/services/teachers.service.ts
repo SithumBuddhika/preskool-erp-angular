@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { map, Observable } from 'rxjs';
 import { CreateTeacherPayload, Teacher } from '../models/teacher.model';
 
@@ -7,7 +8,7 @@ import { CreateTeacherPayload, Teacher } from '../models/teacher.model';
   providedIn: 'root',
 })
 export class TeachersService {
-  private readonly apiUrl = 'http://localhost:3002/api/teachers';
+  private readonly apiUrl = environment.peopleApiUrl + '/teachers';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -42,3 +43,4 @@ export class TeachersService {
       .pipe(map((response) => response.employeeNo));
   }
 }
+

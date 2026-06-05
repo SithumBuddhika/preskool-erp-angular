@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { catchError, forkJoin, map, Observable, of } from 'rxjs';
 
 export type ParentDashboardStatCard = {
@@ -121,7 +122,7 @@ type SchoolEventRecord = {
   providedIn: 'root',
 })
 export class ParentDashboardDataService {
-  private readonly peopleApiUrl = 'http://localhost:3002/api';
+  private readonly peopleApiUrl = environment.peopleApiUrl + '';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -383,3 +384,4 @@ export class ParentDashboardDataService {
     )}-${String(today.getDate()).padStart(2, '0')}`;
   }
 }
+

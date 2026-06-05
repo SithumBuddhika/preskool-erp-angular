@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { map, Observable } from 'rxjs';
 import { CreateLeavePayload, StaffLeave } from '../models/leave.model';
 
@@ -7,7 +8,7 @@ import { CreateLeavePayload, StaffLeave } from '../models/leave.model';
   providedIn: 'root',
 })
 export class LeavesService {
-  private readonly apiUrl = 'http://localhost:3002/api/leaves';
+  private readonly apiUrl = environment.peopleApiUrl + '/leaves';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -42,3 +43,4 @@ export class LeavesService {
       .pipe(map((response) => response.leaveCode));
   }
 }
+

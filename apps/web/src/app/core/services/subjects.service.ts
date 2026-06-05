@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 import { CreateSubjectPayload, Subject } from '../models/subject.model';
 
@@ -7,7 +8,7 @@ import { CreateSubjectPayload, Subject } from '../models/subject.model';
   providedIn: 'root',
 })
 export class SubjectsService {
-  private readonly apiUrl = 'http://localhost:3003/api/subjects';
+  private readonly apiUrl = environment.academicApiUrl + '/subjects';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -36,3 +37,4 @@ export class SubjectsService {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
   }
 }
+

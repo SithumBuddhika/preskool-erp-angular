@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { map, Observable } from 'rxjs';
 import {
   CreateTransportRoutePayload,
@@ -10,7 +11,7 @@ import {
   providedIn: 'root',
 })
 export class TransportRoutesService {
-  private readonly apiUrl = 'http://localhost:3002/api/transport-routes';
+  private readonly apiUrl = environment.peopleApiUrl + '/transport-routes';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -47,3 +48,4 @@ export class TransportRoutesService {
       .pipe(map((response) => response.routeCode));
   }
 }
+

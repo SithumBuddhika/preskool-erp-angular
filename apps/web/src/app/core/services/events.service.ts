@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import {
   CreateSchoolEventPayload,
   SchoolEvent,
@@ -9,7 +10,7 @@ import {
   providedIn: 'root',
 })
 export class EventsService {
-  private readonly apiUrl = 'http://localhost:3002/api/events';
+  private readonly apiUrl = environment.peopleApiUrl + '/events';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -49,3 +50,4 @@ export class EventsService {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
   }
 }
+

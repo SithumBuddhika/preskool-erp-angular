@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { map, Observable } from 'rxjs';
 import { CreateLibraryBookPayload, LibraryBook } from '../models/library.model';
 
@@ -7,7 +8,7 @@ import { CreateLibraryBookPayload, LibraryBook } from '../models/library.model';
   providedIn: 'root',
 })
 export class LibraryService {
-  private readonly apiUrl = 'http://localhost:3002/api/library';
+  private readonly apiUrl = environment.peopleApiUrl + '/library';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -42,3 +43,4 @@ export class LibraryService {
       .pipe(map((response) => response.bookCode));
   }
 }
+

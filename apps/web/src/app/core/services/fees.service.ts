@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { map, Observable } from 'rxjs';
 import { CreateFeePayload, Fee } from '../models/fee.model';
 
@@ -7,7 +8,7 @@ import { CreateFeePayload, Fee } from '../models/fee.model';
   providedIn: 'root',
 })
 export class FeesService {
-  private readonly apiUrl = 'http://localhost:3002/api/fees';
+  private readonly apiUrl = environment.peopleApiUrl + '/fees';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -39,3 +40,4 @@ export class FeesService {
       .pipe(map((response) => response.receiptNo));
   }
 }
+

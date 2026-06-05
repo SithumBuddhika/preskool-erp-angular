@@ -1,5 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import {
   AdminUser,
   CreateAdminUserPayload,
@@ -13,7 +14,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root',
 })
 export class AdminUsersService {
-  private readonly apiUrl = 'http://localhost:3001/api/auth/admin-users';
+  private readonly apiUrl = environment.authApiUrl + '/auth/admin-users';
 
   constructor(
     private readonly http: HttpClient,
@@ -68,3 +69,4 @@ export class AdminUsersService {
     });
   }
 }
+

@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { map, Observable } from 'rxjs';
 import {
   CreateTimeTablePayload,
@@ -11,7 +12,7 @@ import {
   providedIn: 'root',
 })
 export class TimeTableService {
-  private readonly apiUrl = 'http://localhost:3003/api/time-table';
+  private readonly apiUrl = environment.academicApiUrl + '/time-table';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -46,3 +47,4 @@ export class TimeTableService {
       .pipe(map((response) => response.timeTableCode));
   }
 }
+

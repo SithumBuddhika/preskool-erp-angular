@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { map, Observable } from 'rxjs';
 import { CreateSportPayload, Sport } from '../models/sport.model';
 
@@ -7,7 +8,7 @@ import { CreateSportPayload, Sport } from '../models/sport.model';
   providedIn: 'root',
 })
 export class SportsService {
-  private readonly apiUrl = 'http://localhost:3002/api/sports';
+  private readonly apiUrl = environment.peopleApiUrl + '/sports';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -42,3 +43,4 @@ export class SportsService {
       .pipe(map((response) => response.sportCode));
   }
 }
+

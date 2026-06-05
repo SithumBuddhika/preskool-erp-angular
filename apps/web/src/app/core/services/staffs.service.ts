@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { map, Observable } from 'rxjs';
 import { CreateStaffPayload, Staff } from '../models/staff.model';
 
@@ -7,7 +8,7 @@ import { CreateStaffPayload, Staff } from '../models/staff.model';
   providedIn: 'root',
 })
 export class StaffsService {
-  private readonly apiUrl = 'http://localhost:3002/api/staffs';
+  private readonly apiUrl = environment.peopleApiUrl + '/staffs';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -42,3 +43,4 @@ export class StaffsService {
       .pipe(map((response) => response.staffCode));
   }
 }
+
