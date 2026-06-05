@@ -96,11 +96,11 @@
           <tbody>
             @for (book of books(); track book.id) {
               <tr>
-                <td>
+                <td data-label="Book ID">
                   <span class="book-code">{{ book.bookCode }}</span>
                 </td>
 
-                <td>
+                <td data-label="Book Title">
                   <div class="book-info">
                     <span>{{ getInitials(book) }}</span>
 
@@ -111,25 +111,27 @@
                   </div>
                 </td>
 
-                <td>{{ book.isbn || 'Not added' }}</td>
-                <td>{{ book.author }}</td>
+                <td data-label="ISBN">{{ book.isbn || 'Not added' }}</td>
+                <td data-label="Author">{{ book.author }}</td>
 
-                <td>
+                <td data-label="Category">
                   <span class="category-pill">{{ book.category }}</span>
                 </td>
 
-                <td>{{ book.publisher || 'Not added' }}</td>
+                <td data-label="Publisher">
+                  {{ book.publisher || 'Not added' }}
+                </td>
 
-                <td>
+                <td data-label="Copies">
                   <div class="copies-info">
                     <strong>{{ getAvailabilityText(book) }}</strong>
                     <span>Available / Total</span>
                   </div>
                 </td>
 
-                <td>{{ book.shelfNo || 'Not added' }}</td>
+                <td data-label="Shelf No">{{ book.shelfNo || 'Not added' }}</td>
 
-                <td>
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--unavailable]="
@@ -140,7 +142,7 @@
                   </span>
                 </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"

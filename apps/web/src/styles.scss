@@ -16,6 +16,7 @@
 html,
 body {
   margin: 0;
+  width: 100%;
   min-height: 100%;
   font-family: var(--erp-font-main);
   background: var(--erp-bg);
@@ -25,6 +26,11 @@ body {
 
 body {
   overflow-x: hidden;
+}
+
+img,
+svg {
+  max-width: 100%;
 }
 
 h1,
@@ -49,6 +55,10 @@ button {
   cursor: pointer;
 }
 
+button:disabled {
+  cursor: not-allowed;
+}
+
 input,
 select,
 textarea {
@@ -59,4 +69,23 @@ input::placeholder,
 textarea::placeholder {
   color: #98a2b3;
   font-weight: 400;
+}
+
+/* Global responsive safety */
+
+table {
+  max-width: 100%;
+}
+
+input,
+select,
+textarea,
+button {
+  max-width: 100%;
+}
+
+@media (max-width: 767px) {
+  body {
+    background: #f5f7fb;
+  }
 }

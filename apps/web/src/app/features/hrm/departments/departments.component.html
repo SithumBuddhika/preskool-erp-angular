@@ -94,13 +94,13 @@
           <tbody>
             @for (department of departments(); track department.id) {
               <tr>
-                <td>
+                <td data-label="Department ID">
                   <span class="department-code">
                     {{ department.departmentCode }}
                   </span>
                 </td>
 
-                <td>
+                <td data-label="Department Name">
                   <div class="department-name">
                     <span>{{ getInitials(department) }}</span>
 
@@ -113,12 +113,23 @@
                   </div>
                 </td>
 
-                <td>{{ department.headOfDepartment || 'Not assigned' }}</td>
-                <td>{{ department.phone || 'Not added' }}</td>
-                <td>{{ department.email || 'No email added' }}</td>
-                <td>{{ department.location || 'Not added' }}</td>
+                <td data-label="Head">
+                  {{ department.headOfDepartment || 'Not assigned' }}
+                </td>
 
-                <td>
+                <td data-label="Phone">
+                  {{ department.phone || 'Not added' }}
+                </td>
+
+                <td data-label="Email">
+                  {{ department.email || 'No email added' }}
+                </td>
+
+                <td data-label="Location">
+                  {{ department.location || 'Not added' }}
+                </td>
+
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--inactive]="
@@ -129,7 +140,7 @@
                   </span>
                 </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"

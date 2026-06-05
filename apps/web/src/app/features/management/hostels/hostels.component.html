@@ -93,11 +93,11 @@
           <tbody>
             @for (hostel of hostels(); track hostel.id) {
               <tr>
-                <td>
+                <td data-label="Hostel Code">
                   <span class="hostel-code">{{ hostel.hostelCode }}</span>
                 </td>
 
-                <td>
+                <td data-label="Hostel">
                   <div class="hostel-info">
                     <span>{{ getHostelInitial(hostel) }}</span>
 
@@ -108,23 +108,23 @@
                   </div>
                 </td>
 
-                <td>
-                  <span class="type-pill">{{
-                    getTypeLabel(hostel.hostelType)
-                  }}</span>
+                <td data-label="Type">
+                  <span class="type-pill">
+                    {{ getTypeLabel(hostel.hostelType) }}
+                  </span>
                 </td>
 
-                <td>{{ hostel.wardenName || '-' }}</td>
-                <td>{{ hostel.phone || '-' }}</td>
-                <td>{{ hostel.totalRooms }}</td>
+                <td data-label="Warden">{{ hostel.wardenName || '-' }}</td>
+                <td data-label="Phone">{{ hostel.phone || '-' }}</td>
+                <td data-label="Rooms">{{ hostel.totalRooms }}</td>
 
-                <td>
+                <td data-label="Beds">
                   <span class="beds-pill">
                     {{ getBedAvailabilityLabel(hostel) }}
                   </span>
                 </td>
 
-                <td>
+                <td data-label="Monthly Fee">
                   @if (hostel.monthlyFee) {
                     Rs. {{ hostel.monthlyFee | number: '1.0-0' }}
                   } @else {
@@ -132,7 +132,7 @@
                   }
                 </td>
 
-                <td>
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--inactive]="hostel.status === 'INACTIVE'"
@@ -144,7 +144,7 @@
                   </span>
                 </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"

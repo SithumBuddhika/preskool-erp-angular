@@ -94,11 +94,11 @@
           <tbody>
             @for (leave of leaves(); track leave.id) {
               <tr>
-                <td>
+                <td data-label="Leave ID">
                   <span class="leave-code">{{ leave.leaveCode }}</span>
                 </td>
 
-                <td>
+                <td data-label="Staff">
                   <div class="staff-info">
                     <span>{{ getLeaveInitial(leave) }}</span>
 
@@ -109,7 +109,7 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Department">
                   <div class="meta-info">
                     <strong>{{ leave.departmentName || 'Not added' }}</strong>
                     @if (leave.departmentCode) {
@@ -118,7 +118,7 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Designation">
                   <div class="meta-info">
                     <strong>{{ leave.designation || 'Not added' }}</strong>
                     @if (leave.designationCode) {
@@ -127,17 +127,23 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Leave Type">
                   <span class="type-pill">
                     {{ getLeaveTypeLabel(leave.leaveType) }}
                   </span>
                 </td>
 
-                <td>{{ formatDisplayDate(leave.startDate) }}</td>
-                <td>{{ formatDisplayDate(leave.endDate) }}</td>
-                <td>{{ leave.totalDays }} day(s)</td>
+                <td data-label="Start Date">
+                  {{ formatDisplayDate(leave.startDate) }}
+                </td>
 
-                <td>
+                <td data-label="End Date">
+                  {{ formatDisplayDate(leave.endDate) }}
+                </td>
+
+                <td data-label="Total Days">{{ leave.totalDays }} day(s)</td>
+
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--approved]="leave.status === 'APPROVED'"
@@ -147,9 +153,11 @@
                   </span>
                 </td>
 
-                <td>{{ leave.approvedBy || 'Not added' }}</td>
+                <td data-label="Approved By">
+                  {{ leave.approvedBy || 'Not added' }}
+                </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"

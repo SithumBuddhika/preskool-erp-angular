@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TablerIconComponent, provideTablerIcons } from 'angular-tabler-icons';
 import {
@@ -41,6 +41,9 @@ type SidebarSection = {
   styleUrl: './sidebar.component.scss',
 })
 export class SidebarComponent {
+  @Input() isMobileOpen = false;
+  @Output() mobileClose = new EventEmitter<void>();
+
   sections: SidebarSection[] = [
     {
       title: 'Main',
@@ -283,4 +286,8 @@ export class SidebarComponent {
       ],
     },
   ];
+
+  closeMobileSidebar(): void {
+    this.mobileClose.emit();
+  }
 }

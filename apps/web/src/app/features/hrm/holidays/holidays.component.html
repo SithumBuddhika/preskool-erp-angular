@@ -93,11 +93,11 @@
           <tbody>
             @for (holiday of holidays(); track holiday.id) {
               <tr>
-                <td>
+                <td data-label="Holiday ID">
                   <span class="holiday-code">{{ holiday.holidayCode }}</span>
                 </td>
 
-                <td>
+                <td data-label="Holiday">
                   <div class="holiday-info">
                     <span>{{ getInitials(holiday) }}</span>
 
@@ -108,17 +108,25 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Type">
                   <span class="type-pill">
                     {{ getHolidayTypeLabel(holiday.holidayType) }}
                   </span>
                 </td>
 
-                <td>{{ formatDisplayDate(holiday.startDate) }}</td>
-                <td>{{ formatDisplayDate(holiday.endDate) }}</td>
-                <td>{{ getDurationDays(holiday) }} day(s)</td>
+                <td data-label="Start Date">
+                  {{ formatDisplayDate(holiday.startDate) }}
+                </td>
 
-                <td>
+                <td data-label="End Date">
+                  {{ formatDisplayDate(holiday.endDate) }}
+                </td>
+
+                <td data-label="Duration">
+                  {{ getDurationDays(holiday) }} day(s)
+                </td>
+
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--inactive]="holiday.status !== 'ACTIVE'"
@@ -127,7 +135,7 @@
                   </span>
                 </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"

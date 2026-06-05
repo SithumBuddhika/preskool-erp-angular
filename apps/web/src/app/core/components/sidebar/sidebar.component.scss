@@ -4,34 +4,46 @@
   width: var(--erp-sidebar-width);
   background: #ffffff;
   border-right: 1px solid var(--erp-border-soft);
-  z-index: 50;
+  z-index: 60;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 14px 14px 18px;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.erp-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.erp-sidebar::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #cbd5e1;
 }
 
 .erp-sidebar__brand {
-  height: 42px;
+  min-height: 50px;
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
 }
 
 .erp-sidebar__brand-left {
   min-width: 0;
   display: flex;
   align-items: center;
-  // gap: 8px;
 }
 
 .erp-sidebar__brand-icon {
-  width: 60px;
-  height: 60px;
+  width: 58px;
+  height: 58px;
   object-fit: contain;
   flex-shrink: 0;
 }
 
 .erp-sidebar__brand strong {
+  margin-left: -4px;
   font-size: 22px;
   line-height: 1;
   font-weight: 800;
@@ -39,12 +51,22 @@
   letter-spacing: -0.6px;
 }
 
-.erp-sidebar__brand button {
+.erp-sidebar__desktop-toggle,
+.erp-sidebar__mobile-close {
   margin-left: auto;
   border: 0;
   background: transparent;
   color: #8a94a6;
   cursor: pointer;
+}
+
+.erp-sidebar__desktop-toggle i-tabler {
+  width: 18px;
+  height: 18px;
+}
+
+.erp-sidebar__mobile-close {
+  display: none;
 }
 
 .erp-sidebar__school {
@@ -53,29 +75,34 @@
   align-items: center;
   gap: 9px;
   border: 1px solid var(--erp-border-soft);
-  border-radius: 6px;
+  border-radius: 10px;
   padding: 0 10px;
   margin-bottom: 18px;
+  background: #ffffff;
   box-shadow: var(--erp-shadow-soft);
 }
 
 .erp-sidebar__school-icon {
-  width: 26px;
-  height: 26px;
-  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
   background: #fce7f3;
   color: #db2777;
   display: grid;
   place-items: center;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .erp-sidebar__school span {
+  min-width: 0;
   flex: 1;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--erp-text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .erp-sidebar__school i-tabler {
@@ -87,26 +114,29 @@
 .erp-sidebar__nav {
   display: grid;
   gap: 16px;
+  padding-bottom: 10px;
 }
 
 .erp-sidebar__section p {
   margin: 0 0 8px;
   font-size: 11px;
   color: #9ca3af;
-  font-weight: 700;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .erp-sidebar__link {
-  min-height: 34px;
+  min-height: 36px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  border-radius: 6px;
-  padding: 0 9px;
+  border-radius: 9px;
+  padding: 0 10px;
   color: #4b587c;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   text-decoration: none;
   transition: 0.18s ease;
 }
@@ -118,13 +148,22 @@
   gap: 9px;
 }
 
+.erp-sidebar__link-left span {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .erp-sidebar__link i-tabler {
   width: 16px;
   height: 16px;
+  flex: 0 0 auto;
 }
 
 .erp-sidebar__arrow {
-  opacity: 0.7;
+  opacity: 0.65;
+  flex: 0 0 auto;
 }
 
 .erp-sidebar__link:hover,
@@ -135,6 +174,66 @@
 
 @media (max-width: 991px) {
   .erp-sidebar {
+    width: min(86vw, 292px);
+    transform: translateX(-105%);
+    border-right: 0;
+    box-shadow: 18px 0 45px rgba(15, 23, 42, 0.18);
+    transition: transform 0.22s ease;
+  }
+
+  .erp-sidebar.is-mobile-open {
+    transform: translateX(0);
+  }
+
+  .erp-sidebar__brand {
+    min-height: 54px;
+    margin-bottom: 10px;
+  }
+
+  .erp-sidebar__desktop-toggle {
     display: none;
+  }
+
+  .erp-sidebar__mobile-close {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #f1f5f9;
+    color: #172554;
+    display: grid;
+    place-items: center;
+    font-size: 24px;
+    line-height: 1;
+    font-weight: 700;
+  }
+}
+
+@media (max-width: 575px) {
+  .erp-sidebar {
+    width: min(88vw, 284px);
+    padding: 12px 12px 16px;
+  }
+
+  .erp-sidebar__brand-icon {
+    width: 52px;
+    height: 52px;
+  }
+
+  .erp-sidebar__brand strong {
+    font-size: 20px;
+  }
+
+  .erp-sidebar__school {
+    height: 46px;
+    margin-bottom: 14px;
+  }
+
+  .erp-sidebar__nav {
+    gap: 13px;
+  }
+
+  .erp-sidebar__link {
+    min-height: 35px;
+    font-size: 12px;
   }
 }

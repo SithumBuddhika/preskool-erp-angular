@@ -97,11 +97,11 @@
           <tbody>
             @for (route of routes(); track route.id) {
               <tr>
-                <td>
+                <td data-label="Route Code">
                   <span class="route-code">{{ route.routeCode }}</span>
                 </td>
 
-                <td>
+                <td data-label="Route">
                   <div class="route-info">
                     <span>{{ getRouteInitial(route) }}</span>
 
@@ -112,15 +112,17 @@
                   </div>
                 </td>
 
-                <td>{{ route.startLocation }}</td>
-                <td>{{ route.endLocation }}</td>
-                <td>{{ getStopsLabel(route) }}</td>
-                <td>{{ route.distanceKm ? route.distanceKm + ' km' : '-' }}</td>
-                <td>{{ route.vehicleNo || '-' }}</td>
-                <td>{{ route.driverName || '-' }}</td>
-                <td>{{ getPointsLabel(route) }}</td>
+                <td data-label="Start">{{ route.startLocation }}</td>
+                <td data-label="End">{{ route.endLocation }}</td>
+                <td data-label="Stops">{{ getStopsLabel(route) }}</td>
+                <td data-label="Distance">
+                  {{ route.distanceKm ? route.distanceKm + ' km' : '-' }}
+                </td>
+                <td data-label="Vehicle">{{ route.vehicleNo || '-' }}</td>
+                <td data-label="Driver">{{ route.driverName || '-' }}</td>
+                <td data-label="Map Points">{{ getPointsLabel(route) }}</td>
 
-                <td>
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--inactive]="route.status === 'INACTIVE'"
@@ -129,7 +131,7 @@
                   </span>
                 </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"

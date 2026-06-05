@@ -95,11 +95,11 @@
           <tbody>
             @for (member of members(); track member.id) {
               <tr>
-                <td>
+                <td data-label="Member Code">
                   <span class="member-code">{{ member.memberCode }}</span>
                 </td>
 
-                <td>
+                <td data-label="Member">
                   <div class="member-info">
                     <span>{{ getMemberInitial(member) }}</span>
 
@@ -110,15 +110,17 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Type">
                   <span class="type-pill">
                     {{ getMemberTypeLabel(member.memberType) }}
                   </span>
                 </td>
 
-                <td>{{ member.referenceCode || '-' }}</td>
+                <td data-label="Reference">
+                  {{ member.referenceCode || '-' }}
+                </td>
 
-                <td>
+                <td data-label="Class / Department">
                   @if (member.className) {
                     {{ member.className }}
                   } @else if (member.department) {
@@ -128,16 +130,18 @@
                   }
                 </td>
 
-                <td>
+                <td data-label="Contact">
                   <div class="contact-cell">
                     <span>{{ member.phone || '-' }}</span>
                     <small>{{ member.email || '-' }}</small>
                   </div>
                 </td>
 
-                <td>{{ formatDisplayDate(member.joinDate) }}</td>
+                <td data-label="Join Date">
+                  {{ formatDisplayDate(member.joinDate) }}
+                </td>
 
-                <td>
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--inactive]="member.status === 'INACTIVE'"
@@ -147,7 +151,7 @@
                   </span>
                 </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"

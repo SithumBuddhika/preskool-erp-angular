@@ -131,13 +131,13 @@
           <tbody>
             @for (timeTable of timeTables(); track timeTable.id) {
               <tr>
-                <td>
-                  <span class="time-table-code">{{
-                    timeTable.timeTableCode
-                  }}</span>
+                <td data-label="Time Table ID">
+                  <span class="time-table-code">
+                    {{ timeTable.timeTableCode }}
+                  </span>
                 </td>
 
-                <td>
+                <td data-label="Class">
                   <div class="class-name">
                     <span>{{ getTimeTableInitial(timeTable) }}</span>
 
@@ -148,18 +148,18 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Section">
                   <span class="section-badge">{{ timeTable.section }}</span>
                 </td>
 
-                <td>{{ timeTable.subjectName }}</td>
-                <td>{{ timeTable.teacherName }}</td>
-                <td>{{ timeTable.roomNo }}</td>
-                <td>{{ getDayLabel(timeTable.day) }}</td>
-                <td>{{ getTimeRange(timeTable) }}</td>
-                <td>{{ getDuration(timeTable) }}</td>
+                <td data-label="Subject">{{ timeTable.subjectName }}</td>
+                <td data-label="Teacher">{{ timeTable.teacherName }}</td>
+                <td data-label="Room No">{{ timeTable.roomNo }}</td>
+                <td data-label="Day">{{ getDayLabel(timeTable.day) }}</td>
+                <td data-label="Time">{{ getTimeRange(timeTable) }}</td>
+                <td data-label="Duration">{{ getDuration(timeTable) }}</td>
 
-                <td>
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--inactive]="
@@ -170,7 +170,7 @@
                   </span>
                 </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"

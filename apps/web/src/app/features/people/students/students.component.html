@@ -94,11 +94,11 @@
           <tbody>
             @for (student of students(); track student.id) {
               <tr>
-                <td>
+                <td data-label="Admission No">
                   <span class="student-code">{{ student.admissionNo }}</span>
                 </td>
 
-                <td>
+                <td data-label="Student">
                   <div class="student-name">
                     <span>{{ getStudentInitial(student) }}</span>
 
@@ -109,7 +109,7 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Class">
                   <div class="class-info">
                     <strong>{{ student.className }}</strong>
                     @if (student.section) {
@@ -118,13 +118,15 @@
                   </div>
                 </td>
 
-                <td>{{ getGenderLabel(student.gender) }}</td>
+                <td data-label="Gender">
+                  {{ getGenderLabel(student.gender) }}
+                </td>
 
-                <td>{{ student.guardianName }}</td>
+                <td data-label="Guardian">{{ student.guardianName }}</td>
 
-                <td>{{ student.guardianPhone }}</td>
+                <td data-label="Phone">{{ student.guardianPhone }}</td>
 
-                <td>
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--inactive]="student.status !== 'ACTIVE'"
@@ -133,7 +135,7 @@
                   </span>
                 </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"

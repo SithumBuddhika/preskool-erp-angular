@@ -90,7 +90,7 @@
           <tbody>
             @for (room of classRooms(); track room.id) {
               <tr>
-                <td>
+                <td data-label="Room No">
                   <div class="room-name">
                     <span>{{ getRoomInitial(room) }}</span>
 
@@ -101,12 +101,12 @@
                   </div>
                 </td>
 
-                <td>{{ room.roomName }}</td>
-                <td>{{ room.building || '-' }}</td>
-                <td>{{ room.floor || '-' }}</td>
-                <td>{{ room.capacity || '-' }}</td>
+                <td data-label="Room Name">{{ room.roomName }}</td>
+                <td data-label="Building">{{ room.building || '-' }}</td>
+                <td data-label="Floor">{{ room.floor || '-' }}</td>
+                <td data-label="Capacity">{{ room.capacity || '-' }}</td>
 
-                <td>
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--inactive]="room.status === 'INACTIVE'"
@@ -118,7 +118,7 @@
                   </span>
                 </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"
@@ -259,6 +259,7 @@
           class="secondary-btn"
           type="button"
           (click)="closeClassRoomModal()"
+          [disabled]="isSubmitting()"
         >
           Cancel
         </button>

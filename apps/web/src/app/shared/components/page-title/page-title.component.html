@@ -2,8 +2,8 @@
   <h1>{{ title }}</h1>
 
   <p>
-    {{ parent }}
-    <span>/</span>
-    {{ current || title }}
+    <span class="page-title__parent">{{ parent }}</span>
+    <span class="page-title__separator">/</span>
+    <span class="page-title__current">{{ current || title }}</span>
   </p>
 </div>

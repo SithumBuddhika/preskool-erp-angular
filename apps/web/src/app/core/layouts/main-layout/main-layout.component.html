@@ -1,7 +1,28 @@
 <div class="erp-layout">
-  <app-sidebar />
+  <app-sidebar
+    [isMobileOpen]="isSidebarOpen()"
+    (mobileClose)="closeSidebar()"
+  />
+
+  @if (isSidebarOpen()) {
+    <button
+      type="button"
+      class="erp-sidebar-backdrop"
+      aria-label="Close sidebar"
+      (click)="closeSidebar()"
+    ></button>
+  }
 
   <div class="erp-main">
+    <button
+      type="button"
+      class="erp-mobile-menu-btn"
+      aria-label="Open sidebar"
+      (click)="toggleSidebar()"
+    >
+      ☰
+    </button>
+
     <app-topbar />
 
     <main class="erp-content">

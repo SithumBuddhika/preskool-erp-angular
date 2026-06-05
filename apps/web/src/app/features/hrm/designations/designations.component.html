@@ -89,13 +89,13 @@
           <tbody>
             @for (designation of designations(); track designation.id) {
               <tr>
-                <td>
+                <td data-label="Designation ID">
                   <span class="designation-code">
                     {{ designation.designationCode }}
                   </span>
                 </td>
 
-                <td>
+                <td data-label="Designation">
                   <div class="designation-info">
                     <span>{{ getInitials(designation) }}</span>
 
@@ -106,7 +106,7 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Department">
                   <div class="department-info">
                     <strong>{{ getDepartmentLabel(designation) }}</strong>
 
@@ -118,11 +118,11 @@
                   </div>
                 </td>
 
-                <td>
+                <td data-label="Description">
                   {{ designation.description || 'No description added' }}
                 </td>
 
-                <td>
+                <td data-label="Status">
                   <span
                     class="status-pill"
                     [class.status-pill--inactive]="
@@ -133,7 +133,7 @@
                   </span>
                 </td>
 
-                <td class="text-right">
+                <td data-label="Action" class="text-right">
                   <div class="action-buttons">
                     <button
                       class="edit-btn"
