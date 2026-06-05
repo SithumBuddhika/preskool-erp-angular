@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { map, Observable } from 'rxjs';
 import { CreateHolidayPayload, Holiday } from '../models/holiday.model';
 
@@ -7,7 +8,7 @@ import { CreateHolidayPayload, Holiday } from '../models/holiday.model';
   providedIn: 'root',
 })
 export class HolidaysService {
-  private readonly apiUrl = 'http://localhost:3002/api/holidays';
+  private readonly apiUrl = environment.peopleApiUrl + '/holidays';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -42,3 +43,4 @@ export class HolidaysService {
       .pipe(map((response) => response.holidayCode));
   }
 }
+

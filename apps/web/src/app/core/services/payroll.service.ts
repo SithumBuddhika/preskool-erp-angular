@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { map, Observable } from 'rxjs';
 import { CreatePayrollPayload, Payroll } from '../models/payroll.model';
 
@@ -7,7 +8,7 @@ import { CreatePayrollPayload, Payroll } from '../models/payroll.model';
   providedIn: 'root',
 })
 export class PayrollService {
-  private readonly apiUrl = 'http://localhost:3002/api/payroll';
+  private readonly apiUrl = environment.peopleApiUrl + '/payroll';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -42,3 +43,4 @@ export class PayrollService {
       .pipe(map((response) => response.payrollCode));
   }
 }
+

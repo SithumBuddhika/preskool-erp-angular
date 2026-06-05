@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 import { CreateClassPayload, SchoolClass } from '../models/school-class.model';
 
@@ -7,7 +8,7 @@ import { CreateClassPayload, SchoolClass } from '../models/school-class.model';
   providedIn: 'root',
 })
 export class ClassesService {
-  private readonly apiUrl = 'http://localhost:3003/api/classes';
+  private readonly apiUrl = environment.academicApiUrl + '/classes';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -36,3 +37,4 @@ export class ClassesService {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
   }
 }
+

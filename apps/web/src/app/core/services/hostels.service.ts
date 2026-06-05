@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { map, Observable } from 'rxjs';
 import { CreateHostelPayload, Hostel } from '../models/hostel.model';
 
@@ -7,7 +8,7 @@ import { CreateHostelPayload, Hostel } from '../models/hostel.model';
   providedIn: 'root',
 })
 export class HostelsService {
-  private readonly apiUrl = 'http://localhost:3002/api/hostels';
+  private readonly apiUrl = environment.peopleApiUrl + '/hostels';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -42,3 +43,4 @@ export class HostelsService {
       .pipe(map((response) => response.hostelCode));
   }
 }
+

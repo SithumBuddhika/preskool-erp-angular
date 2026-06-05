@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 import { CreateGuardianPayload, Guardian } from '../models/guardian.model';
 
@@ -7,7 +8,7 @@ import { CreateGuardianPayload, Guardian } from '../models/guardian.model';
   providedIn: 'root',
 })
 export class GuardiansService {
-  private readonly apiUrl = 'http://localhost:3002/api/guardians';
+  private readonly apiUrl = environment.peopleApiUrl + '/guardians';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -36,3 +37,4 @@ export class GuardiansService {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
   }
 }
+

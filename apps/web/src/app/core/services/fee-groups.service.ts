@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { map, Observable } from 'rxjs';
 import { CreateFeeGroupPayload, FeeGroup } from '../models/fee-group.model';
 
@@ -7,7 +8,7 @@ import { CreateFeeGroupPayload, FeeGroup } from '../models/fee-group.model';
   providedIn: 'root',
 })
 export class FeeGroupsService {
-  private readonly apiUrl = 'http://localhost:3002/api/fee-groups';
+  private readonly apiUrl = environment.peopleApiUrl + '/fee-groups';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -42,3 +43,4 @@ export class FeeGroupsService {
       .pipe(map((response) => response.feeGroupCode));
   }
 }
+

@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { map, Observable } from 'rxjs';
 import {
   ClassRoutine,
@@ -11,7 +12,7 @@ import {
   providedIn: 'root',
 })
 export class ClassRoutinesService {
-  private readonly apiUrl = 'http://localhost:3003/api/class-routines';
+  private readonly apiUrl = environment.academicApiUrl + '/class-routines';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -48,3 +49,4 @@ export class ClassRoutinesService {
       .pipe(map((response) => response.routineCode));
   }
 }
+

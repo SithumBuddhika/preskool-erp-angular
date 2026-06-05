@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { map, Observable } from 'rxjs';
 import {
   CreateGradePayload,
@@ -11,7 +12,7 @@ import {
   providedIn: 'root',
 })
 export class GradesService {
-  private readonly apiUrl = 'http://localhost:3003/api/grades';
+  private readonly apiUrl = environment.academicApiUrl + '/grades';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -43,3 +44,4 @@ export class GradesService {
       .pipe(map((response) => response.gradeCode));
   }
 }
+

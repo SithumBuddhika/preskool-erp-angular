@@ -1,5 +1,6 @@
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+
 import { AppModule } from './app/app.module';
 
 async function bootstrap() {
@@ -20,11 +21,11 @@ async function bootstrap() {
     }),
   );
 
-  const port = process.env.PEOPLE_SERVICE_PORT || 3002;
+  const port = process.env.PORT || process.env.PEOPLE_SERVICE_PORT || 3002;
 
   await app.listen(port);
 
-  Logger.log(`People service is running on http://localhost:${port}/api`);
+  Logger.log(`People service is running on port ${port}/api`);
 }
 
 bootstrap();

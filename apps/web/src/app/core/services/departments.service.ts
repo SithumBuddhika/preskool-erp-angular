@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { map, Observable } from 'rxjs';
 import {
   CreateDepartmentPayload,
@@ -10,7 +11,7 @@ import {
   providedIn: 'root',
 })
 export class DepartmentsService {
-  private readonly apiUrl = 'http://localhost:3002/api/departments';
+  private readonly apiUrl = environment.peopleApiUrl + '/departments';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -45,3 +46,4 @@ export class DepartmentsService {
       .pipe(map((response) => response.departmentCode));
   }
 }
+

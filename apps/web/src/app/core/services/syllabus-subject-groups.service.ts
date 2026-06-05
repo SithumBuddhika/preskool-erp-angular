@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { map, Observable } from 'rxjs';
 import {
   CreateSyllabusSubjectGroupPayload,
@@ -11,7 +12,7 @@ import {
   providedIn: 'root',
 })
 export class SyllabusSubjectGroupsService {
-  private readonly apiUrl = 'http://localhost:3003/api/syllabus-subject-groups';
+  private readonly apiUrl = environment.academicApiUrl + '/syllabus-subject-groups';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -51,3 +52,4 @@ export class SyllabusSubjectGroupsService {
       .pipe(map((response) => response.groupCode));
   }
 }
+

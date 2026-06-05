@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { catchError, forkJoin, map, Observable, of } from 'rxjs';
 
 export type TeacherDashboardStatCard = {
@@ -152,8 +153,8 @@ type LeaveRecord = {
   providedIn: 'root',
 })
 export class TeacherDashboardDataService {
-  private readonly peopleApiUrl = 'http://localhost:3002/api';
-  private readonly academicApiUrl = 'http://localhost:3003/api';
+  private readonly peopleApiUrl = environment.peopleApiUrl + '';
+  private readonly academicApiUrl = environment.academicApiUrl + '';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -458,3 +459,4 @@ export class TeacherDashboardDataService {
     )}-${String(today.getDate()).padStart(2, '0')}`;
   }
 }
+

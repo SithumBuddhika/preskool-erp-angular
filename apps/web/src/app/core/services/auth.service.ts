@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { Observable, catchError, of, tap } from 'rxjs';
 import {
   AuthMessageResponse,
@@ -17,7 +18,7 @@ import {
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly apiUrl = 'http://localhost:3001/api/auth';
+  private readonly apiUrl = environment.authApiUrl + '/auth';
 
   currentUser = signal<AuthUser | null>(this.getStoredUser());
 
@@ -131,3 +132,4 @@ export class AuthService {
     }
   }
 }
+

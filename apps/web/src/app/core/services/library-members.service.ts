@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { map, Observable } from 'rxjs';
 import {
   CreateLibraryMemberPayload,
@@ -10,7 +11,7 @@ import {
   providedIn: 'root',
 })
 export class LibraryMembersService {
-  private readonly apiUrl = 'http://localhost:3002/api/library-members';
+  private readonly apiUrl = environment.peopleApiUrl + '/library-members';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -47,3 +48,4 @@ export class LibraryMembersService {
       .pipe(map((response) => response.memberCode));
   }
 }
+
