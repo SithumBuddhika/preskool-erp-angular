@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  authApiUrl: 'https://REPLACE-AUTH-SERVICE.onrender.com/api',
-  peopleApiUrl: 'https://REPLACE-PEOPLE-SERVICE.onrender.com/api',
-  academicApiUrl: 'https://REPLACE-ACADEMIC-SERVICE.onrender.com/api',
+  authApiUrl: 'https://preskool-erp-angular.onrender.com/api',
+  peopleApiUrl: 'https://preskool-people-service.onrender.com/api',
+  academicApiUrl: 'https://preskool-academic-service.onrender.com/api',
 };
