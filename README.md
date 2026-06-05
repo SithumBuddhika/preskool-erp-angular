@@ -1,7 +1,7 @@
 # 🎓 PreSkool ERP — Modern School Management System
 
 <p align="center">
-  <img src="screenshots/preskool-brandlogo.png" alt="Preskool Brand Logo" width="100%" />
+  <img src="screenshots/preskool-brandlogo.png" alt="Preskool Brand Logo" width="45%" />
 </p>
 
 ![Angular](https://img.shields.io/badge/Angular-21-DD0031?style=for-the-badge&logo=angular&logoColor=white)
